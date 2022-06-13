@@ -37,6 +37,10 @@ public class WiFiItemAdapter extends RecyclerView.Adapter<WiFiItemAdapter.ViewHo
         items.add(item);
     }
 
+    public ArrayList<WiFiItem> getItems() {
+        return items;
+    }
+
     public void setItems(ArrayList<WiFiItem> items) {
         this.items = items;
     }

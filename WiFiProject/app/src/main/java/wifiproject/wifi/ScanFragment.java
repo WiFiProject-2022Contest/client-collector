@@ -17,17 +17,28 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.Toast;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
+
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+import retrofit2.Retrofit;
 
 public class ScanFragment extends Fragment {
     RecyclerView recyclerview_scanned;
     WiFiItemAdapter wifiitem_adpater = new WiFiItemAdapter();
     WifiManager wm;
     Context context;
+    EditText edittext_x, edittext_y;
 
     private BroadcastReceiver wifi_receiver = new BroadcastReceiver() {
         @Override
@@ -35,8 +46,7 @@ public class ScanFragment extends Fragment {
             boolean success = intent.getBooleanExtra(WifiManager.EXTRA_RESULTS_UPDATED, false);
             if (success) {
                 scanSuccess();
-            }
-            else {
+            } else {
                 scanFailure();
             }
         }
@@ -48,6 +58,8 @@ public class ScanFragment extends Fragment {
         // Inflate the layout for this fragment
         ViewGroup rootview = (ViewGroup) inflater.inflate(R.layout.fragment_scan, container, false);
         context = getActivity().getApplicationContext();
+        edittext_x = rootview.findViewById(R.id.editTextX);
+        edittext_y = rootview.findViewById(R.id.editTextY);
 
         recyclerview_scanned = rootview.findViewById(R.id.RecyclerViewScanned);
         recyclerview_scanned.setLayoutManager(new LinearLayoutManager(context, LinearLayoutManager.VERTICAL, false));
@@ -68,7 +80,30 @@ public class ScanFragment extends Fragment {
         button_push.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                // TODO: DB에 올리기
+                RetrofitAPI retrofit_api = RetrofitClient.getRetrofitAPI();
+                retrofit_api.postData(Integer.parseInt(edittext_x.getText().toString()), Integer.parseInt(edittext_y.getText().toString()),
+                        wifiitem_adpater.getItems()).enqueue(new Callback<JSONObject>() {
+                    @Override
+                    public void onResponse(Call<JSONObject> call, Response<JSONObject> response) {
+                        JSONObject r = response.body();
+                        try {
+                            String success = r.get("Success").toString();
+                            if (success.equals("true")) {
+                                Toast.makeText(context, "PUSH 성공", Toast.LENGTH_SHORT).show();
+                            }
+                            else {
+                                Toast.makeText(context, "PUSH 실패", Toast.LENGTH_SHORT).show();
+                            }
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+                    }
+
+                    @Override
+                    public void onFailure(Call<JSONObject> call, Throwable t) {
+                        t.printStackTrace();
+                    }
+                });
             }
         });
 
@@ -81,7 +116,7 @@ public class ScanFragment extends Fragment {
         for (ScanResult result : results) {
 //            if (!result.SSID.equalsIgnoreCase("WiFiLocation@PDA")) continue;
             Log.v("***", result.BSSID);
-            items.add(new WiFiItem(result.SSID, result.BSSID, result.level, result.frequency, (int)(System.currentTimeMillis() / 1000)));
+            items.add(new WiFiItem(result.SSID, result.BSSID, result.level, result.frequency, (int) (System.currentTimeMillis() / 1000)));
         }
         wifiitem_adpater.setItems(items);
         recyclerview_scanned.setAdapter(wifiitem_adpater);
