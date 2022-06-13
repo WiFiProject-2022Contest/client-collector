@@ -85,18 +85,6 @@ public class ScanFragment extends Fragment {
                         wifiitem_adpater.getItems()).enqueue(new Callback<JSONObject>() {
                     @Override
                     public void onResponse(Call<JSONObject> call, Response<JSONObject> response) {
-                        JSONObject r = response.body();
-                        try {
-                            String success = r.get("Success").toString();
-                            if (success.equals("true")) {
-                                Toast.makeText(context, "PUSH 성공", Toast.LENGTH_SHORT).show();
-                            }
-                            else {
-                                Toast.makeText(context, "PUSH 실패", Toast.LENGTH_SHORT).show();
-                            }
-                        } catch (JSONException e) {
-                            e.printStackTrace();
-                        }
                     }
 
                     @Override
