@@ -42,17 +42,21 @@ public class WiFiItemAdapter extends RecyclerView.Adapter<WiFiItemAdapter.ViewHo
     }
 
     static class ViewHolder extends RecyclerView.ViewHolder {
-        TextView textview_BSSID, textview_RSSI;
+        TextView textview_SSID, textview_BSSID, textview_RSSI, textview_bandwidth_and_time;
 
         public ViewHolder(View itemView) {
             super(itemView);
+            textview_SSID = itemView.findViewById(R.id.textViewSSID);
             textview_BSSID = itemView.findViewById(R.id.textViewBSSID);
             textview_RSSI = itemView.findViewById(R.id.textViewRSSI);
+            textview_bandwidth_and_time = itemView.findViewById(R.id.textViewBandwidthAndTime);
         }
 
         public void setItem(WiFiItem item) {
+            textview_SSID.setText("SSID: " + item.getSSID());
             textview_BSSID.setText("BSSID: " + item.getBSSID());
             textview_RSSI.setText("RSSI: " + String.valueOf(item.getRSSI()));
+            textview_bandwidth_and_time.setText(String.format("Bandwidth: %d    Time: %d", item.getBandwidth(), item.getTimestamp()));
         }
     }
 }
