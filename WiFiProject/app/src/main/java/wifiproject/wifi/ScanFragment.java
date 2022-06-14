@@ -82,13 +82,30 @@ public class ScanFragment extends Fragment {
             public void onClick(View view) {
                 RetrofitAPI retrofit_api = RetrofitClient.getRetrofitAPI();
                 retrofit_api.postData(Integer.parseInt(edittext_x.getText().toString()), Integer.parseInt(edittext_y.getText().toString()),
-                        wifiitem_adpater.getItems()).enqueue(new Callback<JSONObject>() {
+                        wifiitem_adpater.getItems()).enqueue(new Callback<PushResultModel>() {
                     @Override
-                    public void onResponse(Call<JSONObject> call, Response<JSONObject> response) {
+                    public void onResponse(Call<PushResultModel> call, Response<PushResultModel> response) {
+                        PushResultModel r = response.body();
+                        if (r.getSuccess().equals("true")) {
+                            getActivity().runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    Toast.makeText(context, "PUSH 성공", Toast.LENGTH_SHORT).show();
+                                }
+                            });
+                        }
+                        else {
+                            getActivity().runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    Toast.makeText(context, "PUSH 실패", Toast.LENGTH_SHORT).show();
+                                }
+                            });
+                        }
                     }
 
                     @Override
-                    public void onFailure(Call<JSONObject> call, Throwable t) {
+                    public void onFailure(Call<PushResultModel> call, Throwable t) {
                         t.printStackTrace();
                     }
                 });

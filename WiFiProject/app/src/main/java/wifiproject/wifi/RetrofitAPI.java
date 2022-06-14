@@ -16,5 +16,5 @@ public interface RetrofitAPI {
     Call<List<WiFiItem>> getData(@Query("pos_x") int x, @Query("pos_y") int  y);
 
     @POST("/rssi")
-    Call<JSONObject> postData(@Query("pos_x") int x, @Query("pos_y") int  y, @Body List<WiFiItem> data);
+    Call<PushResultModel> postData(@Query("pos_x") int x, @Query("pos_y") int  y, @Body List<WiFiItem> data);
 }
