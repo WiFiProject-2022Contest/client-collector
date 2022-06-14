@@ -12,7 +12,7 @@ import retrofit2.http.POST;
 import retrofit2.http.Query;
 
 public interface RetrofitAPI {
-    @GET("/ap")
+    @GET("/rssi")
     Call<List<WiFiItem>> getData(@Query("pos_x") int x, @Query("pos_y") int  y);
 
     @POST("/rssi")
