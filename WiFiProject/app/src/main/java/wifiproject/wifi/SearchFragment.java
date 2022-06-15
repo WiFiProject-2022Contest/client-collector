@@ -40,7 +40,7 @@ public class SearchFragment extends Fragment {
             public boolean onQueryTextSubmit(String s) {
                 RetrofitAPI retrofit_api = RetrofitClient.getRetrofitAPI();
                 String[] pos = s.split(",");
-                retrofit_api.getData(Integer.parseInt(pos[0]), Integer.parseInt(pos[1])).enqueue(new Callback<List<WiFiItem>>() {
+                retrofit_api.getData(Float.parseFloat(pos[0]), Float.parseFloat(pos[1])).enqueue(new Callback<List<WiFiItem>>() {
                     @Override
                     public void onResponse(Call<List<WiFiItem>> call, Response<List<WiFiItem>> response) {
                         ArrayList<WiFiItem> items = new ArrayList<WiFiItem>();

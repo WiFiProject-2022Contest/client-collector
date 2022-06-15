@@ -13,8 +13,8 @@ import retrofit2.http.Query;
 
 public interface RetrofitAPI {
     @GET("/rssi")
-    Call<List<WiFiItem>> getData(@Query("pos_x") int x, @Query("pos_y") int  y);
+    Call<List<WiFiItem>> getData(@Query("pos_x") float x, @Query("pos_y") float  y);
 
     @POST("/rssi")
-    Call<PushResultModel> postData(@Query("pos_x") int x, @Query("pos_y") int  y, @Body List<WiFiItem> data);
+    Call<PushResultModel> postData(@Query("pos_x") float x, @Query("pos_y") float  y, @Body List<WiFiItem> data);
 }

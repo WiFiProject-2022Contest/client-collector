@@ -81,7 +81,7 @@ public class ScanFragment extends Fragment {
             @Override
             public void onClick(View view) {
                 RetrofitAPI retrofit_api = RetrofitClient.getRetrofitAPI();
-                retrofit_api.postData(Integer.parseInt(edittext_x.getText().toString()), Integer.parseInt(edittext_y.getText().toString()),
+                retrofit_api.postData(Float.parseFloat(edittext_x.getText().toString()), Float.parseFloat(edittext_y.getText().toString()),
                         wifiitem_adpater.getItems()).enqueue(new Callback<PushResultModel>() {
                     @Override
                     public void onResponse(Call<PushResultModel> call, Response<PushResultModel> response) {
