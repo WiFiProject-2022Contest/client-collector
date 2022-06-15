@@ -66,9 +66,9 @@
         app:layout_constraintTop_toBottomOf="@+id/buttonPush" />
 
     <com.davemorrissey.labs.subscaleview.SubsamplingScaleImageView
-        android:id="@+id/imageView"
+        android:id="@+id/imageViewMap"
         android:layout_width="0dp"
-        android:layout_height="350dp"
+        android:layout_height="wrap_content"
         android:layout_marginTop="3dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -82,7 +82,7 @@
         android:background="#DADADA"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/imageView" />
+        app:layout_constraintTop_toBottomOf="@+id/imageViewMap" />
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/RecyclerViewScanned"

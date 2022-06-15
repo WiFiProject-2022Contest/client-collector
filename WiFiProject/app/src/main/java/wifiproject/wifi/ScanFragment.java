@@ -4,6 +4,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.graphics.PointF;
 import android.net.wifi.ScanResult;
 import android.net.wifi.WifiManager;
 import android.os.Bundle;
@@ -13,29 +14,29 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.util.Log;
+import android.view.GestureDetector;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
+import com.davemorrissey.labs.subscaleview.ImageSource;
+import com.davemorrissey.labs.subscaleview.SubsamplingScaleImageView;
 
-import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
 
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
-import retrofit2.Retrofit;
 
 public class ScanFragment extends Fragment {
     RecyclerView recyclerview_scanned;
     WiFiItemAdapter wifiitem_adpater = new WiFiItemAdapter();
+    SubsamplingScaleImageView imageview_map;
     WifiManager wm;
     Context context;
     EditText edittext_x, edittext_y;
@@ -63,6 +64,26 @@ public class ScanFragment extends Fragment {
 
         recyclerview_scanned = rootview.findViewById(R.id.RecyclerViewScanned);
         recyclerview_scanned.setLayoutManager(new LinearLayoutManager(context, LinearLayoutManager.VERTICAL, false));
+
+        imageview_map = rootview.findViewById(R.id.imageViewMap);
+        imageview_map.setImage(ImageSource.resource(R.drawable.skku_example));
+        final GestureDetector gesture_detector = new GestureDetector(context, new GestureDetector.SimpleOnGestureListener() {
+            @Override
+            public boolean onSingleTapConfirmed(MotionEvent e) {
+                if (imageview_map.isReady()) {
+                    PointF s_coord = imageview_map.viewToSourceCoord(e.getX(), e.getY());
+                    edittext_x.setText(String.valueOf(s_coord.x));
+                    edittext_y.setText(String.valueOf(s_coord.y));
+                }
+                return super.onSingleTapConfirmed(e);
+            }
+        });
+        imageview_map.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View view, MotionEvent motionEvent) {
+                return gesture_detector.onTouchEvent(motionEvent);
+            }
+        });
 
         wm = (WifiManager) context.getSystemService(Context.WIFI_SERVICE);
         IntentFilter filter = new IntentFilter();
