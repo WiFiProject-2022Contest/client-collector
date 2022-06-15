@@ -36,7 +36,7 @@ import retrofit2.Response;
 public class ScanFragment extends Fragment {
     RecyclerView recyclerview_scanned;
     WiFiItemAdapter wifiitem_adpater = new WiFiItemAdapter();
-    SubsamplingScaleImageView imageview_map;
+    ScalableSpotImageView imageview_map;
     WifiManager wm;
     Context context;
     EditText edittext_x, edittext_y;
@@ -74,6 +74,7 @@ public class ScanFragment extends Fragment {
                     PointF s_coord = imageview_map.viewToSourceCoord(e.getX(), e.getY());
                     edittext_x.setText(String.valueOf(s_coord.x));
                     edittext_y.setText(String.valueOf(s_coord.y));
+                    imageview_map.moveSpot(s_coord.x, s_coord.y);
                 }
                 return super.onSingleTapConfirmed(e);
             }

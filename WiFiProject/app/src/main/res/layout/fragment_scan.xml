@@ -65,7 +65,7 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/buttonPush" />
 
-    <com.davemorrissey.labs.subscaleview.SubsamplingScaleImageView
+    <wifilocation.wifi.ScalableSpotImageView
         android:id="@+id/imageViewMap"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
