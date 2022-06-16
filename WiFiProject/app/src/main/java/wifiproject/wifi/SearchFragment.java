@@ -13,15 +13,19 @@ import android.view.ViewGroup;
 import android.widget.SearchView;
 import android.widget.Toast;
 
+import com.davemorrissey.labs.subscaleview.ImageSource;
+
 import java.util.ArrayList;
 import java.util.List;
 
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
+import retrofit2.http.Query;
 
-public class SearchFragment extends Fragment {
+public class SearchFragment<v> extends Fragment {
     RecyclerView recyclerview_searched;
+    SpotImageView imageview_map;
     WiFiItemAdapter wifiitem_adapter = new WiFiItemAdapter();
 
     @Override
@@ -33,6 +37,9 @@ public class SearchFragment extends Fragment {
 
         recyclerview_searched = rootview.findViewById(R.id.RecyclerViewSearched);
         recyclerview_searched.setLayoutManager(new LinearLayoutManager(context, LinearLayoutManager.VERTICAL, false));
+
+        imageview_map = rootview.findViewById(R.id.imageViewMap);
+        imageview_map.setImage(ImageSource.resource(R.drawable.skku_example));
 
         SearchView searchview = rootview.findViewById(R.id.searchView);
         searchview.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
@@ -50,13 +57,15 @@ public class SearchFragment extends Fragment {
                             @Override
                             public void run() {
                                 recyclerview_searched.setAdapter(wifiitem_adapter);
+                                for(WiFiItem item : items) {
+                                    imageview_map.setSpot(item.x, item.y);
+                                }
                             }
                         });
                     }
 
                     @Override
                     public void onFailure(Call<List<WiFiItem>> call, Throwable t) {
-
                     }
                 });
                 return false;
@@ -67,6 +76,7 @@ public class SearchFragment extends Fragment {
                 return false;
             }
         });
+
         return rootview;
     }
 }
