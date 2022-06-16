@@ -15,13 +15,16 @@ public class WiFiItem {
     int bandwidth;
     @SerializedName("uuid")
     String uuid;
+    @SerializedName("building")
+    String building;
 
-    public WiFiItem(String SSID, String BSSID, int RSSI, int bandwidth, String uuid) {
+    public WiFiItem(String SSID, String BSSID, int RSSI, int bandwidth, String uuid, String building) {
         this.SSID = SSID;
         this.BSSID = BSSID;
         this.RSSI = RSSI;
         this.bandwidth = bandwidth;
         this.uuid = uuid;
+        this.building = building;
     }
 
     public String getSSID() {
@@ -62,5 +65,13 @@ public class WiFiItem {
 
     public void setUuid(String uuid) {
         this.uuid = uuid;
+    }
+
+    public String getBuilding() {
+        return building;
+    }
+
+    public void setBuilding(String building) {
+        this.building = building;
     }
 }
