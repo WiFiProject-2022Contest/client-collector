@@ -140,7 +140,7 @@ public class ScanFragment extends Fragment {
         ArrayList<WiFiItem> items = new ArrayList<WiFiItem>();
         for (ScanResult result : results) {
 //            if (!result.SSID.equalsIgnoreCase("WiFiLocation@PDA")) continue;
-            items.add(new WiFiItem(-1, -1, result.SSID, result.BSSID, result.level, result.frequency, GetDevicesUUID(context), "skku"));
+            items.add(new WiFiItem(Float.parseFloat(edittext_x.getText().toString()), Float.parseFloat(edittext_y.getText().toString()), result.SSID, result.BSSID, result.level, result.frequency, GetDevicesUUID(context), "skku"));
         }
         wifiitem_adpater.setItems(items);
         recyclerview_scanned.setAdapter(wifiitem_adpater);
