@@ -12,4 +12,9 @@
         android:icon="@android:drawable/ic_menu_search"
         android:title="검색"
         app:showAsAction="ifRoom" />
+    <item
+        android:id="@+id/tab_estimate"
+        android:icon="@android:drawable/ic_menu_mylocation"
+        android:title="측정"
+        app:showAsAction="ifRoom" />
 </menu>

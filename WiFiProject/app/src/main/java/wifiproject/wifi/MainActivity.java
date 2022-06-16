@@ -16,6 +16,7 @@ import com.google.android.material.navigation.NavigationBarView;
 public class MainActivity extends AppCompatActivity {
     ScanFragment scan_fragment;
     SearchFragment search_fragment;
+    EstimateFragment estimate_fragment;
 
     String[] PERMISSIONS = {
             Manifest.permission.ACCESS_COARSE_LOCATION,
@@ -48,6 +49,7 @@ public class MainActivity extends AppCompatActivity {
     private void initView() {
         scan_fragment = new ScanFragment();
         search_fragment = new SearchFragment();
+        estimate_fragment = new EstimateFragment();
 
         getSupportFragmentManager().beginTransaction().replace(R.id.container, scan_fragment).commit();
         BottomNavigationView bottom_navigation = findViewById(R.id.bottomNavigation);
@@ -60,6 +62,9 @@ public class MainActivity extends AppCompatActivity {
                         return true;
                     case R.id.tab_search:
                         getSupportFragmentManager().beginTransaction().replace(R.id.container, search_fragment).commit();
+                        return true;
+                    case R.id.tab_estimate:
+                        getSupportFragmentManager().beginTransaction().replace(R.id.container, estimate_fragment).commit();
                         return true;
                 }
                 return false;
