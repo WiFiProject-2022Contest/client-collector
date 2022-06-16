@@ -1,18 +1,22 @@
 package wifilocation.wifi;
 
+import android.Manifest;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.pm.PackageManager;
 import android.graphics.PointF;
 import android.net.wifi.ScanResult;
 import android.net.wifi.WifiManager;
 import android.os.Bundle;
 
+import androidx.core.app.ActivityCompat;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.telephony.TelephonyManager;
 import android.util.Log;
 import android.view.GestureDetector;
 import android.view.LayoutInflater;
@@ -28,6 +32,7 @@ import com.davemorrissey.labs.subscaleview.SubsamplingScaleImageView;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -143,7 +148,7 @@ public class ScanFragment extends Fragment {
         for (ScanResult result : results) {
 //            if (!result.SSID.equalsIgnoreCase("WiFiLocation@PDA")) continue;
             Log.v("***", result.BSSID);
-            items.add(new WiFiItem(result.SSID, result.BSSID, result.level, result.frequency, (int) (System.currentTimeMillis() / 1000)));
+            items.add(new WiFiItem(result.SSID, result.BSSID, result.level, result.frequency, GetDevicesUUID(context)));
         }
         wifiitem_adpater.setItems(items);
         recyclerview_scanned.setAdapter(wifiitem_adpater);
@@ -152,5 +157,20 @@ public class ScanFragment extends Fragment {
     private void scanFailure() {
         Toast.makeText(context, "Scan failed.", Toast.LENGTH_SHORT).show();
         wm.getScanResults();
+    }
+
+    private String GetDevicesUUID(Context context) {
+        final TelephonyManager tm = (TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE);
+        final String tmDevice, tmSerial, androidId;
+        if (ActivityCompat.checkSelfPermission(context, Manifest.permission.READ_PHONE_STATE) != PackageManager.PERMISSION_GRANTED) {
+            return null;
+        }
+        tmDevice = "" + tm.getDeviceId();
+        tmSerial = "" + tm.getSimSerialNumber();
+        androidId = "" + android.provider.Settings.Secure.getString(getActivity().getContentResolver(), android.provider.Settings.Secure.ANDROID_ID);
+        UUID deviceUuid = new UUID(androidId.hashCode(), ((long)tmDevice.hashCode() << 32) | tmSerial.hashCode());
+        String deviceId = deviceUuid.toString();
+        Log.d("UUID_generater", deviceId);
+        return deviceId;
     }
 }

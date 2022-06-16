@@ -1,6 +1,5 @@
 package wifilocation.wifi;
 
-import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
 public class WiFiItem {
@@ -14,15 +13,15 @@ public class WiFiItem {
     int RSSI;
     @SerializedName("frequency")
     int bandwidth;
-    @SerializedName("timestamp")
-    int timestamp;
+    @SerializedName("uuid")
+    String uuid;
 
-    public WiFiItem(String SSID, String BSSID, int RSSI, int bandwidth, int timestamp) {
+    public WiFiItem(String SSID, String BSSID, int RSSI, int bandwidth, String uuid) {
         this.SSID = SSID;
         this.BSSID = BSSID;
         this.RSSI = RSSI;
         this.bandwidth = bandwidth;
-        this.timestamp = timestamp;
+        this.uuid = uuid;
     }
 
     public String getSSID() {
@@ -57,11 +56,11 @@ public class WiFiItem {
         this.bandwidth = bandwidth;
     }
 
-    public int getTimestamp() {
-        return timestamp;
+    public String getUuid() {
+        return uuid;
     }
 
-    public void setTimestamp(int timestamp) {
-        this.timestamp = timestamp;
+    public void setUuid(String uuid) {
+        this.uuid = uuid;
     }
 }
