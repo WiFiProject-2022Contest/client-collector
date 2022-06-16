@@ -6,43 +6,73 @@
     android:layout_height="match_parent"
     tools:context=".SearchFragment" >
 
-    <SearchView
-        android:id="@+id/searchView"
+    <EditText
+        android:id="@+id/editTextX2"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:queryHint="x,y 형식으로 입력(m)"
-        app:layout_constraintEnd_toEndOf="parent"
+        android:ems="10"
+        android:hint="X 좌표(m)"
+        android:inputType="text"
+        android:minHeight="48dp"
+        app:layout_constraintEnd_toStartOf="@+id/buttonSearch"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toTopOf="parent"
+        tools:ignore="SpeakableTextPresentCheck" />
+
+    <EditText
+        android:id="@+id/editTextY2"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:ems="10"
+        android:hint="Y 좌표(m)"
+        android:inputType="text"
+        android:minHeight="48dp"
+        app:layout_constraintEnd_toStartOf="@+id/buttonSearch"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/editTextX2"
+        tools:ignore="SpeakableTextPresentCheck" />
+
+    <androidx.appcompat.widget.AppCompatButton
+        android:id="@+id/buttonSearch"
+        android:layout_width="100dp"
+        android:layout_height="0dp"
+        android:text="Search"
+        app:layout_constraintBottom_toBottomOf="@+id/editTextY2"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toEndOf="@+id/editTextX2"
+        app:layout_constraintTop_toTopOf="@+id/editTextX2" />
 
     <View
-        android:id="@+id/divisionLine1"
+        android:id="@+id/divisionLine3"
         android:layout_width="0dp"
         android:layout_height="2dp"
         android:layout_marginTop="3dp"
         android:background="#DADADA"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/searchView" />
+        app:layout_constraintTop_toBottomOf="@+id/editTextY2" />
 
     <wifilocation.wifi.SpotImageView
-        android:id="@+id/imageViewMap"
+        android:id="@+id/imageViewMap2"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginTop="3dp"
+        android:src="@drawable/skku_example"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/divisionLine1" />
+        app:layout_constraintTop_toBottomOf="@+id/divisionLine3" />
 
     <View
-        android:id="@+id/divisionLine2"
+        android:id="@+id/divisionLine4"
         android:layout_width="0dp"
         android:layout_height="2dp"
         android:layout_marginTop="3dp"
         android:background="#DADADA"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/imageViewMap" />
+        app:layout_constraintTop_toBottomOf="@+id/imageViewMap2" />
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/RecyclerViewSearched"
@@ -56,5 +86,5 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="1.0"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/divisionLine2" />
+        app:layout_constraintTop_toBottomOf="@+id/divisionLine4" />
 </androidx.constraintlayout.widget.ConstraintLayout>

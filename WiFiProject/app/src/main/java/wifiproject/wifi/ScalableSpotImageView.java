@@ -6,7 +6,6 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.util.AttributeSet;
-import android.view.MotionEvent;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -28,7 +27,7 @@ public class ScalableSpotImageView extends SubsamplingScaleImageView {
     }
 
     private void init(Context context) {
-        bitmap_spot = BitmapFactory.decodeResource(getResources(), R.drawable.spot);
+        bitmap_spot = BitmapFactory.decodeResource(getResources(), R.drawable.red_spot);
         bitmap_spot = Bitmap.createScaledBitmap(bitmap_spot, 30, 30, true);
     }
 
