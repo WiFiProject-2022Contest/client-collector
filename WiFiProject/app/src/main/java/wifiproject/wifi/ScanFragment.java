@@ -72,22 +72,15 @@ public class ScanFragment extends Fragment {
 
         imageview_map = rootview.findViewById(R.id.imageViewMap);
         imageview_map.setImage(ImageSource.resource(R.drawable.skku_example));
-        final GestureDetector gesture_detector = new GestureDetector(context, new GestureDetector.SimpleOnGestureListener() {
-            @Override
-            public boolean onSingleTapConfirmed(MotionEvent e) {
-                if (imageview_map.isReady()) {
-                    PointF s_coord = imageview_map.viewToSourceCoord(e.getX(), e.getY());
-                    edittext_x.setText(String.valueOf(s_coord.x));
-                    edittext_y.setText(String.valueOf(s_coord.y));
-                    imageview_map.moveSpot(s_coord.x, s_coord.y);
-                }
-                return super.onSingleTapConfirmed(e);
-            }
-        });
         imageview_map.setOnTouchListener(new View.OnTouchListener() {
             @Override
             public boolean onTouch(View view, MotionEvent motionEvent) {
-                return gesture_detector.onTouchEvent(motionEvent);
+                if (imageview_map.isReady()) {
+                    PointF s_coord = imageview_map.viewToSourceCoord((float)imageview_map.getWidth() / 2, (float)imageview_map.getHeight() / 2);
+                    edittext_x.setText(String.valueOf(s_coord.x));
+                    edittext_y.setText(String.valueOf(s_coord.y));
+                }
+                return false;
             }
         });
 

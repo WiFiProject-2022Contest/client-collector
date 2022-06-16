@@ -6,6 +6,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.util.AttributeSet;
+import android.view.MotionEvent;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -15,7 +16,6 @@ import com.davemorrissey.labs.subscaleview.SubsamplingScaleImageView;
 public class ScalableSpotImageView extends SubsamplingScaleImageView {
 
     private Bitmap bitmap_spot;
-    float x = -1, y = -1;
 
     public ScalableSpotImageView(@NonNull Context context) {
         super(context);
@@ -35,13 +35,6 @@ public class ScalableSpotImageView extends SubsamplingScaleImageView {
     @Override
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
-        if (bitmap_spot != null && x != -1 && y != -1)
-            canvas.drawBitmap(bitmap_spot, x, y, null);
-    }
-
-    public void moveSpot(float x, float y) {
-        this.x = x;
-        this.y = y;
-        invalidate();
+        canvas.drawBitmap(bitmap_spot, (float)getWidth() / 2 - 15, (float)getHeight() / 2 - 30, null);
     }
 }
