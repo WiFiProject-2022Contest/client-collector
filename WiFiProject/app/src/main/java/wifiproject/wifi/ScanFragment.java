@@ -140,7 +140,6 @@ public class ScanFragment extends Fragment {
         ArrayList<WiFiItem> items = new ArrayList<WiFiItem>();
         for (ScanResult result : results) {
 //            if (!result.SSID.equalsIgnoreCase("WiFiLocation@PDA")) continue;
-            Log.v("***", result.BSSID);
             items.add(new WiFiItem(-1, -1, result.SSID, result.BSSID, result.level, result.frequency, GetDevicesUUID(context), "skku"));
         }
         wifiitem_adpater.setItems(items);
@@ -163,7 +162,6 @@ public class ScanFragment extends Fragment {
         androidId = "" + android.provider.Settings.Secure.getString(getActivity().getContentResolver(), android.provider.Settings.Secure.ANDROID_ID);
         UUID deviceUuid = new UUID(androidId.hashCode(), ((long)tmDevice.hashCode() << 32) | tmSerial.hashCode());
         String deviceId = deviceUuid.toString();
-        Log.d("UUID_generater", deviceId);
         return deviceId;
     }
 }
