@@ -1,6 +1,7 @@
 package wifilocation.wifi;
 
 import android.content.Context;
+import android.graphics.PointF;
 import android.os.Bundle;
 
 import androidx.fragment.app.Fragment;
@@ -8,10 +9,16 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.SearchView;
+import android.widget.Button;
+import android.widget.EditText;
 import android.widget.Toast;
+
+import androidx.appcompat.widget.SearchView;
+
+import com.davemorrissey.labs.subscaleview.ImageSource;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -22,7 +29,9 @@ import retrofit2.Response;
 
 public class SearchFragment extends Fragment {
     RecyclerView recyclerview_searched;
+    SpotImageView imageview_map2;
     WiFiItemAdapter wifiitem_adapter = new WiFiItemAdapter();
+    EditText edittext_x2, edittext_y2;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -30,17 +39,41 @@ public class SearchFragment extends Fragment {
         ViewGroup rootview = (ViewGroup) inflater.inflate(R.layout.fragment_search, container, false);
 
         Context context = getActivity().getApplicationContext();
+        edittext_x2 = rootview.findViewById(R.id.editTextX2);
+        edittext_y2 = rootview.findViewById(R.id.editTextY2);
 
         recyclerview_searched = rootview.findViewById(R.id.RecyclerViewSearched);
         recyclerview_searched.setLayoutManager(new LinearLayoutManager(context, LinearLayoutManager.VERTICAL, false));
 
-        SearchView searchview = rootview.findViewById(R.id.searchView);
-        searchview.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+        imageview_map2 = rootview.findViewById(R.id.imageViewMap2);
+        imageview_map2.setImage(ImageSource.resource(R.drawable.skku_example));
+        imageview_map2.setOnTouchListener(new View.OnTouchListener() {
             @Override
-            public boolean onQueryTextSubmit(String s) {
+            public boolean onTouch(View view, MotionEvent motionEvent) {
+                if (imageview_map2.isReady()) {
+                    PointF s_coord = imageview_map2.viewToSourceCoord((float)imageview_map2.getWidth() / 2, (float)imageview_map2.getHeight() / 2);
+                    edittext_x2.setText(String.valueOf(s_coord.x));
+                    edittext_y2.setText(String.valueOf(s_coord.y));
+                }
+                return false;
+            }
+        });
+
+        Button button_search = rootview.findViewById(R.id.buttonSearch);
+        button_search.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                float target_x;
+                float target_y;
+                try {
+                    target_x = Float.parseFloat(edittext_x2.getText().toString());
+                    target_y = Float.parseFloat(edittext_y2.getText().toString());
+                } catch (Exception e) {
+                    Toast.makeText(context, "올바른 형식의 좌표 입력 필요", Toast.LENGTH_SHORT).show();
+                    return;
+                }
                 RetrofitAPI retrofit_api = RetrofitClient.getRetrofitAPI();
-                String[] pos = s.split(",");
-                retrofit_api.getData(Float.parseFloat(pos[0]), Float.parseFloat(pos[1])).enqueue(new Callback<List<WiFiItem>>() {
+                retrofit_api.getData(target_x, target_y).enqueue(new Callback<List<WiFiItem>>() {
                     @Override
                     public void onResponse(Call<List<WiFiItem>> call, Response<List<WiFiItem>> response) {
                         ArrayList<WiFiItem> items = new ArrayList<WiFiItem>();
@@ -50,23 +83,18 @@ public class SearchFragment extends Fragment {
                             @Override
                             public void run() {
                                 recyclerview_searched.setAdapter(wifiitem_adapter);
+                                imageview_map2.setSpot(items);
                             }
                         });
                     }
 
                     @Override
                     public void onFailure(Call<List<WiFiItem>> call, Throwable t) {
-
                     }
                 });
-                return false;
-            }
-
-            @Override
-            public boolean onQueryTextChange(String s) {
-                return false;
             }
         });
+
         return rootview;
     }
 }
