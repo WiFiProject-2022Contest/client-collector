@@ -20,21 +20,21 @@ import retrofit2.Response;
 public class EstimateFragment extends Fragment {
     Button buttonEstimate;
     TextView textResultEstimate;
-    List<WiFiItem> allData;
+    List<WiFiItem> databaseData;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        ViewGroup rootview = (ViewGroup) inflater.inflate(R.layout.fragment_estimate, container, false);
-        buttonEstimate = rootview.findViewById(R.id.buttonEstimate);
-        textResultEstimate = rootview.findViewById(R.id.textResultEstimate);
+        ViewGroup rootView = (ViewGroup) inflater.inflate(R.layout.fragment_estimate, container, false);
+        buttonEstimate = rootView.findViewById(R.id.buttonEstimate);
+        textResultEstimate = rootView.findViewById(R.id.textResultEstimate);
 
         // DB 전체 다 받아오기
         RetrofitAPI retrofit_api = RetrofitClient.getRetrofitAPI();
         retrofit_api.getData(-1, -1).enqueue(new Callback<List<WiFiItem>>() {
             @Override
             public void onResponse(Call<List<WiFiItem>> call, Response<List<WiFiItem>> response) {
-                allData = response.body();
+                databaseData = response.body();
             }
 
             @Override
@@ -46,10 +46,10 @@ public class EstimateFragment extends Fragment {
         buttonEstimate.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-
+                
             }
         });
 
-        return rootview;
+        return rootView;
     }
 }
