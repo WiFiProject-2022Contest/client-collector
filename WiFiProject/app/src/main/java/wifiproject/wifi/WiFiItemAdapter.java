@@ -62,7 +62,7 @@ public class WiFiItemAdapter extends RecyclerView.Adapter<WiFiItemAdapter.ViewHo
             textview_SSID.setText("SSID: " + item.getSSID());
             textview_BSSID.setText("BSSID: " + item.getBSSID());
             textview_RSSI.setText("RSSI: " + String.valueOf(item.getRSSI()));
-            textview_bandwidth.setText(String.format("Bandwidth: %d, UUID: %s", item.getBandwidth(), item.getUuid()));
+            textview_bandwidth.setText(String.format("Bandwidth: %d", item.getBandwidth()));
             textview_uuid.setText(String.format("UUID: %s", item.getUuid()));
             textview_pos.setText(String.format("x: %.5f, y: %.5f", item.getX(), item.getY()));
         }

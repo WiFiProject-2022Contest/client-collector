@@ -77,7 +77,7 @@ public class ScanFragment extends Fragment {
             @Override
             public boolean onTouch(View view, MotionEvent motionEvent) {
                 if (imageview_map.isReady()) {
-                    PointF s_coord = imageview_map.viewToSourceCoord((float) imageview_map.getWidth() / 2, (float) imageview_map.getHeight() / 2);
+                    PointF s_coord = imageview_map.getCenter();
                     edittext_x.setText(String.valueOf(s_coord.x));
                     edittext_y.setText(String.valueOf(s_coord.y));
                 }

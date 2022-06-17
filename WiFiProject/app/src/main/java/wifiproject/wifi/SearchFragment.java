@@ -51,7 +51,7 @@ public class SearchFragment extends Fragment {
             @Override
             public boolean onTouch(View view, MotionEvent motionEvent) {
                 if (imageview_map2.isReady()) {
-                    PointF s_coord = imageview_map2.viewToSourceCoord((float)imageview_map2.getWidth() / 2, (float)imageview_map2.getHeight() / 2);
+                    PointF s_coord = imageview_map2.getCenter();
                     edittext_x2.setText(String.valueOf(s_coord.x));
                     edittext_y2.setText(String.valueOf(s_coord.y));
                 }
