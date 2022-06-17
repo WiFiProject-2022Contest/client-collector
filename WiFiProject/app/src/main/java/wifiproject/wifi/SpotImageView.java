@@ -5,6 +5,7 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
+import android.graphics.PointF;
 import android.util.AttributeSet;
 
 import androidx.annotation.NonNull;
@@ -46,7 +47,8 @@ public class SpotImageView extends SubsamplingScaleImageView {
         int size = xs.size();
         if(size == ys.size()) {
             for (int i = 0; i < size; i++) {
-                canvas.drawBitmap(bitmap_green_spot, xs.get(i), ys.get(i), null);
+                PointF pos = sourceToViewCoord(xs.get(i), ys.get(i));
+                canvas.drawBitmap(bitmap_green_spot, pos.x, pos.y, null);
             }
         }
     }
