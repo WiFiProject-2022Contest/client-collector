@@ -1,5 +1,7 @@
 package wifilocation.wifi;
 
+import android.icu.text.AlphabeticIndex;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -10,21 +12,42 @@ import java.util.Map.Entry;
 import java.util.Set;
 
 public class PositioningAlgorithm {
-    public static double[] run(List<WiFiItem> databaseData) {
-        List<RecordPoint> rp = transform(databaseData);
-        double[] estimatedPosition = estimate(new RecordPoint(new double[] {0, 0}), rp);
+    static List<RecordPoint> rp;
+    static List<WiFiItem> previousDatabase = null;
 
-        return estimatedPosition;
+    public static double[] run(List<WiFiItem> databaseData) {
+        // 데이터베이스는 한 줄에 하나의 AP 정보가 담겨있기 때문에
+        // 이것을 다루기 쉽게 한 측정 지점에서 측정한 RSSI 값들을 모두 하나의 RecordPoint 객체에 담아주는 과정입니다.
+        // 기존에 변환한 정보가 없거나 받은 데이터베이스 정보가 변경되었을 때만 변환 과정을 시행합니다.
+        if (databaseData != previousDatabase) {
+            rp = transform(databaseData);
+            previousDatabase = databaseData;
+        }
+
+        // 변환된 정보를 함수에 넣어서 추정값을 반환받습니다.
+        return estimate(new RecordPoint(new double[] {0, 0}), rp);
     }
 
     static List<RecordPoint> transform(List<WiFiItem> databaseData) {
         List<RecordPoint> rp = new ArrayList<>();
 
         for (WiFiItem databaseRow : databaseData) {
-            boolean locationExists = false;
+            RecordPoint workingRP = null;
 
             for (RecordPoint recordPoint : rp) {
+                if (databaseRow.getX() == recordPoint.getLocation()[0] && databaseRow.getY() == recordPoint.getLocation()[1]) {
+                    //RecordPoint newRecordPoint = new RecordPoint(new double[]);
+                    workingRP = recordPoint;
+
+                    break;
+                }
             }
+
+            if (workingRP == null) {
+                workingRP = new RecordPoint(new double[] {databaseRow.getX(), databaseRow.getY()});
+                rp.add(workingRP);
+            }
+            workingRP.getRSSI().put(databaseRow.getBSSID(), databaseRow.getRSSI());
         }
 
         return rp;
