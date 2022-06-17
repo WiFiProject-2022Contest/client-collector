@@ -30,6 +30,7 @@ import android.widget.Toast;
 import com.davemorrissey.labs.subscaleview.ImageSource;
 import com.davemorrissey.labs.subscaleview.SubsamplingScaleImageView;
 
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -76,7 +77,7 @@ public class ScanFragment extends Fragment {
             @Override
             public boolean onTouch(View view, MotionEvent motionEvent) {
                 if (imageview_map.isReady()) {
-                    PointF s_coord = imageview_map.viewToSourceCoord((float)imageview_map.getWidth() / 2, (float)imageview_map.getHeight() / 2);
+                    PointF s_coord = imageview_map.viewToSourceCoord((float) imageview_map.getWidth() / 2, (float) imageview_map.getHeight() / 2);
                     edittext_x.setText(String.valueOf(s_coord.x));
                     edittext_y.setText(String.valueOf(s_coord.y));
                 }
@@ -92,6 +93,13 @@ public class ScanFragment extends Fragment {
         button_scan.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                try {
+                    Float.parseFloat(edittext_x.getText().toString());
+                    Float.parseFloat(edittext_y.getText().toString());
+                } catch (Exception e) {
+                    Toast.makeText(context, "올바른 형식의 좌표 입력 필요", Toast.LENGTH_SHORT).show();
+                    return;
+                }
                 wm.startScan();
             }
         });
@@ -100,12 +108,9 @@ public class ScanFragment extends Fragment {
         button_push.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if (edittext_x.getText().toString().equals("") || edittext_y.getText().toString().equals("")) {
-                    Toast.makeText(context, "좌표 입력 필요", Toast.LENGTH_SHORT);
-                    return;
-                }
                 RetrofitAPI retrofit_api = RetrofitClient.getRetrofitAPI();
-                retrofit_api.postData(Float.parseFloat(edittext_x.getText().toString()), Float.parseFloat(edittext_y.getText().toString()),
+
+                retrofit_api.postData(wifiitem_adpater.getItems().get(0).getX(), wifiitem_adpater.getItems().get(0).getY(),
                         wifiitem_adpater.getItems()).enqueue(new Callback<PushResultModel>() {
                     @Override
                     public void onResponse(Call<PushResultModel> call, Response<PushResultModel> response) {
@@ -117,8 +122,7 @@ public class ScanFragment extends Fragment {
                                     Toast.makeText(context, "PUSH 성공", Toast.LENGTH_SHORT).show();
                                 }
                             });
-                        }
-                        else {
+                        } else {
                             getActivity().runOnUiThread(new Runnable() {
                                 @Override
                                 public void run() {
@@ -142,9 +146,11 @@ public class ScanFragment extends Fragment {
     private void scanSuccess() {
         List<ScanResult> results = wm.getScanResults();
         ArrayList<WiFiItem> items = new ArrayList<WiFiItem>();
+        float target_x = Float.parseFloat(edittext_x.getText().toString());
+        float target_y = Float.parseFloat(edittext_y.getText().toString());
         for (ScanResult result : results) {
 //            if (!result.SSID.equalsIgnoreCase("WiFiLocation@PDA")) continue;
-            items.add(new WiFiItem(Float.parseFloat(edittext_x.getText().toString()), Float.parseFloat(edittext_y.getText().toString()), result.SSID, result.BSSID, result.level, result.frequency, GetDevicesUUID(context), "skku"));
+            items.add(new WiFiItem(target_x, target_y, result.SSID, result.BSSID, result.level, result.frequency, GetDevicesUUID(context), "skku"));
         }
         wifiitem_adpater.setItems(items);
         recyclerview_scanned.setAdapter(wifiitem_adpater);
@@ -164,7 +170,7 @@ public class ScanFragment extends Fragment {
         tmDevice = "" + tm.getDeviceId();
         tmSerial = "" + tm.getSimSerialNumber();
         androidId = "" + android.provider.Settings.Secure.getString(getActivity().getContentResolver(), android.provider.Settings.Secure.ANDROID_ID);
-        UUID deviceUuid = new UUID(androidId.hashCode(), ((long)tmDevice.hashCode() << 32) | tmSerial.hashCode());
+        UUID deviceUuid = new UUID(androidId.hashCode(), ((long) tmDevice.hashCode() << 32) | tmSerial.hashCode());
         String deviceId = deviceUuid.toString();
         return deviceId;
     }

@@ -63,12 +63,17 @@ public class SearchFragment extends Fragment {
         button_search.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if (edittext_x2.getText().toString().equals("") || edittext_y2.getText().toString().equals("")) {
-                    Toast.makeText(context, "좌표 입력 필요", Toast.LENGTH_SHORT).show();
+                float target_x;
+                float target_y;
+                try {
+                    target_x = Float.parseFloat(edittext_x2.getText().toString());
+                    target_y = Float.parseFloat(edittext_y2.getText().toString());
+                } catch (Exception e) {
+                    Toast.makeText(context, "올바른 형식의 좌표 입력 필요", Toast.LENGTH_SHORT).show();
                     return;
                 }
                 RetrofitAPI retrofit_api = RetrofitClient.getRetrofitAPI();
-                retrofit_api.getData(Float.parseFloat(edittext_x2.getText().toString()), Float.parseFloat(edittext_y2.getText().toString())).enqueue(new Callback<List<WiFiItem>>() {
+                retrofit_api.getData(target_x, target_y).enqueue(new Callback<List<WiFiItem>>() {
                     @Override
                     public void onResponse(Call<List<WiFiItem>> call, Response<List<WiFiItem>> response) {
                         ArrayList<WiFiItem> items = new ArrayList<WiFiItem>();
