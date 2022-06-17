@@ -100,6 +100,10 @@ public class ScanFragment extends Fragment {
         button_push.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                if (edittext_x.getText().toString().equals("") || edittext_y.getText().toString().equals("")) {
+                    Toast.makeText(context, "좌표 입력 필요", Toast.LENGTH_SHORT);
+                    return;
+                }
                 RetrofitAPI retrofit_api = RetrofitClient.getRetrofitAPI();
                 retrofit_api.postData(Float.parseFloat(edittext_x.getText().toString()), Float.parseFloat(edittext_y.getText().toString()),
                         wifiitem_adpater.getItems()).enqueue(new Callback<PushResultModel>() {

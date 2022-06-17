@@ -14,6 +14,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.Toast;
 
 import androidx.appcompat.widget.SearchView;
 
@@ -62,6 +63,10 @@ public class SearchFragment extends Fragment {
         button_search.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                if (edittext_x2.getText().toString().equals("") || edittext_y2.getText().toString().equals("")) {
+                    Toast.makeText(context, "좌표 입력 필요", Toast.LENGTH_SHORT).show();
+                    return;
+                }
                 RetrofitAPI retrofit_api = RetrofitClient.getRetrofitAPI();
                 retrofit_api.getData(Float.parseFloat(edittext_x2.getText().toString()), Float.parseFloat(edittext_y2.getText().toString())).enqueue(new Callback<List<WiFiItem>>() {
                     @Override
