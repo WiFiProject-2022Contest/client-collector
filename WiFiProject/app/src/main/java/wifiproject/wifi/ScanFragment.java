@@ -143,6 +143,13 @@ public class ScanFragment extends Fragment {
         return rootview;
     }
 
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+
+        context.unregisterReceiver(wifi_receiver);
+    }
+
     private void scanSuccess() {
         List<ScanResult> results = wm.getScanResults();
         ArrayList<WiFiItem> items = new ArrayList<WiFiItem>();
