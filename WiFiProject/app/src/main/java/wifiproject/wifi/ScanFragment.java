@@ -143,6 +143,13 @@ public class ScanFragment extends Fragment {
         return rootview;
     }
 
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+
+        context.unregisterReceiver(wifi_receiver);
+    }
+
     private void scanSuccess() {
         List<ScanResult> results = wm.getScanResults();
         ArrayList<WiFiItem> items = new ArrayList<WiFiItem>();
@@ -150,7 +157,8 @@ public class ScanFragment extends Fragment {
         float target_y = Float.parseFloat(edittext_y.getText().toString());
         for (ScanResult result : results) {
 //            if (!result.SSID.equalsIgnoreCase("WiFiLocation@PDA")) continue;
-            items.add(new WiFiItem(target_x, target_y, result.SSID, result.BSSID, result.level, result.frequency, GetDevicesUUID(context), "skku"));
+            items.add(new WiFiItem(target_x, target_y, result.SSID, result.BSSID, result.level, result.frequency, null, "skku"));
+//            items.add(new WiFiItem(target_x, target_y, result.SSID, result.BSSID, result.level, result.frequency, GetDevicesUUID(context), "skku"));
         }
         wifiitem_adpater.setItems(items);
         recyclerview_scanned.setAdapter(wifiitem_adpater);
