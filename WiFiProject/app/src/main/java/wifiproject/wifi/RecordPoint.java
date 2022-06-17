@@ -1,10 +1,11 @@
 package wifilocation.wifi;
 
 import java.util.HashMap;
+import java.util.Map;
 
 public class RecordPoint {
     private double[] location;
-    private HashMap<String, Integer> RSSI;
+    private Map<String, Integer> RSSI;
 
     public RecordPoint() {
         this.location = new double[2];
@@ -18,7 +19,7 @@ public class RecordPoint {
         RSSI = new HashMap<>();
     }
 
-    public RecordPoint(double[] location, HashMap<String, Integer> RSSI) {
+    public RecordPoint(double[] location, Map<String, Integer> RSSI) {
         this.location = location;
         this.RSSI = RSSI;
     }
@@ -31,11 +32,11 @@ public class RecordPoint {
         this.location = location;
     }
 
-    public HashMap<String, Integer> getRSSI() {
+    public Map<String, Integer> getRSSI() {
         return this.RSSI;
     }
 
-    public void setRSSI(HashMap<String, Integer> RSSI) {
+    public void setRSSI(Map<String, Integer> RSSI) {
         this.RSSI = RSSI;
     }
 }

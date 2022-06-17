@@ -4,17 +4,39 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Set;
+import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 
 public class PositioningAlgorithm {
-    public static double[] estimate(RecordPoint tp, ArrayList<RecordPoint> rp) {
-        ArrayList<RecordPoint> vrp = interpolation(rp, 3);
+    public static double[] run(List<WiFiItem> databaseData) {
+        List<RecordPoint> rp = transform(databaseData);
+        double[] estimatedPosition = estimate(new RecordPoint(new double[] {0, 0}), rp);
+
+        return estimatedPosition;
+    }
+
+    static List<RecordPoint> transform(List<WiFiItem> databaseData) {
+        List<RecordPoint> rp = new ArrayList<>();
+
+        for (WiFiItem databaseRow : databaseData) {
+            boolean locationExists = false;
+
+            for (RecordPoint recordPoint : rp) {
+            }
+        }
+
+        return rp;
+    }
+
+    static double[] estimate(RecordPoint tp, List<RecordPoint> rp) {
+        List<RecordPoint> vrp = interpolation(rp, 3);
         return weightedKNN(tp, vrp, 3, 2, -30, -70);
     }
 
-    static ArrayList<RecordPoint> interpolation(ArrayList<RecordPoint> rp, double standardRecordDistance) {
-        ArrayList<RecordPoint> vrp = new ArrayList<>(rp);
+    static List<RecordPoint> interpolation(List<RecordPoint> rp, double standardRecordDistance) {
+        List<RecordPoint> vrp = new ArrayList<>(rp);
 
         for (int i = 0; i < rp.size(); i++) {
             for (int j = i + 1; j < rp.size(); j++) {
@@ -45,8 +67,8 @@ public class PositioningAlgorithm {
         return vrp;
     }
 
-    static double[] weightedKNN(RecordPoint tp, ArrayList<RecordPoint> rp, int K, int minAPNum, int maxDbm, int minDbm) {
-        ArrayList<RecordPoint> candidateRP = new ArrayList<>();
+    static double[] weightedKNN(RecordPoint tp, List<RecordPoint> rp, int K, int minAPNum, int maxDbm, int minDbm) {
+        List<RecordPoint> candidateRP = new ArrayList<>();
         for (int i = 0; i < rp.size(); i++) {
             Set<String> intersectBSSID = new HashSet<>(rp.get(i).getRSSI().keySet());
             intersectBSSID.retainAll(tp.getRSSI().keySet());
@@ -68,7 +90,7 @@ public class PositioningAlgorithm {
             allBSSID.addAll(rp.get(i).getRSSI().keySet());
         }
 
-        HashMap<RecordPoint, Double> nearDistance = new HashMap<>();
+        Map<RecordPoint, Double> nearDistance = new HashMap<>();
         double maxDistance = Double.MAX_VALUE;
         for (int i = 0; i < candidateRP.size(); i++) {
             double currentDistanceSquare = 0;
@@ -99,7 +121,7 @@ public class PositioningAlgorithm {
             maxDistance = Collections.max(nearDistance.values());
         }
 
-        HashMap<RecordPoint, Double> weight = new HashMap<>();
+        Map<RecordPoint, Double> weight = new HashMap<>();
         for (Entry<RecordPoint, Double> entry : nearDistance.entrySet()) {
             weight.put(entry.getKey(), 1 / (entry.getValue() + 0.01));
         }

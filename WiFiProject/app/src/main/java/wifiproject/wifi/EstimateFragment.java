@@ -20,7 +20,7 @@ import retrofit2.Response;
 public class EstimateFragment extends Fragment {
     Button buttonEstimate;
     TextView textResultEstimate;
-    List<WiFiItem> databaseData;
+    List<WiFiItem> databaseAllData;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -34,7 +34,7 @@ public class EstimateFragment extends Fragment {
         retrofit_api.getData(-1, -1).enqueue(new Callback<List<WiFiItem>>() {
             @Override
             public void onResponse(Call<List<WiFiItem>> call, Response<List<WiFiItem>> response) {
-                databaseData = response.body();
+                databaseAllData = response.body();
             }
 
             @Override
@@ -46,7 +46,8 @@ public class EstimateFragment extends Fragment {
         buttonEstimate.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                
+                double[] estimatedPosition = PositioningAlgorithm.run(databaseAllData);
+                textResultEstimate.setText(String.format("(%s, %s)", estimatedPosition[0], estimatedPosition[1]));
             }
         });
 
