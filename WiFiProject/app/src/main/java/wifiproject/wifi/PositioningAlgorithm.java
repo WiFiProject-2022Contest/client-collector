@@ -61,7 +61,7 @@ public class PositioningAlgorithm {
 
     static double[] estimate(RecordPoint tp, List<RecordPoint> rp) {
         List<RecordPoint> vrp = interpolation(rp, 3);
-        return weightedKNN(tp, vrp, 3, 2, -30, -70);
+        return weightedKNN(tp, vrp, 5, 2, -0, -70);
     }
 
     static List<RecordPoint> interpolation(List<RecordPoint> rp, double standardRecordDistance) {
@@ -97,6 +97,7 @@ public class PositioningAlgorithm {
     }
 
     static double[] weightedKNN(RecordPoint tp, List<RecordPoint> rp, int K, int minAPNum, int maxDbm, int minDbm) {
+        // K개의 최근접 RP를 선별하는 과정
         List<RecordPoint> candidateRP = new ArrayList<>();
         for (int i = 0; i < rp.size(); i++) {
             Set<String> intersectBSSID = new HashSet<>(rp.get(i).getRSSI().keySet());
@@ -114,21 +115,49 @@ public class PositioningAlgorithm {
             candidateRP.add(rp.get(i));
         }
 
+        Map<RecordPoint, Double> nearDistance = getKNearDistance(tp, candidateRP, K, maxDbm, minDbm);
+
+        // K개의 최근접 AP를 토대로 평가용 가중치를 산정하는 과정
+        Map<RecordPoint, Double> evaluateDistance = getKNearDistance(tp, new ArrayList<RecordPoint>(nearDistance.keySet()), K, maxDbm, minDbm);
+
+        Map<RecordPoint, Double> weight = new HashMap<>();
+        for (Entry<RecordPoint, Double> entry : evaluateDistance.entrySet()) {
+            weight.put(entry.getKey(), 1 / (entry.getValue() + 0.01));
+        }
+
+        double totalWeight = 0;
+        for (double val : weight.values()) {
+            totalWeight += val;
+        }
+
+        // 최종 위치를 추정하는 과정
+        double[] estimatedPosition = {0, 0};
+        for (RecordPoint key : evaluateDistance.keySet()) {
+            for (int i = 0; i < 2; i++) {
+                double fraction = (weight.get(key) / totalWeight);
+                estimatedPosition[i] += fraction * key.getLocation()[i];
+            }
+        }
+
+        return estimatedPosition;
+    }
+
+    static Map<RecordPoint, Double> getKNearDistance(RecordPoint tp, List<RecordPoint> rp, int K, int maxDbm, int minDbm) {
         Set<String> allBSSID = new HashSet<>(tp.getRSSI().keySet());
+
         for (int i = 0; i < rp.size(); i++) {
             allBSSID.addAll(rp.get(i).getRSSI().keySet());
         }
 
         Map<RecordPoint, Double> nearDistance = new HashMap<>();
         double maxDistance = Double.MAX_VALUE;
-        for (int i = 0; i < candidateRP.size(); i++) {
+        for (int i = 0; i < rp.size(); i++) {
             double currentDistanceSquare = 0;
 
             for (String BSSID : allBSSID) {
-                if (candidateRP.get(i).getRSSI().containsKey(BSSID) && candidateRP.get(i).getRSSI().get(BSSID) >= minDbm) {
-                    currentDistanceSquare += Math.pow(candidateRP.get(i).getRSSI().get(BSSID), 2);
-                }
-                else {
+                if (tp.getRSSI().containsKey(BSSID) && rp.get(i).getRSSI().containsKey(BSSID) && rp.get(i).getRSSI().get(BSSID) >= minDbm) {
+                    currentDistanceSquare += Math.pow(tp.getRSSI().get(BSSID) - rp.get(i).getRSSI().get(BSSID), 2);
+                } else {
                     currentDistanceSquare += Math.pow(Math.abs(maxDbm - minDbm) + 10, 2);
                 }
 
@@ -142,7 +171,7 @@ public class PositioningAlgorithm {
             }
 
             double currentDistance = Math.sqrt(currentDistanceSquare) / allBSSID.size();
-            nearDistance.put(candidateRP.get(i), currentDistance);
+            nearDistance.put(rp.get(i), currentDistance);
             if (nearDistance.size() > K) {
                 nearDistance.values().remove(maxDistance);
             }
@@ -150,24 +179,6 @@ public class PositioningAlgorithm {
             maxDistance = Collections.max(nearDistance.values());
         }
 
-        Map<RecordPoint, Double> weight = new HashMap<>();
-        for (Entry<RecordPoint, Double> entry : nearDistance.entrySet()) {
-            weight.put(entry.getKey(), 1 / (entry.getValue() + 0.01));
-        }
-
-        double totalWeight = 0;
-        for (double val : weight.values()) {
-            totalWeight += val;
-        }
-
-        double[] estimatedPosition = {0, 0};
-        for (RecordPoint key : nearDistance.keySet()) {
-            for (int i = 0; i < 2; i++) {
-                double fraction = (weight.get(key) / totalWeight);
-                estimatedPosition[i] += fraction * key.getLocation()[i];
-            }
-        }
-
-        return estimatedPosition;
+        return nearDistance;
     }
 }
