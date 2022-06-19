@@ -31,7 +31,7 @@ public class PositioningAlgorithm {
         }
 
         // 변환된 정보를 함수에 넣어서 추정값을 반환받습니다.
-        return estimate(new RecordPoint(new double[] {0, 0}), rp);
+        return estimate(tp, rp);
     }
 
     static List<RecordPoint> transform(List<WiFiItem> databaseData) {
