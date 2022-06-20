@@ -16,19 +16,19 @@ public class WiFiItem {
     @SerializedName("level")
     int RSSI;
     @SerializedName("frequency")
-    int bandwidth;
+    int frequency;
     @SerializedName("uuid")
     String uuid;
     @SerializedName("building")
     String building;
 
-    public WiFiItem(float x, float y, String SSID, String BSSID, int RSSI, int bandwidth, String uuid, String building) {
+    public WiFiItem(float x, float y, String SSID, String BSSID, int RSSI, int frequency, String uuid, String building) {
         this.x = x;
         this.y = y;
         this.SSID = SSID;
         this.BSSID = BSSID;
         this.RSSI = RSSI;
-        this.bandwidth = bandwidth;
+        this.frequency = frequency;
         this.uuid = uuid;
         this.building = building;
     }
@@ -73,12 +73,10 @@ public class WiFiItem {
         this.RSSI = RSSI;
     }
 
-    public int getBandwidth() {
-        return bandwidth;
-    }
+    public int getFrequency() { return frequency; }
 
-    public void setBandwidth(int bandwidth) {
-        this.bandwidth = bandwidth;
+    public void setFrequency(int frequency) {
+        this.frequency = frequency;
     }
 
     public String getUuid() {
