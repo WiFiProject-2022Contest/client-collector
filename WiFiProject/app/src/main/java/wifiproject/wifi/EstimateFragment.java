@@ -30,7 +30,6 @@ public class EstimateFragment extends Fragment {
     Button buttonEstimate;
     TextView textResultEstimate;
     List<WiFiItem> databaseAllData;
-    List<WiFiItem> userData;
 
     private BroadcastReceiver wifi_receiver = new BroadcastReceiver() {
         @Override
@@ -91,9 +90,11 @@ public class EstimateFragment extends Fragment {
     }
 
     private void scanSuccess() {
+        // 스캔 리스트를 받아오는 과정
         List<ScanResult> results = wm.getScanResults();
         Toast.makeText(context, "Scan finished.", Toast.LENGTH_SHORT).show();
-        userData = new ArrayList<WiFiItem>();
+
+        List<WiFiItem> userData = new ArrayList<WiFiItem>();
         for (ScanResult result : results) {
             userData.add(new WiFiItem(0, 0, result.SSID, result.BSSID, result.level, result.frequency, null, null));
         }

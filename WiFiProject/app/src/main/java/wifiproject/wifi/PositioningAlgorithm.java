@@ -16,7 +16,7 @@ import java.util.Map.Entry;
 import java.util.Set;
 
 public class PositioningAlgorithm {
-    static RecordPoint tp;
+    static List<RecordPoint> tp;
     static List<RecordPoint> rp;
     static List<WiFiItem> previousDatabase = null;
 
@@ -24,21 +24,28 @@ public class PositioningAlgorithm {
         // 데이터베이스는 한 줄에 하나의 AP 정보가 담겨있기 때문에
         // 이것을 다루기 쉽게 한 측정 지점에서 측정한 RSSI 값들을 모두 하나의 RecordPoint 객체에 담아주는 과정입니다.
         // 데이터베이스에 대한 작업은 기존에 변환한 정보가 없거나 받은 데이터베이스 정보가 변경되었을 때만 시행합니다.
-        tp = transform(userData).get(0);
+        String targetSSID = "SKKU";
+        int targetGHZ = 2;
+
+        tp = getRecordPointList(userData, targetSSID, targetGHZ);
         if (databaseData != previousDatabase) {
-            rp = transform(databaseData);
+            rp = getRecordPointList(databaseData, targetSSID, targetGHZ);
             previousDatabase = databaseData;
         }
 
         // 변환된 정보를 함수에 넣어서 추정값을 반환받습니다.
-        return estimate(tp, rp);
+        return estimate(tp.get(0), rp);
     }
 
-    static List<RecordPoint> transform(List<WiFiItem> databaseData) {
+    static List<RecordPoint> getRecordPointList(List<WiFiItem> databaseData, String targetSSID, int targetGHZ) {
         List<RecordPoint> rp = new ArrayList<>();
 
         for (WiFiItem databaseRow : databaseData) {
             RecordPoint workingRP = null;
+
+            if (databaseRow.getSSID().equals(targetSSID) == false || databaseRow.getBandwidth() / 1000 != targetGHZ) {
+                continue;
+            }
 
             for (RecordPoint recordPoint : rp) {
                 if (databaseRow.getX() == recordPoint.getLocation()[0] && databaseRow.getY() == recordPoint.getLocation()[1]) {
