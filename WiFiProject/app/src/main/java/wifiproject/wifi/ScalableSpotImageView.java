@@ -39,10 +39,10 @@ public class ScalableSpotImageView extends SubsamplingScaleImageView {
         canvas.drawBitmap(bitmap_spot, (float)getWidth() / 2 - 15, (float)getHeight() / 2 - 30, null);
     }
 
-    public PointF sourceToMeter(PointF pos) {
+    public PointF sourceToMeter(PointF s_coord) {
         PointF size = viewToSourceCoord(getWidth(), getHeight());
-        float width_ratio = pos.x / size.x;
-        float height_ratio = pos.y / size.y;
+        float width_ratio = s_coord.x / size.x;
+        float height_ratio = s_coord.y / size.y;
         return new PointF(MAP_SIZE.x * width_ratio, MAP_SIZE.y * height_ratio);
     }
 }
