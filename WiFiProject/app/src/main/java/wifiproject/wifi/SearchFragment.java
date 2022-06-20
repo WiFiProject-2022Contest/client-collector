@@ -52,8 +52,10 @@ public class SearchFragment extends Fragment {
             public boolean onTouch(View view, MotionEvent motionEvent) {
                 if (imageview_map2.isReady()) {
                     PointF s_coord = imageview_map2.getCenter();
-                    edittext_x2.setText(String.valueOf(s_coord.x));
-                    edittext_y2.setText(String.valueOf(s_coord.y));
+                    PointF meter_coord = imageview_map2.sourceToMeter(s_coord);
+
+                    edittext_x2.setText(String.valueOf(meter_coord.x));
+                    edittext_y2.setText(String.valueOf(meter_coord.y));
                 }
                 return false;
             }

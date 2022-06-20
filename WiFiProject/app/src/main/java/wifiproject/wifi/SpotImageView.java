@@ -22,6 +22,7 @@ public class SpotImageView extends SubsamplingScaleImageView {
     private ArrayList<Float> ys = new ArrayList<Float>();
     private Bitmap bitmap_green_spot;
     private Bitmap bitmap_red_spot;
+    private final PointF MAP_SIZE = new PointF(100, 50);
 
     public SpotImageView(@NonNull Context context) {
         super(context);
@@ -61,5 +62,12 @@ public class SpotImageView extends SubsamplingScaleImageView {
             ys.add(item.getY());
         }
         invalidate();
+    }
+
+    public PointF sourceToMeter(PointF pos) {
+        PointF size = viewToSourceCoord(getWidth(), getHeight());
+        float width_ratio = pos.x / size.x;
+        float height_ratio = pos.y / size.y;
+        return new PointF(MAP_SIZE.x * width_ratio, MAP_SIZE.y * height_ratio);
     }
 }

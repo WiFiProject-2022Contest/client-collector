@@ -78,8 +78,10 @@ public class ScanFragment extends Fragment {
             public boolean onTouch(View view, MotionEvent motionEvent) {
                 if (imageview_map.isReady()) {
                     PointF s_coord = imageview_map.getCenter();
-                    edittext_x.setText(String.valueOf(s_coord.x));
-                    edittext_y.setText(String.valueOf(s_coord.y));
+                    PointF meter_coord = imageview_map.sourceToMeter(s_coord);
+
+                    edittext_x.setText(String.valueOf(meter_coord.x));
+                    edittext_y.setText(String.valueOf(meter_coord.y));
                 }
                 return false;
             }
