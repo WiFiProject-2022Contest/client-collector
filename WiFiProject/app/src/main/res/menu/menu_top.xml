@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item
+        android:id="@+id/map_skku"
+        android:icon="@android:drawable/ic_menu_view"
+        android:title="SKKU"
+        app:showAsAction="never" />
+    <item
+        android:id="@+id/map_wifilocation"
+        android:icon="@android:drawable/ic_menu_view"
+        android:title="WiFiLocation"
+        app:showAsAction="never" />
+</menu>

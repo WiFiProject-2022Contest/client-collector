@@ -46,6 +46,9 @@ public class ScanFragment extends Fragment {
     WifiManager wm;
     Context context;
     EditText edittext_x, edittext_y;
+    String building = "";
+
+    public void setBuilding(String building) { this.building = building; }
 
     private BroadcastReceiver wifi_receiver = new BroadcastReceiver() {
         @Override
@@ -72,7 +75,16 @@ public class ScanFragment extends Fragment {
         recyclerview_scanned.setLayoutManager(new LinearLayoutManager(context, LinearLayoutManager.VERTICAL, false));
 
         imageview_map = rootview.findViewById(R.id.imageViewMap);
-        imageview_map.setImage(ImageSource.resource(R.drawable.skku_example));
+        switch(building) {
+            case "skku":
+                imageview_map.setImage(ImageSource.resource(R.drawable.skku_example));
+                break;
+            case "wifilocation":
+                imageview_map.setImage(ImageSource.resource(R.drawable.wifilocation_example));
+                break;
+            default:
+                break;
+        }
         imageview_map.setOnTouchListener(new View.OnTouchListener() {
             @Override
             public boolean onTouch(View view, MotionEvent motionEvent) {
@@ -159,7 +171,7 @@ public class ScanFragment extends Fragment {
         float target_y = Float.parseFloat(edittext_y.getText().toString());
         for (ScanResult result : results) {
 //            if (!result.SSID.equalsIgnoreCase("WiFiLocation@PDA")) continue;
-            items.add(new WiFiItem(target_x, target_y, result.SSID, result.BSSID, result.level, result.frequency, null, "skku"));
+            items.add(new WiFiItem(target_x, target_y, result.SSID, result.BSSID, result.level, result.frequency, null, building));
 //            items.add(new WiFiItem(target_x, target_y, result.SSID, result.BSSID, result.level, result.frequency, GetDevicesUUID(context), "skku"));
         }
         wifiitem_adpater.setItems(items);
@@ -184,4 +196,5 @@ public class ScanFragment extends Fragment {
         String deviceId = deviceUuid.toString();
         return deviceId;
     }
+
 }

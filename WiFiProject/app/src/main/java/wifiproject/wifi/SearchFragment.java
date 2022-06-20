@@ -32,6 +32,9 @@ public class SearchFragment extends Fragment {
     SpotImageView imageview_map2;
     WiFiItemAdapter wifiitem_adapter = new WiFiItemAdapter();
     EditText edittext_x2, edittext_y2;
+    String building = "";
+
+    public void setBuilding(String building) { this.building = building; }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -46,7 +49,16 @@ public class SearchFragment extends Fragment {
         recyclerview_searched.setLayoutManager(new LinearLayoutManager(context, LinearLayoutManager.VERTICAL, false));
 
         imageview_map2 = rootview.findViewById(R.id.imageViewMap2);
-        imageview_map2.setImage(ImageSource.resource(R.drawable.skku_example));
+        switch(building) {
+            case "skku":
+                imageview_map2.setImage(ImageSource.resource(R.drawable.skku_example));
+                break;
+            case "wifilocation":
+                imageview_map2.setImage(ImageSource.resource(R.drawable.wifilocation_example));
+                break;
+            default:
+                break;
+        }
         imageview_map2.setOnTouchListener(new View.OnTouchListener() {
             @Override
             public boolean onTouch(View view, MotionEvent motionEvent) {

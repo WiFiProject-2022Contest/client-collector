@@ -3,7 +3,9 @@ package wifilocation.wifi;
 import android.Manifest;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
+import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
@@ -17,6 +19,7 @@ public class MainActivity extends AppCompatActivity {
     ScanFragment scan_fragment;
     SearchFragment search_fragment;
     EstimateFragment estimate_fragment;
+    int now_fragment = 1; // 1은 scan, 2는 search
 
     String[] PERMISSIONS = {
             Manifest.permission.ACCESS_COARSE_LOCATION,
@@ -33,6 +36,37 @@ public class MainActivity extends AppCompatActivity {
 
         getPermission();
         initView();
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.menu_top, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+        scan_fragment = new ScanFragment();
+        search_fragment = new SearchFragment();
+        int cur_id = item.getItemId();
+        switch (cur_id) {
+            case R.id.map_skku:
+                scan_fragment.setBuilding("skku");
+                search_fragment.setBuilding("skku");
+                break;
+            case R.id.map_wifilocation:
+                scan_fragment.setBuilding("wifilocation");
+                search_fragment.setBuilding("wifilocation");
+                break;
+            default:
+                break;
+        }
+        if(now_fragment == 1) {
+            getSupportFragmentManager().beginTransaction().replace(R.id.container, scan_fragment).commit();
+        } else if(now_fragment == 2) {
+            getSupportFragmentManager().beginTransaction().replace(R.id.container, search_fragment).commit();
+        }
+        return super.onOptionsItemSelected(item);
     }
 
     private void getPermission() {
@@ -58,9 +92,11 @@ public class MainActivity extends AppCompatActivity {
             public boolean onNavigationItemSelected(@NonNull MenuItem item) {
                 switch (item.getItemId()) {
                     case R.id.tab_scan:
+                        now_fragment = 1;
                         getSupportFragmentManager().beginTransaction().replace(R.id.container, scan_fragment).commit();
                         return true;
                     case R.id.tab_search:
+                        now_fragment = 2;
                         getSupportFragmentManager().beginTransaction().replace(R.id.container, search_fragment).commit();
                         return true;
                     case R.id.tab_estimate:
