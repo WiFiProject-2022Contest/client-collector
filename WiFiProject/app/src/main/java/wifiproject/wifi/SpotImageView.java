@@ -7,6 +7,7 @@ import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.PointF;
 import android.util.AttributeSet;
+import android.util.Log;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -68,7 +69,7 @@ public class SpotImageView extends SubsamplingScaleImageView {
     }
 
     public PointF meterToSourceCoord(PointF m_coord) {
-        PointF size = viewToSourceCoord(getWidth(), getHeight());
+        PointF size = new PointF(getSWidth(), getSHeight());
         float width_ratio = m_coord.x / MAP_SIZE.x;
         float height_ratio = m_coord.y / MAP_SIZE.y;
         return new PointF(size.x * width_ratio, size.y * height_ratio);

@@ -40,7 +40,7 @@ public class ScalableSpotImageView extends SubsamplingScaleImageView {
     }
 
     public PointF sourceToMeter(PointF s_coord) {
-        PointF size = viewToSourceCoord(getWidth(), getHeight());
+        PointF size = new PointF(getSWidth(), getSHeight());
         float width_ratio = s_coord.x / size.x;
         float height_ratio = s_coord.y / size.y;
         return new PointF(MAP_SIZE.x * width_ratio, MAP_SIZE.y * height_ratio);
