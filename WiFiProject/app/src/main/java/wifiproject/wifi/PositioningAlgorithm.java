@@ -43,7 +43,7 @@ public class PositioningAlgorithm {
         for (WiFiItem databaseRow : databaseData) {
             RecordPoint workingRP = null;
 
-            if (databaseRow.getSSID().equals(targetSSID) == false || databaseRow.getBandwidth() / 1000 != targetGHZ) {
+            if (databaseRow.getSSID().equals(targetSSID) == false || databaseRow.getFrequency() / 1000 != targetGHZ) {
                 continue;
             }
 

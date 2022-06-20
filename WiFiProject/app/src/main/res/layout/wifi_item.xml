@@ -41,7 +41,7 @@
         app:layout_constraintTop_toBottomOf="@+id/textViewBSSID" />
 
     <TextView
-        android:id="@+id/textViewBandwidth"
+        android:id="@+id/textViewFrequency"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:text="TextView"
@@ -60,7 +60,7 @@
         android:textSize="16sp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/textViewBandwidth" />
+        app:layout_constraintTop_toBottomOf="@+id/textViewFrequency" />
 
     <TextView
         android:id="@+id/textViewPos"
