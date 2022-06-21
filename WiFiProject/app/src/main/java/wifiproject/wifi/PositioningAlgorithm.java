@@ -92,8 +92,8 @@ public class PositioningAlgorithm {
     }
 
     static double[] estimate(RecordPoint tp, List<RecordPoint> rp, int K, int minValidAPNum, int minDbm, StringBuilder estimateReason) {
-        //List<RecordPoint> vrp = interpolation(rp, 3);
-        return weightedKNN(tp, rp, K, minValidAPNum, minDbm, estimateReason);
+        List<RecordPoint> vrp = interpolation(rp, 3);
+        return weightedKNN(tp, vrp, K, minValidAPNum, minDbm, estimateReason);
     }
 
     static List<RecordPoint> interpolation(List<RecordPoint> rp, double standardRecordDistance) {
