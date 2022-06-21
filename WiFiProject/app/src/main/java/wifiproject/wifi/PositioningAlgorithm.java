@@ -20,32 +20,46 @@ public class PositioningAlgorithm {
     static List<RecordPoint> rp;
     static List<WiFiItem> previousDatabase = null;
 
-    public static double[] run(List<WiFiItem> userData, List<WiFiItem> databaseData, String targetBuilding, String targetSSID, int targetGHZ) {
+    static int lastGHZ = 0;
+    static int lastK = 0;
+    static int lastMinValidAPNum = 0;
+    static int lastMinDbm = 0;
+
+    public static double[] run(List<WiFiItem> userData, List<WiFiItem> databaseData, String targetBuilding, String targetSSID, int targetGHZ, StringBuilder estimateReason) {
         int K = 0;
         int minValidAPNum = 0;
         int minDbm = 0;
 
         if (targetGHZ == 2) {
-            K = 3;
+            K = 5;
             minValidAPNum = 1;
             minDbm = -50; // 55도 가능
         } else if (targetGHZ == 5) {
             K = 3;
             minValidAPNum = 1;
-            minDbm = -60; // 65도 가능
+            minDbm = -50; // 65도 가능
         }
 
         // 데이터베이스는 한 줄에 하나의 AP 정보가 담겨있기 때문에
         // 이것을 다루기 쉽게 한 측정 지점에서 측정한 RSSI 값들을 모두 하나의 RecordPoint 객체에 담아주는 과정입니다.
         // 데이터베이스에 대한 작업은 기존에 변환한 정보가 없거나 받은 데이터베이스 정보가 변경되었을 때만 시행합니다.
         tp = getRecordPointList(userData, targetBuilding, targetSSID, targetGHZ, minDbm);
-        if (databaseData != previousDatabase) {
+        if (tp.size() == 0) {
+            return null;
+        }
+
+        if (databaseData != previousDatabase || lastGHZ != targetGHZ || lastK != K || lastMinValidAPNum != minValidAPNum || lastMinDbm != minDbm) {
             rp = getRecordPointList(databaseData, targetBuilding, targetSSID, targetGHZ, minDbm);
+
             previousDatabase = databaseData;
+            lastGHZ = targetGHZ;
+            lastK = K;
+            lastMinValidAPNum = minValidAPNum;
+            lastMinDbm = minDbm;
         }
 
         // 변환된 정보를 함수에 넣어서 추정값을 반환받습니다.
-        return estimate(tp.get(0), rp, K, minValidAPNum, minDbm);
+        return estimate(tp.get(0), rp, K, minValidAPNum, minDbm, estimateReason);
     }
 
     static List<RecordPoint> getRecordPointList(List<WiFiItem> databaseData, String targetBuilding, String targetSSID, int targetGHZ, int minDbm) {
@@ -77,9 +91,9 @@ public class PositioningAlgorithm {
         return rp;
     }
 
-    static double[] estimate(RecordPoint tp, List<RecordPoint> rp, int K, int minValidAPNum, int minDbm) {
-        //List<RecordPoint> vrp = interpolation(rp, 3);
-        return weightedKNN(tp, rp, K, minValidAPNum, minDbm);
+    static double[] estimate(RecordPoint tp, List<RecordPoint> rp, int K, int minValidAPNum, int minDbm, StringBuilder estimateReason) {
+        List<RecordPoint> vrp = interpolation(rp, 3);
+        return weightedKNN(tp, vrp, K, minValidAPNum, minDbm, estimateReason);
     }
 
     static List<RecordPoint> interpolation(List<RecordPoint> rp, double standardRecordDistance) {
@@ -114,7 +128,7 @@ public class PositioningAlgorithm {
         return vrp;
     }
 
-    static double[] weightedKNN(RecordPoint tp, List<RecordPoint> rp, int K, int minValidAPNum, int minDbm) {
+    static double[] weightedKNN(RecordPoint tp, List<RecordPoint> rp, int K, int minValidAPNum, int minDbm, StringBuilder estimateReason) {
         // K개의 최근접 RP를 선별하는 과정
         List<RecordPoint> candidateRP = new ArrayList<>();
         for (int i = 0; i < rp.size(); i++) {
@@ -153,11 +167,17 @@ public class PositioningAlgorithm {
 
         // 최종 위치를 추정하는 과정
         double[] estimatedPosition = {0, 0};
-        for (RecordPoint key : evaluateDistance.keySet()) {
+        int nth = 0;
+        for (Entry<RecordPoint, Double> entry : evaluateDistance.entrySet()) {
+            double fraction = (weight.get(entry.getKey()) / totalWeight);
+
             for (int i = 0; i < 2; i++) {
-                double fraction = (weight.get(key) / totalWeight);
-                estimatedPosition[i] += fraction * key.getLocation()[i];
+                estimatedPosition[i] += fraction * entry.getKey().getLocation()[i];
             }
+
+            estimateReason.append(nth++ + " (" + String.format("%.6f", entry.getKey().getLocation()[0]) + ", " + String.format("%.6f", entry.getKey().getLocation()[1]) + ") ");
+            estimateReason.append(String.format("%.6f", fraction));
+            estimateReason.append("\n");
         }
 
         return estimatedPosition;

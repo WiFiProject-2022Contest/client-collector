@@ -28,8 +28,12 @@ public class EstimateFragment extends Fragment {
     Context context;
     WifiManager wm;
     Button buttonEstimate;
-    TextView textResultEstimate;
+    TextView textResultEstimate2G;
+    TextView textResultEstimate5G;
+    TextView textEstimateReason;
+
     List<WiFiItem> databaseAllData = null;
+    StringBuilder estimateReason = new StringBuilder();
 
     private BroadcastReceiver wifi_receiver = new BroadcastReceiver() {
         @Override
@@ -54,7 +58,9 @@ public class EstimateFragment extends Fragment {
 
         ViewGroup rootView = (ViewGroup) inflater.inflate(R.layout.fragment_estimate, container, false);
         buttonEstimate = rootView.findViewById(R.id.buttonEstimate);
-        textResultEstimate = rootView.findViewById(R.id.textResultEstimate);
+        textResultEstimate2G = rootView.findViewById(R.id.textResultEstimate2G);
+        textResultEstimate5G = rootView.findViewById(R.id.textResultEstimate5G);
+        textEstimateReason = rootView.findViewById(R.id.textEstimateReason);
 
         // DB 전체 다 받아오기
         RetrofitAPI retrofit_api = RetrofitClient.getRetrofitAPI();
@@ -104,8 +110,24 @@ public class EstimateFragment extends Fragment {
             userData.add(new WiFiItem(0, 0, result.SSID, result.BSSID, result.level, result.frequency, null, "Library5F"));
         }
 
-        double[] estimatedPosition = PositioningAlgorithm.run(userData, databaseAllData, "Library5F", "SKKU", 2);
-        textResultEstimate.setText(String.format("(%s, %s)", estimatedPosition[0], estimatedPosition[1]));
+        estimateReason.setLength(0);
+        estimateReason.append("2Ghz\n");
+        double[] estimatedPosition2G = PositioningAlgorithm.run(userData, databaseAllData, "Library5F", "SKKU", 2, estimateReason);
+        estimateReason.append("\n5Ghz\n");
+        double[] estimatedPosition5G = PositioningAlgorithm.run(userData, databaseAllData, "Library5F", "SKKU", 5, estimateReason);
+
+        if (estimatedPosition2G != null) {
+            textResultEstimate2G.setText(String.format("(%s, %s)", String.format("%.6f", estimatedPosition2G[0]), String.format("%.6f", estimatedPosition2G[1])));
+        } else {
+            textResultEstimate2G.setText("Out of Service");
+        }
+        if (estimatedPosition5G != null) {
+            textResultEstimate5G.setText(String.format("(%s, %s)", String.format("%.6f", estimatedPosition5G[0]), String.format("%.6f", estimatedPosition5G[1])));
+        } else {
+            textResultEstimate5G.setText("Out of Service");
+        }
+
+        textEstimateReason.setText(estimateReason);
         Toast.makeText(context, "Estimation finished.", Toast.LENGTH_SHORT).show();
     }
 
