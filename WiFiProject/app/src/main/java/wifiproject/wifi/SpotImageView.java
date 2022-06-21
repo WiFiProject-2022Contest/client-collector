@@ -5,7 +5,9 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
+import android.graphics.PointF;
 import android.util.AttributeSet;
+import android.util.Log;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -17,10 +19,10 @@ import java.util.ArrayList;
 
 public class SpotImageView extends SubsamplingScaleImageView {
 
-    private ArrayList<Float> xs = new ArrayList<Float>();
-    private ArrayList<Float> ys = new ArrayList<Float>();
+    private ArrayList<PointF> positions = new ArrayList<PointF>();
     private Bitmap bitmap_green_spot;
     private Bitmap bitmap_red_spot;
+    private final PointF MAP_SIZE = new PointF(100, 50);
 
     public SpotImageView(@NonNull Context context) {
         super(context);
@@ -43,20 +45,33 @@ public class SpotImageView extends SubsamplingScaleImageView {
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
         canvas.drawBitmap(bitmap_red_spot, (float)getWidth() / 2 - 15, (float)getHeight() / 2 - 30, null);
-        int size = xs.size();
-        if(size == ys.size()) {
-            for (int i = 0; i < size; i++) {
-                canvas.drawBitmap(bitmap_green_spot, xs.get(i), ys.get(i), null);
-            }
+        for (PointF m_coord : positions) {
+            PointF s_coord = meterToSourceCoord(m_coord);
+            PointF v_coord = sourceToViewCoord(s_coord);
+            canvas.drawBitmap(bitmap_green_spot, v_coord.x, v_coord.y, null);
         }
     }
 
     public void setSpot(ArrayList<WiFiItem> items) {
-        xs.clear(); ys.clear();
+        setScaleAndCenter(0.0f, getCenter());
+        positions.clear();
         for (WiFiItem item : items) {
-            xs.add(item.getX());
-            ys.add(item.getY());
+            positions.add(new PointF(item.getX(), item.getY()));
         }
         invalidate();
+    }
+
+    public PointF sourceToMeter(PointF pos) {
+        PointF size = viewToSourceCoord(getWidth(), getHeight());
+        float width_ratio = pos.x / size.x;
+        float height_ratio = pos.y / size.y;
+        return new PointF(MAP_SIZE.x * width_ratio, MAP_SIZE.y * height_ratio);
+    }
+
+    public PointF meterToSourceCoord(PointF m_coord) {
+        PointF size = new PointF(getSWidth(), getSHeight());
+        float width_ratio = m_coord.x / MAP_SIZE.x;
+        float height_ratio = m_coord.y / MAP_SIZE.y;
+        return new PointF(size.x * width_ratio, size.y * height_ratio);
     }
 }

@@ -55,7 +55,7 @@ public class PositioningAlgorithm {
             RecordPoint workingRP = null;
 
             if (databaseRow.getBuilding().equals(targetBuilding) == false || databaseRow.getSSID().equals(targetSSID) == false
-                                || databaseRow.getBandwidth() / 1000 != targetGHZ || databaseRow.getRSSI() < minDbm) {
+                                || databaseRow.getFrequency() / 1000 != targetGHZ || databaseRow.getRSSI() < minDbm) {
                 continue;
             }
 

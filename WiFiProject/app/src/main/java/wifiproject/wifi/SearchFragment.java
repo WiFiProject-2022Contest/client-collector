@@ -32,6 +32,9 @@ public class SearchFragment extends Fragment {
     SpotImageView imageview_map2;
     WiFiItemAdapter wifiitem_adapter = new WiFiItemAdapter();
     EditText edittext_x2, edittext_y2;
+    String building = "";
+
+    public void setBuilding(String building) { this.building = building; }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -46,14 +49,25 @@ public class SearchFragment extends Fragment {
         recyclerview_searched.setLayoutManager(new LinearLayoutManager(context, LinearLayoutManager.VERTICAL, false));
 
         imageview_map2 = rootview.findViewById(R.id.imageViewMap2);
-        imageview_map2.setImage(ImageSource.resource(R.drawable.skku_example));
+        switch(building) {
+            case "skku":
+                imageview_map2.setImage(ImageSource.resource(R.drawable.skku_example));
+                break;
+            case "wifilocation":
+                imageview_map2.setImage(ImageSource.resource(R.drawable.wifilocation_example));
+                break;
+            default:
+                break;
+        }
         imageview_map2.setOnTouchListener(new View.OnTouchListener() {
             @Override
             public boolean onTouch(View view, MotionEvent motionEvent) {
                 if (imageview_map2.isReady()) {
-                    PointF s_coord = imageview_map2.viewToSourceCoord((float)imageview_map2.getWidth() / 2, (float)imageview_map2.getHeight() / 2);
-                    edittext_x2.setText(String.valueOf(s_coord.x));
-                    edittext_y2.setText(String.valueOf(s_coord.y));
+                    PointF s_coord = imageview_map2.getCenter();
+                    PointF meter_coord = imageview_map2.sourceToMeter(s_coord);
+
+                    edittext_x2.setText(String.valueOf(meter_coord.x));
+                    edittext_y2.setText(String.valueOf(meter_coord.y));
                 }
                 return false;
             }

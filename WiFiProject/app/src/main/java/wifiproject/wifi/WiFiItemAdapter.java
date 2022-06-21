@@ -46,14 +46,14 @@ public class WiFiItemAdapter extends RecyclerView.Adapter<WiFiItemAdapter.ViewHo
     }
 
     static class ViewHolder extends RecyclerView.ViewHolder {
-        TextView textview_SSID, textview_BSSID, textview_RSSI, textview_bandwidth, textview_uuid, textview_pos;
+        TextView textview_SSID, textview_BSSID, textview_RSSI, textview_frequency, textview_uuid, textview_pos;
 
         public ViewHolder(View itemView) {
             super(itemView);
             textview_SSID = itemView.findViewById(R.id.textViewSSID);
             textview_BSSID = itemView.findViewById(R.id.textViewBSSID);
             textview_RSSI = itemView.findViewById(R.id.textViewRSSI);
-            textview_bandwidth = itemView.findViewById(R.id.textViewBandwidth);
+            textview_frequency = itemView.findViewById(R.id.textViewFrequency);
             textview_uuid = itemView.findViewById(R.id.textViewUuid);
             textview_pos = itemView.findViewById(R.id.textViewPos);
         }
@@ -62,7 +62,7 @@ public class WiFiItemAdapter extends RecyclerView.Adapter<WiFiItemAdapter.ViewHo
             textview_SSID.setText("SSID: " + item.getSSID());
             textview_BSSID.setText("BSSID: " + item.getBSSID());
             textview_RSSI.setText("RSSI: " + String.valueOf(item.getRSSI()));
-            textview_bandwidth.setText(String.format("Bandwidth: %d, UUID: %s", item.getBandwidth(), item.getUuid()));
+            textview_frequency.setText(String.format("Frequency: %d", item.getFrequency()));
             textview_uuid.setText(String.format("UUID: %s", item.getUuid()));
             textview_pos.setText(String.format("x: %.5f, y: %.5f", item.getX(), item.getY()));
         }

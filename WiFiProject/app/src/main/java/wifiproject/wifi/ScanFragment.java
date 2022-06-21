@@ -46,6 +46,9 @@ public class ScanFragment extends Fragment {
     WifiManager wm;
     Context context;
     EditText edittext_x, edittext_y;
+    String building = "";
+
+    public void setBuilding(String building) { this.building = building; }
 
     private BroadcastReceiver wifi_receiver = new BroadcastReceiver() {
         @Override
@@ -72,14 +75,25 @@ public class ScanFragment extends Fragment {
         recyclerview_scanned.setLayoutManager(new LinearLayoutManager(context, LinearLayoutManager.VERTICAL, false));
 
         imageview_map = rootview.findViewById(R.id.imageViewMap);
-        imageview_map.setImage(ImageSource.resource(R.drawable.skku_example));
+        switch(building) {
+            case "skku":
+                imageview_map.setImage(ImageSource.resource(R.drawable.skku_example));
+                break;
+            case "wifilocation":
+                imageview_map.setImage(ImageSource.resource(R.drawable.wifilocation_example));
+                break;
+            default:
+                break;
+        }
         imageview_map.setOnTouchListener(new View.OnTouchListener() {
             @Override
             public boolean onTouch(View view, MotionEvent motionEvent) {
                 if (imageview_map.isReady()) {
-                    PointF s_coord = imageview_map.viewToSourceCoord((float) imageview_map.getWidth() / 2, (float) imageview_map.getHeight() / 2);
-                    edittext_x.setText(String.valueOf(s_coord.x));
-                    edittext_y.setText(String.valueOf(s_coord.y));
+                    PointF s_coord = imageview_map.getCenter();
+                    PointF meter_coord = imageview_map.sourceToMeter(s_coord);
+
+                    edittext_x.setText(String.valueOf(meter_coord.x));
+                    edittext_y.setText(String.valueOf(meter_coord.y));
                 }
                 return false;
             }
@@ -157,7 +171,7 @@ public class ScanFragment extends Fragment {
         float target_y = Float.parseFloat(edittext_y.getText().toString());
         for (ScanResult result : results) {
 //            if (!result.SSID.equalsIgnoreCase("WiFiLocation@PDA")) continue;
-            items.add(new WiFiItem(target_x, target_y, result.SSID, result.BSSID, result.level, result.frequency, GetDevicesUUID(context), "Library5F"));
+            items.add(new WiFiItem(target_x, target_y, result.SSID, result.BSSID, result.level, result.frequency, null, building));
         }
         wifiitem_adpater.setItems(items);
         recyclerview_scanned.setAdapter(wifiitem_adpater);
@@ -181,4 +195,5 @@ public class ScanFragment extends Fragment {
         String deviceId = deviceUuid.toString();
         return deviceId;
     }
+
 }
