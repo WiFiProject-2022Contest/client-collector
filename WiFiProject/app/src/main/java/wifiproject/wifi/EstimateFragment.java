@@ -58,7 +58,7 @@ public class EstimateFragment extends Fragment {
 
         // DB 전체 다 받아오기
         RetrofitAPI retrofit_api = RetrofitClient.getRetrofitAPI();
-        retrofit_api.getData(-1, -1).enqueue(new Callback<List<WiFiItem>>() {
+        retrofit_api.getData(-1, -1, null, null).enqueue(new Callback<List<WiFiItem>>() {
             @Override
             public void onResponse(Call<List<WiFiItem>> call, Response<List<WiFiItem>> response) {
                 databaseAllData = response.body();
