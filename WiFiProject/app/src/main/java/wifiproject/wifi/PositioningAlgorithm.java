@@ -20,36 +20,47 @@ public class PositioningAlgorithm {
     static List<RecordPoint> rp;
     static List<WiFiItem> previousDatabase = null;
 
-    public static double[] run(List<WiFiItem> userData, List<WiFiItem> databaseData) {
+    public static double[] run(List<WiFiItem> userData, List<WiFiItem> databaseData, String targetBuilding, String targetSSID, int targetGHZ) {
+        int K = 0;
+        int minValidAPNum = 0;
+        int minDbm = 0;
+
+        if (targetGHZ == 2) {
+            K = 3;
+            minValidAPNum = 1;
+            minDbm = -50; // 55도 가능
+        } else if (targetGHZ == 5) {
+            K = 3;
+            minValidAPNum = 1;
+            minDbm = -60; // 65도 가능
+        }
+
         // 데이터베이스는 한 줄에 하나의 AP 정보가 담겨있기 때문에
         // 이것을 다루기 쉽게 한 측정 지점에서 측정한 RSSI 값들을 모두 하나의 RecordPoint 객체에 담아주는 과정입니다.
         // 데이터베이스에 대한 작업은 기존에 변환한 정보가 없거나 받은 데이터베이스 정보가 변경되었을 때만 시행합니다.
-        String targetSSID = "SKKU";
-        int targetGHZ = 2;
-
-        tp = getRecordPointList(userData, targetSSID, targetGHZ);
+        tp = getRecordPointList(userData, targetBuilding, targetSSID, targetGHZ, minDbm);
         if (databaseData != previousDatabase) {
-            rp = getRecordPointList(databaseData, targetSSID, targetGHZ);
+            rp = getRecordPointList(databaseData, targetBuilding, targetSSID, targetGHZ, minDbm);
             previousDatabase = databaseData;
         }
 
         // 변환된 정보를 함수에 넣어서 추정값을 반환받습니다.
-        return estimate(tp.get(0), rp);
+        return estimate(tp.get(0), rp, K, minValidAPNum, minDbm);
     }
 
-    static List<RecordPoint> getRecordPointList(List<WiFiItem> databaseData, String targetSSID, int targetGHZ) {
+    static List<RecordPoint> getRecordPointList(List<WiFiItem> databaseData, String targetBuilding, String targetSSID, int targetGHZ, int minDbm) {
         List<RecordPoint> rp = new ArrayList<>();
 
         for (WiFiItem databaseRow : databaseData) {
             RecordPoint workingRP = null;
 
-            if (databaseRow.getSSID().equals(targetSSID) == false || databaseRow.getBandwidth() / 1000 != targetGHZ) {
+            if (databaseRow.getBuilding().equals(targetBuilding) == false || databaseRow.getSSID().equals(targetSSID) == false
+                                || databaseRow.getBandwidth() / 1000 != targetGHZ || databaseRow.getRSSI() < minDbm) {
                 continue;
             }
 
             for (RecordPoint recordPoint : rp) {
                 if (databaseRow.getX() == recordPoint.getLocation()[0] && databaseRow.getY() == recordPoint.getLocation()[1]) {
-                    //RecordPoint newRecordPoint = new RecordPoint(new double[]);
                     workingRP = recordPoint;
 
                     break;
@@ -66,9 +77,9 @@ public class PositioningAlgorithm {
         return rp;
     }
 
-    static double[] estimate(RecordPoint tp, List<RecordPoint> rp) {
-        List<RecordPoint> vrp = interpolation(rp, 3);
-        return weightedKNN(tp, vrp, 5, 2, -0, -70);
+    static double[] estimate(RecordPoint tp, List<RecordPoint> rp, int K, int minValidAPNum, int minDbm) {
+        //List<RecordPoint> vrp = interpolation(rp, 3);
+        return weightedKNN(tp, rp, K, minValidAPNum, minDbm);
     }
 
     static List<RecordPoint> interpolation(List<RecordPoint> rp, double standardRecordDistance) {
@@ -103,23 +114,26 @@ public class PositioningAlgorithm {
         return vrp;
     }
 
-    static double[] weightedKNN(RecordPoint tp, List<RecordPoint> rp, int K, int minAPNum, int maxDbm, int minDbm) {
+    static double[] weightedKNN(RecordPoint tp, List<RecordPoint> rp, int K, int minValidAPNum, int minDbm) {
         // K개의 최근접 RP를 선별하는 과정
         List<RecordPoint> candidateRP = new ArrayList<>();
         for (int i = 0; i < rp.size(); i++) {
             Set<String> intersectBSSID = new HashSet<>(rp.get(i).getRSSI().keySet());
             intersectBSSID.retainAll(tp.getRSSI().keySet());
-            for (String BSSID : new HashSet<>(intersectBSSID)) {
-                if (rp.get(i).getRSSI().get(BSSID) < minDbm) {
-                    intersectBSSID.remove(BSSID);
-                }
-            }
 
-            if (intersectBSSID.size() < minAPNum) {
+            if (intersectBSSID.size() < minValidAPNum) {
                 continue;
             }
 
             candidateRP.add(rp.get(i));
+        }
+
+        int maxDbm = Integer.MIN_VALUE;
+        for (RecordPoint recordPoint : candidateRP) {
+            int maxDbmInRecordPoint = Collections.max(recordPoint.getRSSI().values());
+            if (maxDbmInRecordPoint > maxDbm) {
+                maxDbm = maxDbmInRecordPoint;
+            }
         }
 
         Map<RecordPoint, Double> nearDistance = getKNearDistance(tp, candidateRP, K, maxDbm, minDbm);
@@ -151,39 +165,42 @@ public class PositioningAlgorithm {
 
     static Map<RecordPoint, Double> getKNearDistance(RecordPoint tp, List<RecordPoint> rp, int K, int maxDbm, int minDbm) {
         Set<String> allBSSID = new HashSet<>(tp.getRSSI().keySet());
-
         for (int i = 0; i < rp.size(); i++) {
             allBSSID.addAll(rp.get(i).getRSSI().keySet());
         }
 
-        Map<RecordPoint, Double> nearDistance = new HashMap<>();
-        double maxDistance = Double.MAX_VALUE;
+        Map<RecordPoint, Double> nearDistanceSquareSum = new HashMap<>();
+        double maxDistanceSquareSum = Double.MAX_VALUE;
         for (int i = 0; i < rp.size(); i++) {
-            double currentDistanceSquare = 0;
+            double currentDistanceSquareSum = 0;
 
             for (String BSSID : allBSSID) {
                 if (tp.getRSSI().containsKey(BSSID) && rp.get(i).getRSSI().containsKey(BSSID) && rp.get(i).getRSSI().get(BSSID) >= minDbm) {
-                    currentDistanceSquare += Math.pow(tp.getRSSI().get(BSSID) - rp.get(i).getRSSI().get(BSSID), 2);
+                    currentDistanceSquareSum += Math.pow(tp.getRSSI().get(BSSID) - rp.get(i).getRSSI().get(BSSID), 2);
                 } else {
-                    currentDistanceSquare += Math.pow(Math.abs(maxDbm - minDbm) + 10, 2);
+                    currentDistanceSquareSum += Math.pow(Math.abs(maxDbm - minDbm) + 10, 2);
                 }
 
-                if (nearDistance.size() >= K && currentDistanceSquare >= Math.pow(maxDistance, 2)) {
+                if (nearDistanceSquareSum.size() >= K && currentDistanceSquareSum >= maxDistanceSquareSum) {
                     break;
                 }
             }
 
-            if (nearDistance.size() >= K && currentDistanceSquare >= Math.pow(maxDistance, 2)) {
+            if (nearDistanceSquareSum.size() >= K && currentDistanceSquareSum >= maxDistanceSquareSum) {
                 continue;
             }
 
-            double currentDistance = Math.sqrt(currentDistanceSquare) / allBSSID.size();
-            nearDistance.put(rp.get(i), currentDistance);
-            if (nearDistance.size() > K) {
-                nearDistance.values().remove(maxDistance);
+            nearDistanceSquareSum.put(rp.get(i), currentDistanceSquareSum);
+            if (nearDistanceSquareSum.size() > K) {
+                nearDistanceSquareSum.values().remove(maxDistanceSquareSum);
             }
 
-            maxDistance = Collections.max(nearDistance.values());
+            maxDistanceSquareSum = Collections.max(nearDistanceSquareSum.values());
+        }
+
+        Map<RecordPoint, Double> nearDistance = new HashMap<>();
+        for (Entry<RecordPoint, Double> entry : nearDistanceSquareSum.entrySet()) {
+            nearDistance.put(entry.getKey(), Math.sqrt(entry.getValue()) / rp.size());
         }
 
         return nearDistance;

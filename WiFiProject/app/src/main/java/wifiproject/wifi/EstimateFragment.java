@@ -29,7 +29,7 @@ public class EstimateFragment extends Fragment {
     WifiManager wm;
     Button buttonEstimate;
     TextView textResultEstimate;
-    List<WiFiItem> databaseAllData;
+    List<WiFiItem> databaseAllData = null;
 
     private BroadcastReceiver wifi_receiver = new BroadcastReceiver() {
         @Override
@@ -74,6 +74,11 @@ public class EstimateFragment extends Fragment {
         buttonEstimate.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                if (databaseAllData == null) {
+                    Toast.makeText(context, "You should get database first.", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+
                 wm.startScan();
                 Toast.makeText(context, "Scan started.", Toast.LENGTH_SHORT).show();
             }
@@ -94,12 +99,12 @@ public class EstimateFragment extends Fragment {
         List<ScanResult> results = wm.getScanResults();
         Toast.makeText(context, "Scan finished.", Toast.LENGTH_SHORT).show();
 
-        List<WiFiItem> userData = new ArrayList<WiFiItem>();
+        List<WiFiItem> userData = new ArrayList<>();
         for (ScanResult result : results) {
-            userData.add(new WiFiItem(0, 0, result.SSID, result.BSSID, result.level, result.frequency, null, null));
+            userData.add(new WiFiItem(0, 0, result.SSID, result.BSSID, result.level, result.frequency, null, "Library5F"));
         }
 
-        double[] estimatedPosition = PositioningAlgorithm.run(userData, databaseAllData);
+        double[] estimatedPosition = PositioningAlgorithm.run(userData, databaseAllData, "Library5F", "SKKU", 2);
         textResultEstimate.setText(String.format("(%s, %s)", estimatedPosition[0], estimatedPosition[1]));
         Toast.makeText(context, "Estimation finished.", Toast.LENGTH_SHORT).show();
     }
