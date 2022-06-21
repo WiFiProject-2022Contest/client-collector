@@ -99,14 +99,14 @@ public class SearchFragment extends Fragment {
         button_search.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                float target_x;
-                float target_y;
+                Float target_x;
+                Float target_y;
                 try {
                     target_x = Float.parseFloat(edittext_x2.getText().toString());
                     target_y = Float.parseFloat(edittext_y2.getText().toString());
                 } catch (Exception e) {
-                    Toast.makeText(context, "올바른 형식의 좌표 입력 필요", Toast.LENGTH_SHORT).show();
-                    return;
+                    target_x = null;
+                    target_y = null;
                 }
                 RetrofitAPI retrofit_api = RetrofitClient.getRetrofitAPI();
                 retrofit_api.getData(target_x, target_y, textview_date_from.getText().toString(), textview_date_to.getText().toString()).enqueue(new Callback<List<WiFiItem>>() {

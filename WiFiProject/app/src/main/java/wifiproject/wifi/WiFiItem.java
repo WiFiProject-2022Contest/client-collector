@@ -6,9 +6,9 @@ public class WiFiItem {
     // https://www.notion.so/f61f9f892b254d1d8dbdf2f101ef5fb2?v=e9a507783cde4e3ca3410d92fd295e48
     // TODO: @Expose 추가 고려
     @SerializedName("pos_x")
-    float x;
+    Float x;
     @SerializedName("pos_y")
-    float y;
+    Float y;
     @SerializedName("SSID")
     String SSID;
     @SerializedName("BSSID")
