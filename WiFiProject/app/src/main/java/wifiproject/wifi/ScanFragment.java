@@ -80,7 +80,7 @@ public class ScanFragment extends Fragment {
                 imageview_map.setImage(ImageSource.resource(R.drawable.skku_example));
                 break;
             case "wifilocation":
-                //imageview_map.setImage(ImageSource.resource(R.drawable.wifilocation_example));
+                imageview_map.setImage(ImageSource.resource(R.drawable.wifilocation_example));
                 break;
             default:
                 break;
