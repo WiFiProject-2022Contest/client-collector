@@ -33,6 +33,6 @@ public class DatePickerFragment extends DialogFragment
     @Override
     public void onDateSet(DatePicker datePicker, int y, int m, int d) {
         MainActivity activity = (MainActivity) getActivity();
-        activity.search_fragment.setDateText(String.format("%d%02d%02d", y, m, d));
+        activity.search_fragment.setDateText(String.format("%d%02d%02d", y, m + 1, d));
     }
 }
