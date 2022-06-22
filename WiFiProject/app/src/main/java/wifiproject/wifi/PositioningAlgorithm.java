@@ -151,6 +151,10 @@ public class PositioningAlgorithm {
         }
 
         Map<RecordPoint, Double> nearDistance = getKNearDistance(tp, candidateRP, K, maxDbm, minDbm);
+        // 아무것도 추정되지 않은 경우, 서비스 지역이 있지 않은 경우임
+        if (nearDistance.size() == 0) {
+            return null;
+        }
 
         // K개의 최근접 AP를 토대로 평가용 가중치를 산정하는 과정
         Map<RecordPoint, Double> evaluateDistance = getKNearDistance(tp, new ArrayList<RecordPoint>(nearDistance.keySet()), K, maxDbm, minDbm);

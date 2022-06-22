@@ -28,8 +28,8 @@ public class EstimateFragment extends Fragment {
     Context context;
     WifiManager wm;
     Button buttonEstimate;
-    TextView textResultEstimate2G;
-    TextView textResultEstimate5G;
+    TextView textResultEstimateWiFi2G;
+    TextView textResultEstimateWiFi5G;
     TextView textEstimateReason;
 
     List<WiFiItem> databaseAllData = null;
@@ -58,8 +58,8 @@ public class EstimateFragment extends Fragment {
 
         ViewGroup rootView = (ViewGroup) inflater.inflate(R.layout.fragment_estimate, container, false);
         buttonEstimate = rootView.findViewById(R.id.buttonEstimate);
-        textResultEstimate2G = rootView.findViewById(R.id.textResultEstimate2G);
-        textResultEstimate5G = rootView.findViewById(R.id.textResultEstimate5G);
+        textResultEstimateWiFi2G = rootView.findViewById(R.id.textResultEstimateWiFi2G);
+        textResultEstimateWiFi5G = rootView.findViewById(R.id.textResultEstimateWiFi5G);
         textEstimateReason = rootView.findViewById(R.id.textEstimateReason);
 
         // DB 전체 다 받아오기
@@ -110,21 +110,26 @@ public class EstimateFragment extends Fragment {
             userData.add(new WiFiItem(0, 0, result.SSID, result.BSSID, result.level, result.frequency, null, "Library5F"));
         }
 
-        estimateReason.setLength(0);
-        estimateReason.append("2Ghz\n");
-        double[] estimatedPosition2G = PositioningAlgorithm.run(userData, databaseAllData, "Library5F", "SKKU", 2, estimateReason);
-        estimateReason.append("\n5Ghz\n");
-        double[] estimatedPosition5G = PositioningAlgorithm.run(userData, databaseAllData, "Library5F", "SKKU", 5, estimateReason);
+        String targetBuilding = "Library5F";
+        String targetSSID = "SKKU";
 
-        if (estimatedPosition2G != null) {
-            textResultEstimate2G.setText(String.format("(%s, %s)", String.format("%.6f", estimatedPosition2G[0]), String.format("%.6f", estimatedPosition2G[1])));
+        estimateReason.setLength(0);
+        estimateReason.append(targetBuilding + ", " + targetSSID + "\n\n");
+
+        estimateReason.append("WiFi 2Ghz\n");
+        double[] estimatedPositionWiFi2G = PositioningAlgorithm.run(userData, databaseAllData, targetBuilding, targetSSID, 2, estimateReason);
+        estimateReason.append("\nWiFi 5Ghz\n");
+        double[] estimatedPositionWiFi5G = PositioningAlgorithm.run(userData, databaseAllData, targetBuilding, targetSSID, 5, estimateReason);
+
+        if (estimatedPositionWiFi2G != null) {
+            textResultEstimateWiFi2G.setText(String.format("(%s, %s)", String.format("%.6f", estimatedPositionWiFi2G[0]), String.format("%.6f", estimatedPositionWiFi2G[1])));
         } else {
-            textResultEstimate2G.setText("Out of Service");
+            textResultEstimateWiFi2G.setText("Out of Service");
         }
-        if (estimatedPosition5G != null) {
-            textResultEstimate5G.setText(String.format("(%s, %s)", String.format("%.6f", estimatedPosition5G[0]), String.format("%.6f", estimatedPosition5G[1])));
+        if (estimatedPositionWiFi5G != null) {
+            textResultEstimateWiFi5G.setText(String.format("(%s, %s)", String.format("%.6f", estimatedPositionWiFi5G[0]), String.format("%.6f", estimatedPositionWiFi5G[1])));
         } else {
-            textResultEstimate5G.setText("Out of Service");
+            textResultEstimateWiFi5G.setText("Out of Service");
         }
 
         textEstimateReason.setText(estimateReason);
