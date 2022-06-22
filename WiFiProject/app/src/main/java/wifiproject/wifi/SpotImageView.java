@@ -55,8 +55,12 @@ public class SpotImageView extends SubsamplingScaleImageView {
     public void setSpot(ArrayList<WiFiItem> items) {
         setScaleAndCenter(0.0f, getCenter());
         positions.clear();
+        float x = -1, y = -1;
         for (WiFiItem item : items) {
-            positions.add(new PointF(item.getX(), item.getY()));
+            if (item.getX() == x && item.getY() == y) continue;
+            x = item.getX();
+            y = item.getY();
+            positions.add(new PointF(x, y));
         }
         invalidate();
     }

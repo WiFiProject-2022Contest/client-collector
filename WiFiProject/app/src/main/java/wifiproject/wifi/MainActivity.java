@@ -46,8 +46,6 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
-        scan_fragment = new ScanFragment();
-        search_fragment = new SearchFragment();
         int cur_id = item.getItemId();
         switch (cur_id) {
             case R.id.map_skku:
@@ -84,6 +82,9 @@ public class MainActivity extends AppCompatActivity {
         scan_fragment = new ScanFragment();
         search_fragment = new SearchFragment();
         estimate_fragment = new EstimateFragment();
+
+        scan_fragment.setBuilding("skku");
+        search_fragment.setBuilding("skku");
 
         getSupportFragmentManager().beginTransaction().replace(R.id.container, scan_fragment).commit();
         BottomNavigationView bottom_navigation = findViewById(R.id.bottomNavigation);

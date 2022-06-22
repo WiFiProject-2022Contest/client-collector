@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".SearchFragment" >
+    tools:context=".SearchFragment">
 
     <EditText
         android:id="@+id/editTextX2"
@@ -14,7 +14,7 @@
         android:hint="X 좌표(m)"
         android:inputType="text"
         android:minHeight="48dp"
-        app:layout_constraintEnd_toStartOf="@+id/buttonSearch"
+        app:layout_constraintEnd_toStartOf="@+id/editTextY2"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         tools:ignore="SpeakableTextPresentCheck" />
@@ -28,8 +28,8 @@
         android:inputType="text"
         android:minHeight="48dp"
         app:layout_constraintEnd_toStartOf="@+id/buttonSearch"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/editTextX2"
+        app:layout_constraintStart_toEndOf="@+id/editTextX2"
+        app:layout_constraintTop_toTopOf="parent"
         tools:ignore="SpeakableTextPresentCheck" />
 
     <androidx.appcompat.widget.AppCompatButton
@@ -37,10 +37,9 @@
         android:layout_width="100dp"
         android:layout_height="0dp"
         android:text="Search"
-        app:layout_constraintBottom_toBottomOf="@+id/editTextY2"
+        app:layout_constraintBottom_toBottomOf="@+id/editTextDateFrom"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.5"
-        app:layout_constraintStart_toEndOf="@+id/editTextX2"
+        app:layout_constraintStart_toEndOf="@+id/editTextY2"
         app:layout_constraintTop_toTopOf="@+id/editTextX2" />
 
     <View
@@ -51,7 +50,7 @@
         android:background="#DADADA"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/editTextY2" />
+        app:layout_constraintTop_toBottomOf="@+id/editTextDateTo" />
 
     <wifilocation.wifi.SpotImageView
         android:id="@+id/imageViewMap2"
@@ -87,4 +86,24 @@
         app:layout_constraintHorizontal_bias="1.0"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/divisionLine4" />
+
+    <TextView
+        android:id="@+id/editTextDateFrom"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:hint="시작 날짜"
+        android:textSize="18sp"
+        app:layout_constraintEnd_toStartOf="@+id/editTextDateTo"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/editTextX2" />
+
+    <TextView
+        android:id="@+id/editTextDateTo"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:hint="끝 날짜"
+        android:textSize="18sp"
+        app:layout_constraintEnd_toStartOf="@+id/buttonSearch"
+        app:layout_constraintStart_toEndOf="@+id/editTextDateFrom"
+        app:layout_constraintTop_toBottomOf="@+id/editTextY2" />
 </androidx.constraintlayout.widget.ConstraintLayout>

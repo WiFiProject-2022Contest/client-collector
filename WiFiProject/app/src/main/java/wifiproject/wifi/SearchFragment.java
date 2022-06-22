@@ -4,6 +4,7 @@ import android.content.Context;
 import android.graphics.PointF;
 import android.os.Bundle;
 
+import androidx.fragment.app.DialogFragment;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -14,9 +15,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.TextView;
 import android.widget.Toast;
-
-import androidx.appcompat.widget.SearchView;
 
 import com.davemorrissey.labs.subscaleview.ImageSource;
 
@@ -33,8 +33,11 @@ public class SearchFragment extends Fragment {
     WiFiItemAdapter wifiitem_adapter = new WiFiItemAdapter();
     EditText edittext_x2, edittext_y2;
     String building = "";
+    TextView textview_date;
 
-    public void setBuilding(String building) { this.building = building; }
+    public void setBuilding(String building) {
+        this.building = building;
+    }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -49,7 +52,7 @@ public class SearchFragment extends Fragment {
         recyclerview_searched.setLayoutManager(new LinearLayoutManager(context, LinearLayoutManager.VERTICAL, false));
 
         imageview_map2 = rootview.findViewById(R.id.imageViewMap2);
-        switch(building) {
+        switch (building) {
             case "skku":
                 imageview_map2.setImage(ImageSource.resource(R.drawable.skku_example));
                 break;
@@ -73,21 +76,40 @@ public class SearchFragment extends Fragment {
             }
         });
 
+        TextView textview_date_from = rootview.findViewById(R.id.editTextDateFrom);
+        textview_date_from.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                textview_date = textview_date_from;
+                DialogFragment datepicker = new DatePickerFragment();
+                datepicker.show(getActivity().getSupportFragmentManager(), "datePicker");
+            }
+        });
+        TextView textview_date_to = rootview.findViewById(R.id.editTextDateTo);
+        textview_date_to.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                textview_date = textview_date_to;
+                DialogFragment datepicker = new DatePickerFragment();
+                datepicker.show(getActivity().getSupportFragmentManager(), "datePicker");
+            }
+        });
+
         Button button_search = rootview.findViewById(R.id.buttonSearch);
         button_search.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                float target_x;
-                float target_y;
+                Float target_x;
+                Float target_y;
                 try {
                     target_x = Float.parseFloat(edittext_x2.getText().toString());
                     target_y = Float.parseFloat(edittext_y2.getText().toString());
                 } catch (Exception e) {
-                    Toast.makeText(context, "올바른 형식의 좌표 입력 필요", Toast.LENGTH_SHORT).show();
-                    return;
+                    target_x = null;
+                    target_y = null;
                 }
                 RetrofitAPI retrofit_api = RetrofitClient.getRetrofitAPI();
-                retrofit_api.getData(target_x, target_y).enqueue(new Callback<List<WiFiItem>>() {
+                retrofit_api.getData(target_x, target_y, textview_date_from.getText().toString(), textview_date_to.getText().toString()).enqueue(new Callback<List<WiFiItem>>() {
                     @Override
                     public void onResponse(Call<List<WiFiItem>> call, Response<List<WiFiItem>> response) {
                         ArrayList<WiFiItem> items = new ArrayList<WiFiItem>();
@@ -110,5 +132,9 @@ public class SearchFragment extends Fragment {
         });
 
         return rootview;
+    }
+
+    public void setDateText(String date) {
+        textview_date.setText(date);
     }
 }
