@@ -8,6 +8,7 @@ import android.net.wifi.ScanResult;
 import android.net.wifi.WifiManager;
 import android.os.Bundle;
 
+import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
 import android.view.LayoutInflater;
@@ -27,6 +28,7 @@ import retrofit2.Response;
 public class EstimateFragment extends Fragment {
     Context context;
     WifiManager wm;
+    Button buttonUpdateAllDatabase;
     Button buttonEstimate;
     TextView textResultEstimateWiFi2G;
     TextView textResultEstimateWiFi5G;
@@ -48,8 +50,17 @@ public class EstimateFragment extends Fragment {
     };
 
     @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+
+        getDatabaseAllData();
+    }
+
+    @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
+        super.onCreateView(inflater, container, savedInstanceState);
+
         context = getActivity().getApplicationContext();
         wm = (WifiManager) context.getSystemService(Context.WIFI_SERVICE);
         IntentFilter filter = new IntentFilter();
@@ -57,23 +68,16 @@ public class EstimateFragment extends Fragment {
         context.registerReceiver(wifi_receiver, filter);
 
         ViewGroup rootView = (ViewGroup) inflater.inflate(R.layout.fragment_estimate, container, false);
+        buttonUpdateAllDatabase = rootView.findViewById(R.id.buttonUpdateAllDatabase);
         buttonEstimate = rootView.findViewById(R.id.buttonEstimate);
         textResultEstimateWiFi2G = rootView.findViewById(R.id.textResultEstimateWiFi2G);
         textResultEstimateWiFi5G = rootView.findViewById(R.id.textResultEstimateWiFi5G);
         textEstimateReason = rootView.findViewById(R.id.textEstimateReason);
 
-        // DB 전체 다 받아오기
-        RetrofitAPI retrofit_api = RetrofitClient.getRetrofitAPI();
-        retrofit_api.getData(-1, -1).enqueue(new Callback<List<WiFiItem>>() {
+        buttonUpdateAllDatabase.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onResponse(Call<List<WiFiItem>> call, Response<List<WiFiItem>> response) {
-                databaseAllData = response.body();
-                Toast.makeText(context, "Database loaded.", Toast.LENGTH_SHORT).show();
-            }
-
-            @Override
-            public void onFailure(Call<List<WiFiItem>> call, Throwable t) {
-                Toast.makeText(context, "Database failed.", Toast.LENGTH_SHORT).show();
+            public void onClick(View view) {
+                getDatabaseAllData();
             }
         });
 
@@ -98,6 +102,23 @@ public class EstimateFragment extends Fragment {
         super.onDestroyView();
 
         context.unregisterReceiver(wifi_receiver);
+    }
+
+    private void getDatabaseAllData() {
+        // DB 전체 다 받아오기
+        RetrofitAPI retrofit_api = RetrofitClient.getRetrofitAPI();
+        retrofit_api.getData(-1, -1).enqueue(new Callback<List<WiFiItem>>() {
+            @Override
+            public void onResponse(Call<List<WiFiItem>> call, Response<List<WiFiItem>> response) {
+                databaseAllData = response.body();
+                Toast.makeText(context, "Database loaded.", Toast.LENGTH_SHORT).show();
+            }
+
+            @Override
+            public void onFailure(Call<List<WiFiItem>> call, Throwable t) {
+                Toast.makeText(context, "Database failed.", Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 
     private void scanSuccess() {

@@ -100,7 +100,7 @@
             android:id="@+id/buttonUpdateAllDatabase"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:text="DATABASE"
+            android:text="UPDATE DB"
             app:layout_constraintEnd_toStartOf="@+id/EstimateButton"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
