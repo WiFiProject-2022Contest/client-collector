@@ -1,19 +1,18 @@
 package wifilocation.wifi;
 
 import android.Manifest;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
-
-import com.google.android.material.bottomnavigation.BottomNavigationView;
-import com.google.android.material.navigation.NavigationBarView;
+import com.google.android.material.tabs.TabLayout;
 
 public class MainActivity extends AppCompatActivity {
     ScanFragment scan_fragment;
@@ -46,6 +45,9 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+        scan_fragment = new ScanFragment();
+        search_fragment = new SearchFragment();
+
         int cur_id = item.getItemId();
         switch (cur_id) {
             case R.id.map_skku:
@@ -57,6 +59,8 @@ public class MainActivity extends AppCompatActivity {
                 search_fragment.setBuilding("wifilocation");
                 break;
             default:
+                scan_fragment.setBuilding("skku");
+                search_fragment.setBuilding("skku");
                 break;
         }
         if(now_fragment == 1) {
@@ -83,30 +87,39 @@ public class MainActivity extends AppCompatActivity {
         search_fragment = new SearchFragment();
         estimate_fragment = new EstimateFragment();
 
+        now_fragment = 1;
         scan_fragment.setBuilding("skku");
         search_fragment.setBuilding("skku");
-
         getSupportFragmentManager().beginTransaction().replace(R.id.container, scan_fragment).commit();
-        BottomNavigationView bottom_navigation = findViewById(R.id.bottomNavigation);
-        bottom_navigation.setOnItemSelectedListener(new NavigationBarView.OnItemSelectedListener() {
-            @Override
-            public boolean onNavigationItemSelected(@NonNull MenuItem item) {
-                switch (item.getItemId()) {
-                    case R.id.tab_scan:
-                        now_fragment = 1;
-                        getSupportFragmentManager().beginTransaction().replace(R.id.container, scan_fragment).commit();
-                        return true;
-                    case R.id.tab_search:
-                        now_fragment = 2;
-                        getSupportFragmentManager().beginTransaction().replace(R.id.container, search_fragment).commit();
-                        return true;
-                    case R.id.tab_estimate:
-                        getSupportFragmentManager().beginTransaction().replace(R.id.container, estimate_fragment).commit();
-                        return true;
-                }
-                return false;
-            }
-        });
 
+        TabLayout tabs = (TabLayout) findViewById(R.id.tabs);
+        tabs.addTab(tabs.newTab().setText("스캔"));
+        tabs.addTab(tabs.newTab().setText("검색"));
+        tabs.addTab(tabs.newTab().setText("측정"));
+
+        tabs.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
+            @Override
+            public void onTabSelected(TabLayout.Tab tab) {
+                int position = tab.getPosition();
+                if (position == 0) {
+                    now_fragment = 1;
+                    getSupportFragmentManager().beginTransaction().replace(R.id.container, scan_fragment).commit();
+                } else if (position == 1) {
+                    now_fragment = 2;
+                    getSupportFragmentManager().beginTransaction().replace(R.id.container, search_fragment).commit();
+                } else if (position == 2) {
+                    getSupportFragmentManager().beginTransaction().replace(R.id.container, estimate_fragment).commit();
+                }
+            }
+
+            @Override
+            public void onTabUnselected(TabLayout.Tab tab) {
+                now_fragment = 1;
+                getSupportFragmentManager().beginTransaction().replace(R.id.container, scan_fragment).commit();
+            }
+
+            @Override
+            public void onTabReselected(TabLayout.Tab tab) {}
+        });
     }
 }
