@@ -1,10 +1,8 @@
 package wifilocation.wifi;
 
 import android.Manifest;
-import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 
@@ -19,6 +17,8 @@ public class MainActivity extends AppCompatActivity {
     SearchFragment search_fragment;
     EstimateFragment estimate_fragment;
     int now_fragment = 1; // 1은 scan, 2는 search
+
+    public static String building = "skku";
 
     String[] PERMISSIONS = {
             Manifest.permission.ACCESS_COARSE_LOCATION,
@@ -51,16 +51,12 @@ public class MainActivity extends AppCompatActivity {
         int cur_id = item.getItemId();
         switch (cur_id) {
             case R.id.map_skku:
-                scan_fragment.setBuilding("skku");
-                search_fragment.setBuilding("skku");
+                building = "skku";
                 break;
             case R.id.map_wifilocation:
-                scan_fragment.setBuilding("wifilocation");
-                search_fragment.setBuilding("wifilocation");
+                building = "wifilocation";
                 break;
             default:
-                scan_fragment.setBuilding("skku");
-                search_fragment.setBuilding("skku");
                 break;
         }
         if(now_fragment == 1) {
@@ -88,8 +84,6 @@ public class MainActivity extends AppCompatActivity {
         estimate_fragment = new EstimateFragment();
 
         now_fragment = 1;
-        scan_fragment.setBuilding("skku");
-        search_fragment.setBuilding("skku");
         getSupportFragmentManager().beginTransaction().replace(R.id.container, scan_fragment).commit();
 
         TabLayout tabs = (TabLayout) findViewById(R.id.tabs);

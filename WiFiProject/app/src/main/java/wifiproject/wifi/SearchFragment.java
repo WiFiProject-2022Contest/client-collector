@@ -32,12 +32,7 @@ public class SearchFragment extends Fragment {
     SpotImageView imageview_map2;
     WiFiItemAdapter wifiitem_adapter = new WiFiItemAdapter();
     EditText edittext_x2, edittext_y2;
-    String building = "";
     TextView textview_date;
-
-    public void setBuilding(String building) {
-        this.building = building;
-    }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -52,7 +47,7 @@ public class SearchFragment extends Fragment {
         recyclerview_searched.setLayoutManager(new LinearLayoutManager(context, LinearLayoutManager.VERTICAL, false));
 
         imageview_map2 = rootview.findViewById(R.id.imageViewMap2);
-        switch (building) {
+        switch (MainActivity.building) {
             case "skku":
                 imageview_map2.setImage(ImageSource.resource(R.drawable.skku_example));
                 break;
