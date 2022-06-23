@@ -10,6 +10,7 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
+
 import com.google.android.material.tabs.TabLayout;
 
 public class MainActivity extends AppCompatActivity {
@@ -18,7 +19,8 @@ public class MainActivity extends AppCompatActivity {
     EstimateFragment estimate_fragment;
     int now_fragment = 1; // 1은 scan, 2는 search
 
-    public static String building = "skku";
+    public static String building = "Library5F";
+    public static String ssid = "SKKU";
 
     String[] PERMISSIONS = {
             Manifest.permission.ACCESS_COARSE_LOCATION,
@@ -51,17 +53,19 @@ public class MainActivity extends AppCompatActivity {
         int cur_id = item.getItemId();
         switch (cur_id) {
             case R.id.map_skku:
-                building = "skku";
+                building = "Library5F";
+                ssid = "SKKU";
                 break;
             case R.id.map_wifilocation:
                 building = "wifilocation";
+                ssid = "WiFiLocation@PDA";
                 break;
             default:
                 break;
         }
-        if(now_fragment == 1) {
+        if (now_fragment == 1) {
             getSupportFragmentManager().beginTransaction().replace(R.id.container, scan_fragment).commit();
-        } else if(now_fragment == 2) {
+        } else if (now_fragment == 2) {
             getSupportFragmentManager().beginTransaction().replace(R.id.container, search_fragment).commit();
         }
         return super.onOptionsItemSelected(item);
@@ -113,7 +117,8 @@ public class MainActivity extends AppCompatActivity {
             }
 
             @Override
-            public void onTabReselected(TabLayout.Tab tab) {}
+            public void onTabReselected(TabLayout.Tab tab) {
+            }
         });
     }
 }

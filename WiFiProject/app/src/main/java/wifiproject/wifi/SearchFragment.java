@@ -48,7 +48,7 @@ public class SearchFragment extends Fragment {
 
         imageview_map2 = rootview.findViewById(R.id.imageViewMap2);
         switch (MainActivity.building) {
-            case "skku":
+            case "Library5F":
                 imageview_map2.setImage(ImageSource.resource(R.drawable.skku_example));
                 break;
             case "wifilocation":
@@ -104,7 +104,8 @@ public class SearchFragment extends Fragment {
                     target_y = null;
                 }
                 RetrofitAPI retrofit_api = RetrofitClient.getRetrofitAPI();
-                retrofit_api.getData(target_x, target_y, textview_date_from.getText().toString(), textview_date_to.getText().toString()).enqueue(new Callback<List<WiFiItem>>() {
+                // TODO: SSID 설정
+                retrofit_api.getData(MainActivity.building, MainActivity.ssid, target_x, target_y, textview_date_from.getText().toString(), textview_date_to.getText().toString()).enqueue(new Callback<List<WiFiItem>>() {
                     @Override
                     public void onResponse(Call<List<WiFiItem>> call, Response<List<WiFiItem>> response) {
                         ArrayList<WiFiItem> items = new ArrayList<WiFiItem>();

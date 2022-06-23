@@ -73,7 +73,7 @@ public class ScanFragment extends Fragment {
 
         imageview_map = rootview.findViewById(R.id.imageViewMap);
         switch(MainActivity.building) {
-            case "skku":
+            case "Library5F":
                 imageview_map.setImage(ImageSource.resource(R.drawable.skku_example));
                 break;
             case "wifilocation":

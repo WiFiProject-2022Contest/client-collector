@@ -109,7 +109,8 @@ public class EstimateFragment extends Fragment {
     private void getDatabaseAllData() {
         // DB 전체 다 받아오기
         RetrofitAPI retrofit_api = RetrofitClient.getRetrofitAPI();
-        retrofit_api.getData(null, null, null, null).enqueue(new Callback<List<WiFiItem>>() {
+        // TODO: SSID 설정
+        retrofit_api.getData(MainActivity.building, MainActivity.ssid, null, null, null, null).enqueue(new Callback<List<WiFiItem>>() {
             @Override
             public void onResponse(Call<List<WiFiItem>> call, Response<List<WiFiItem>> response) {
                 databaseAllData = response.body();
