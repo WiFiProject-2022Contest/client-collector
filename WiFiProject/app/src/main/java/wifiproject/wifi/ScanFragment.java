@@ -53,12 +53,12 @@ public class ScanFragment extends Fragment {
     private BroadcastReceiver wifi_receiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            boolean success = intent.getBooleanExtra(WifiManager.EXTRA_RESULTS_UPDATED, false);
-            if (success) {
-                scanSuccess();
-            } else {
-                scanFailure();
-            }
+        boolean success = intent.getBooleanExtra(WifiManager.EXTRA_RESULTS_UPDATED, false);
+        if (success) {
+            scanSuccess();
+        } else {
+            scanFailure();
+        }
         }
     };
 
@@ -167,8 +167,13 @@ public class ScanFragment extends Fragment {
     private void scanSuccess() {
         List<ScanResult> results = wm.getScanResults();
         ArrayList<WiFiItem> items = new ArrayList<WiFiItem>();
-        float target_x = Float.parseFloat(edittext_x.getText().toString());
-        float target_y = Float.parseFloat(edittext_y.getText().toString());
+        float target_x, target_y;
+        try {
+            target_x = Float.parseFloat(edittext_x.getText().toString());
+            target_y = Float.parseFloat(edittext_y.getText().toString());
+        } catch (Exception e) {
+            return;
+        }
         for (ScanResult result : results) {
 //            if (!result.SSID.equalsIgnoreCase("WiFiLocation@PDA")) continue;
             items.add(new WiFiItem(target_x, target_y, result.SSID, result.BSSID, result.level, result.frequency, null, building));
