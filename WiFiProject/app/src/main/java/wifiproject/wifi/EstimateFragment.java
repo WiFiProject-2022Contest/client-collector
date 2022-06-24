@@ -6,6 +6,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
+import android.graphics.Point;
+import android.graphics.PointF;
 import android.net.wifi.ScanResult;
 import android.net.wifi.WifiManager;
 import android.os.Bundle;
@@ -155,25 +157,23 @@ public class EstimateFragment extends Fragment {
             userData.add(new WiFiItem(0, 0, result.SSID, result.BSSID, result.level, result.frequency, MainActivity.uuid, MainActivity.building));
         }
 
+        ArrayList<PointF> result = new ArrayList<PointF>();
         estimatedResultWiFi2G = PositioningAlgorithm.run(userData, databaseAllData, MainActivity.building, MainActivity.ssid, MainActivity.uuid, 2);
         estimatedResultWiFi5G = PositioningAlgorithm.run(userData, databaseAllData, MainActivity.building, MainActivity.ssid, MainActivity.uuid, 5);
 
         if (estimatedResultWiFi2G != null) {
             textResultEstimateWiFi2G.setText(String.format("(%s, %s)", String.format("%.6f", estimatedResultWiFi2G.getPositionEstimatedX()), String.format("%.6f", estimatedResultWiFi2G.getPositionEstimatedY())));
-            if (imageview_map3.isReady()) {
-                imageview_map3.setEstimateSpot(estimatedResultWiFi2G.getPositionEstimatedX(), estimatedResultWiFi2G.getPositionEstimatedY());
-            }
+            result.add(new PointF((float)estimatedResultWiFi2G.getPositionEstimatedX(), (float)estimatedResultWiFi2G.getPositionEstimatedY()));
         } else {
             textResultEstimateWiFi2G.setText("Out of Service");
         }
         if (estimatedResultWiFi5G != null) {
             textResultEstimateWiFi5G.setText(String.format("(%s, %s)", String.format("%.6f", estimatedResultWiFi5G.getPositionEstimatedX()), String.format("%.6f", estimatedResultWiFi5G.getPositionEstimatedY())));
-            if (imageview_map3.isReady()) {
-                imageview_map3.setEstimateSpot(estimatedResultWiFi5G.getPositionEstimatedX(), estimatedResultWiFi5G.getPositionEstimatedY());
-            }
+            result.add(new PointF((float)estimatedResultWiFi5G.getPositionEstimatedX(), (float)estimatedResultWiFi5G.getPositionEstimatedY()));
         } else {
             textResultEstimateWiFi5G.setText("Out of Service");
         }
+        imageview_map3.setEstimateSpot(result);
 
         textEstimateReason.setText("");
         textEstimateReason.setText(textEstimateReason.getText() + "\n\nWiFi 2Ghz\n");
