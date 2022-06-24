@@ -1,24 +1,50 @@
 package wifilocation.wifi;
 
+import com.google.gson.annotations.SerializedName;
+
 public class EstimatedResult {
     String building;
     String ssid;
-    double[] positionReal;
-    double[] positionEstimated;
+    @SerializedName("pos_x")
+    double positionRealX;
+    @SerializedName("pos_y")
+    double positionRealY;
+    @SerializedName("est_x")
+    double positionEstimatedX;
+    @SerializedName("est_y")
+    double positionEstimatedY;
+    @SerializedName("uuid")
     String uuid;
+    @SerializedName("k")
     int K;
+    @SerializedName("threshold")
     int threshold;
     StringBuilder estimateReason;
 
     public EstimatedResult() {
         this.building = null;
         this.ssid = null;
-        this.positionReal = new double[2];
-        this.positionEstimated = new double[2];
+        this.positionRealX = 0;
+        this.positionRealY = 0;
+        this.positionEstimatedX = 0;
+        this.positionEstimatedY = 0;
         this.uuid = null;
         this.K = -1;
         this.threshold = -1;
         this.estimateReason = new StringBuilder();
+    }
+
+    public EstimatedResult(EstimatedResult estimatedResult) {
+        this.building = estimatedResult.getBuilding();
+        this.ssid = estimatedResult.getSsid();
+        this.positionRealX = estimatedResult.getPositionRealX();
+        this.positionRealY = estimatedResult.getPositionRealY();
+        this.positionEstimatedX = estimatedResult.getPositionEstimatedX();
+        this.positionEstimatedY = estimatedResult.getPositionEstimatedY();
+        this.uuid = estimatedResult.getUuid();
+        this.K = estimatedResult.getK();
+        this.threshold = estimatedResult.getThreshold();
+        this.estimateReason = estimatedResult.getEstimateReason();
     }
 
     public EstimatedResult(String building, String ssid, String uuid) {
@@ -52,20 +78,36 @@ public class EstimatedResult {
         this.ssid = ssid;
     }
 
-    public double[] getPositionReal() {
-        return this.positionReal;
+    public double getPositionRealX() {
+        return this.positionRealX;
     }
 
-    public void setPositionReal(double[] positionReal) {
-        this.positionReal = positionReal;
+    public void setPositionRealX(double positionRealX) {
+        this.positionRealX = positionRealX;
     }
 
-    public double[] getPositionEstimated() {
-        return this.positionEstimated;
+    public double getPositionRealY() {
+        return this.positionRealY;
     }
 
-    public void setPositionEstimated(double[] positionEstimated) {
-        this.positionEstimated = positionEstimated;
+    public void setPositionRealY(double positionRealY) {
+        this.positionRealY = positionRealY;
+    }
+
+    public double getPositionEstimatedX() {
+        return this.positionEstimatedX;
+    }
+
+    public void setPositionEstimatedX(double positionEstimatedX) {
+        this.positionEstimatedX = positionEstimatedX;
+    }
+
+    public double getPositionEstimatedY() {
+        return this.positionEstimatedY;
+    }
+
+    public void setPositionEstimatedY(double positionEstimatedY) {
+        this.positionEstimatedY = positionEstimatedY;
     }
 
     public String getUuid() {

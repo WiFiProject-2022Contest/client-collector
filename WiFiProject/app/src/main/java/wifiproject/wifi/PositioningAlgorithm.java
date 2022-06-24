@@ -64,7 +64,8 @@ public class PositioningAlgorithm {
         if (positionResult == null) {
             return null;
         }
-        estimatedResult.setPositionEstimated(positionResult);
+        estimatedResult.setPositionEstimatedX(positionResult[0]);
+        estimatedResult.setPositionEstimatedY(positionResult[1]);
         return estimatedResult;
     }
 
