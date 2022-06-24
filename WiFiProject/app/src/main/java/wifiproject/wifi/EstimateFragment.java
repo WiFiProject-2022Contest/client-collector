@@ -23,6 +23,8 @@ import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.davemorrissey.labs.subscaleview.ImageSource;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -37,12 +39,11 @@ public class EstimateFragment extends Fragment {
     Button buttonUpdateAllDatabase;
     Button buttonEstimate;
     Button buttonPushEstimationResult;
-    TextView editTextRealX;
-    TextView editTextRealY;
     TextView textResultEstimateWiFi2G;
     TextView textResultEstimateWiFi5G;
     TextView textEstimateReason;
 
+    SpotImageView imageview_map3;
     List<WiFiItem> databaseAllData = null;
     EstimatedResult estimatedResultWiFi2G;
     EstimatedResult estimatedResultWiFi5G;
@@ -78,12 +79,12 @@ public class EstimateFragment extends Fragment {
         context.registerReceiver(wifi_receiver, filter);
 
         ViewGroup rootView = (ViewGroup) inflater.inflate(R.layout.fragment_estimate, container, false);
+        imageview_map3 = rootView.findViewById(R.id.imageViewMap3);
+        imageview_map3.setImage(ImageSource.resource(R.drawable.skku_example));
+
         buttonUpdateAllDatabase = rootView.findViewById(R.id.buttonUpdateAllDatabase);
         buttonEstimate = rootView.findViewById(R.id.buttonEstimate);
         buttonPushEstimationResult = rootView.findViewById(R.id.buttonPushEstimationResult);
-        editTextRealX = rootView.findViewById(R.id.editTextRealX);
-        editTextRealY = rootView.findViewById(R.id.editTextRealY);
-
         textResultEstimateWiFi2G = rootView.findViewById(R.id.textResultEstimateWiFi2G);
         textResultEstimateWiFi5G = rootView.findViewById(R.id.textResultEstimateWiFi5G);
         textEstimateReason = rootView.findViewById(R.id.textEstimateReason);
@@ -112,66 +113,7 @@ public class EstimateFragment extends Fragment {
         buttonPushEstimationResult.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                EstimatedResult copy2G = null;
-                EstimatedResult copy5G = null;
 
-                if (estimatedResultWiFi2G != null) {
-                    copy2G = new EstimatedResult(estimatedResultWiFi2G);
-                    copy2G.setUuid(copy2G.getUuid() + "-2G");
-                }
-
-                if (estimatedResultWiFi5G != null) {
-                    copy5G = new EstimatedResult(estimatedResultWiFi5G);
-                    copy5G.setUuid(copy5G.getUuid() + "-5G");
-                }
-
-                for (EstimatedResult er : new EstimatedResult[] {copy2G, copy5G}) {
-                    if (er == null) {
-                        continue;
-                    }
-
-                    try {
-                        double x = Double.parseDouble(editTextRealX.getText().toString());
-                        double y = Double.parseDouble(editTextRealY.getText().toString());
-                        er.setPositionRealX(x);
-                        er.setPositionRealY(y);
-                    }
-                    catch (NumberFormatException e) {
-                        er.setPositionRealX(-1);
-                        er.setPositionRealY(-1);
-                    }
-                    catch (NullPointerException e) {
-                        continue;
-                    }
-
-                    RetrofitAPI retrofit_api = RetrofitClient.getRetrofitAPI();
-                    retrofit_api.postData(er).enqueue(new Callback<PushResultModel>() {
-                        @Override
-                        public void onResponse(Call<PushResultModel> call, Response<PushResultModel> response) {
-                            PushResultModel r = response.body();
-                            if (r.getSuccess().equals("true")) {
-                                getActivity().runOnUiThread(new Runnable() {
-                                    @Override
-                                    public void run() {
-                                        Toast.makeText(context, "PUSH 성공", Toast.LENGTH_SHORT).show();
-                                    }
-                                });
-                            } else {
-                                getActivity().runOnUiThread(new Runnable() {
-                                    @Override
-                                    public void run() {
-                                        Toast.makeText(context, "PUSH 실패", Toast.LENGTH_SHORT).show();
-                                    }
-                                });
-                            }
-                        }
-
-                        @Override
-                        public void onFailure(Call<PushResultModel> call, Throwable t) {
-                            t.printStackTrace();
-                        }
-                    });
-                }
             }
         });
 
@@ -218,17 +160,23 @@ public class EstimateFragment extends Fragment {
 
         if (estimatedResultWiFi2G != null) {
             textResultEstimateWiFi2G.setText(String.format("(%s, %s)", String.format("%.6f", estimatedResultWiFi2G.getPositionEstimatedX()), String.format("%.6f", estimatedResultWiFi2G.getPositionEstimatedY())));
+            if (imageview_map3.isReady()) {
+                imageview_map3.setEstimateSpot(estimatedResultWiFi2G.getPositionEstimatedX(), estimatedResultWiFi2G.getPositionEstimatedY());
+            }
         } else {
             textResultEstimateWiFi2G.setText("Out of Service");
         }
         if (estimatedResultWiFi5G != null) {
             textResultEstimateWiFi5G.setText(String.format("(%s, %s)", String.format("%.6f", estimatedResultWiFi5G.getPositionEstimatedX()), String.format("%.6f", estimatedResultWiFi5G.getPositionEstimatedY())));
+            if (imageview_map3.isReady()) {
+                imageview_map3.setEstimateSpot(estimatedResultWiFi5G.getPositionEstimatedX(), estimatedResultWiFi5G.getPositionEstimatedY());
+            }
         } else {
             textResultEstimateWiFi5G.setText("Out of Service");
         }
 
-        textEstimateReason.setText(MainActivity.uuid + "\n" + MainActivity.building + ", " + MainActivity.ssid + "\n");
-        textEstimateReason.setText(textEstimateReason.getText() + "\nWiFi 2Ghz\n");
+        textEstimateReason.setText("");
+        textEstimateReason.setText(textEstimateReason.getText() + "\n\nWiFi 2Ghz\n");
         if (estimatedResultWiFi2G != null) {
             textEstimateReason.setText(textEstimateReason.getText() + estimatedResultWiFi2G.getEstimateReason().toString());
         }
@@ -242,5 +190,19 @@ public class EstimateFragment extends Fragment {
     private void scanFailure() {
         Toast.makeText(context, "Scan failed.", Toast.LENGTH_SHORT).show();
         wm.getScanResults();
+    }
+
+    private String GetDevicesUUID(Context context) {
+        final TelephonyManager tm = (TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE);
+        final String tmDevice, tmSerial, androidId;
+        if (ActivityCompat.checkSelfPermission(context, Manifest.permission.READ_PHONE_STATE) != PackageManager.PERMISSION_GRANTED) {
+            return null;
+        }
+        tmDevice = "" + tm.getDeviceId();
+        tmSerial = "" + tm.getSimSerialNumber();
+        androidId = "" + android.provider.Settings.Secure.getString(getActivity().getContentResolver(), android.provider.Settings.Secure.ANDROID_ID);
+        UUID deviceUuid = new UUID(androidId.hashCode(), ((long) tmDevice.hashCode() << 32) | tmSerial.hashCode());
+        String deviceId = deviceUuid.toString();
+        return deviceId;
     }
 }
