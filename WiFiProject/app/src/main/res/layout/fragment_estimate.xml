@@ -21,7 +21,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/constraintLayoutEstimateResult" />
+        app:layout_constraintTop_toBottomOf="@+id/imageViewMap3" />
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/constraintLayoutEstimateButton"
@@ -133,6 +133,17 @@
                 app:layout_constraintTop_toBottomOf="@+id/textTitleEstimateWiFi5G" />
         </androidx.constraintlayout.widget.ConstraintLayout>
     </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <wifilocation.wifi.SpotImageView
+        android:id="@+id/imageViewMap3"
+        android:layout_width="match_parent"
+        android:layout_height="250dp"
+        android:layout_marginTop="3dp"
+        android:src="@drawable/skku_example"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/constraintLayoutEstimateResult" />
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/constraintLayoutSetRealLocation"

@@ -65,6 +65,13 @@ public class SpotImageView extends SubsamplingScaleImageView {
         invalidate();
     }
 
+    public void setEstimateSpot(ArrayList<PointF> result) {
+        setScaleAndCenter(0.0f, getCenter());
+        positions.clear();
+        positions = result;
+        invalidate();
+    }
+
     public PointF sourceToMeter(PointF pos) {
         PointF size = viewToSourceCoord(getWidth(), getHeight());
         float width_ratio = pos.x / size.x;
