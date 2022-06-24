@@ -163,8 +163,8 @@ public class EstimateFragment extends Fragment {
             textResultEstimateWiFi5G.setText("Out of Service");
         }
 
-        textEstimateReason.setText("");
-        textEstimateReason.setText(textEstimateReason.getText() + "\n\nWiFi 2Ghz\n");
+        textEstimateReason.setText(MainActivity.uuid + "\n" + MainActivity.building + ", " + MainActivity.ssid + "\n");
+        textEstimateReason.setText(textEstimateReason.getText() + "\nWiFi 2Ghz\n");
         if (estimatedResultWiFi2G != null) {
             textEstimateReason.setText(textEstimateReason.getText() + estimatedResultWiFi2G.getEstimateReason().toString());
         }
