@@ -1,8 +1,10 @@
 package wifilocation.wifi;
 
 import android.Manifest;
+import android.content.Context;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
+import android.telephony.TelephonyManager;
 import android.view.Menu;
 import android.view.MenuItem;
 
@@ -13,6 +15,8 @@ import androidx.core.content.ContextCompat;
 
 import com.google.android.material.tabs.TabLayout;
 
+import java.util.UUID;
+
 public class MainActivity extends AppCompatActivity {
     ScanFragment scan_fragment;
     SearchFragment search_fragment;
@@ -21,6 +25,7 @@ public class MainActivity extends AppCompatActivity {
 
     public static String building = "Library5F";
     public static String ssid = "SKKU";
+    public static String uuid;
 
     String[] PERMISSIONS = {
             Manifest.permission.ACCESS_COARSE_LOCATION,
@@ -37,6 +42,8 @@ public class MainActivity extends AppCompatActivity {
 
         getPermission();
         initView();
+
+        uuid = getDevicesUUID(this);
     }
 
     @Override
@@ -120,5 +127,19 @@ public class MainActivity extends AppCompatActivity {
             public void onTabReselected(TabLayout.Tab tab) {
             }
         });
+    }
+
+    private String getDevicesUUID(Context context) {
+        final TelephonyManager tm = (TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE);
+        final String tmDevice, tmSerial, androidId;
+        if (ActivityCompat.checkSelfPermission(context, Manifest.permission.READ_PHONE_STATE) != PackageManager.PERMISSION_GRANTED) {
+            return null;
+        }
+        tmDevice = "" + tm.getDeviceId();
+        tmSerial = "" + tm.getSimSerialNumber();
+        androidId = "" + android.provider.Settings.Secure.getString(getContentResolver(), android.provider.Settings.Secure.ANDROID_ID);
+        UUID deviceUuid = new UUID(androidId.hashCode(), ((long) tmDevice.hashCode() << 32) | tmSerial.hashCode());
+        String deviceId = deviceUuid.toString();
+        return deviceId;
     }
 }

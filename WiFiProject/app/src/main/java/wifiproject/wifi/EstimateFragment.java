@@ -1,16 +1,20 @@
 package wifilocation.wifi;
 
+import android.Manifest;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.pm.PackageManager;
 import android.net.wifi.ScanResult;
 import android.net.wifi.WifiManager;
 import android.os.Bundle;
 
 import androidx.annotation.Nullable;
+import androidx.core.app.ActivityCompat;
 import androidx.fragment.app.Fragment;
 
+import android.telephony.TelephonyManager;
 import android.text.method.ScrollingMovementMethod;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -21,6 +25,7 @@ import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -31,12 +36,14 @@ public class EstimateFragment extends Fragment {
     WifiManager wm;
     Button buttonUpdateAllDatabase;
     Button buttonEstimate;
+    Button buttonPushEstimationResult;
     TextView textResultEstimateWiFi2G;
     TextView textResultEstimateWiFi5G;
     TextView textEstimateReason;
 
     List<WiFiItem> databaseAllData = null;
-    StringBuilder estimateReason = new StringBuilder();
+    EstimatedResult estimatedResultWiFi2G;
+    EstimatedResult estimatedResultWiFi5G;
 
     private BroadcastReceiver wifi_receiver = new BroadcastReceiver() {
         @Override
@@ -71,6 +78,7 @@ public class EstimateFragment extends Fragment {
         ViewGroup rootView = (ViewGroup) inflater.inflate(R.layout.fragment_estimate, container, false);
         buttonUpdateAllDatabase = rootView.findViewById(R.id.buttonUpdateAllDatabase);
         buttonEstimate = rootView.findViewById(R.id.buttonEstimate);
+        buttonPushEstimationResult = rootView.findViewById(R.id.buttonPushEstimationResult);
         textResultEstimateWiFi2G = rootView.findViewById(R.id.textResultEstimateWiFi2G);
         textResultEstimateWiFi5G = rootView.findViewById(R.id.textResultEstimateWiFi5G);
         textEstimateReason = rootView.findViewById(R.id.textEstimateReason);
@@ -93,6 +101,13 @@ public class EstimateFragment extends Fragment {
 
                 wm.startScan();
                 Toast.makeText(context, "Scan started.", Toast.LENGTH_SHORT).show();
+            }
+        });
+
+        buttonPushEstimationResult.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
             }
         });
 
@@ -131,37 +146,51 @@ public class EstimateFragment extends Fragment {
 
         List<WiFiItem> userData = new ArrayList<>();
         for (ScanResult result : results) {
-            userData.add(new WiFiItem(0, 0, result.SSID, result.BSSID, result.level, result.frequency, null, "Library5F"));
+            userData.add(new WiFiItem(0, 0, result.SSID, result.BSSID, result.level, result.frequency, MainActivity.uuid, MainActivity.building));
         }
 
-        String targetBuilding = "Library5F";
-        String targetSSID = "SKKU";
+        estimatedResultWiFi2G = PositioningAlgorithm.run(userData, databaseAllData, MainActivity.building, MainActivity.ssid, MainActivity.uuid, 2);
+        estimatedResultWiFi5G = PositioningAlgorithm.run(userData, databaseAllData, MainActivity.building, MainActivity.ssid, MainActivity.uuid, 5);
 
-        estimateReason.setLength(0);
-        estimateReason.append(targetBuilding + ", " + targetSSID + "\n\n");
-
-        estimateReason.append("WiFi 2Ghz\n");
-        double[] estimatedPositionWiFi2G = PositioningAlgorithm.run(userData, databaseAllData, targetBuilding, targetSSID, 2, estimateReason);
-        estimateReason.append("\nWiFi 5Ghz\n");
-        double[] estimatedPositionWiFi5G = PositioningAlgorithm.run(userData, databaseAllData, targetBuilding, targetSSID, 5, estimateReason);
-
-        if (estimatedPositionWiFi2G != null) {
-            textResultEstimateWiFi2G.setText(String.format("(%s, %s)", String.format("%.6f", estimatedPositionWiFi2G[0]), String.format("%.6f", estimatedPositionWiFi2G[1])));
+        if (estimatedResultWiFi2G != null) {
+            textResultEstimateWiFi2G.setText(String.format("(%s, %s)", String.format("%.6f", estimatedResultWiFi2G.getPositionEstimated()[0]), String.format("%.6f", estimatedResultWiFi2G.getPositionEstimated()[1])));
         } else {
             textResultEstimateWiFi2G.setText("Out of Service");
         }
-        if (estimatedPositionWiFi5G != null) {
-            textResultEstimateWiFi5G.setText(String.format("(%s, %s)", String.format("%.6f", estimatedPositionWiFi5G[0]), String.format("%.6f", estimatedPositionWiFi5G[1])));
+        if (estimatedResultWiFi5G != null) {
+            textResultEstimateWiFi5G.setText(String.format("(%s, %s)", String.format("%.6f", estimatedResultWiFi5G.getPositionEstimated()[0]), String.format("%.6f", estimatedResultWiFi5G.getPositionEstimated()[1])));
         } else {
             textResultEstimateWiFi5G.setText("Out of Service");
         }
 
-        textEstimateReason.setText(estimateReason);
+        textEstimateReason.setText("");
+        textEstimateReason.setText(textEstimateReason.getText() + "\n\nWiFi 2Ghz\n");
+        if (estimatedResultWiFi2G != null) {
+            textEstimateReason.setText(textEstimateReason.getText() + estimatedResultWiFi2G.getEstimateReason().toString());
+        }
+        textEstimateReason.setText(textEstimateReason.getText() + "\nWiFi 5Ghz\n");
+        if (estimatedResultWiFi5G != null) {
+            textEstimateReason.setText(textEstimateReason.getText() + estimatedResultWiFi5G.getEstimateReason().toString());
+        }
         Toast.makeText(context, "Estimation finished.", Toast.LENGTH_SHORT).show();
     }
 
     private void scanFailure() {
         Toast.makeText(context, "Scan failed.", Toast.LENGTH_SHORT).show();
         wm.getScanResults();
+    }
+
+    private String GetDevicesUUID(Context context) {
+        final TelephonyManager tm = (TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE);
+        final String tmDevice, tmSerial, androidId;
+        if (ActivityCompat.checkSelfPermission(context, Manifest.permission.READ_PHONE_STATE) != PackageManager.PERMISSION_GRANTED) {
+            return null;
+        }
+        tmDevice = "" + tm.getDeviceId();
+        tmSerial = "" + tm.getSimSerialNumber();
+        androidId = "" + android.provider.Settings.Secure.getString(getActivity().getContentResolver(), android.provider.Settings.Secure.ANDROID_ID);
+        UUID deviceUuid = new UUID(androidId.hashCode(), ((long) tmDevice.hashCode() << 32) | tmSerial.hashCode());
+        String deviceId = deviceUuid.toString();
+        return deviceId;
     }
 }

@@ -17,4 +17,7 @@ public interface RetrofitAPI {
 
     @POST("/rssi")
     Call<PushResultModel> postData(@Query("pos_x") float x, @Query("pos_y") float y, @Body List<WiFiItem> data);
+
+    @POST("/fingerprint")
+    Call<PushResultModel> postData(@Query("pos_x") float pos_x, @Query("pos_y") float pos_y, @Query("est_x") float est_x, @Query("est_y") float est_y, @Query("UUID") String uuid, @Query("k") int K, @Query("threshold") int threshold);
 }
