@@ -41,6 +41,8 @@ public class EstimateFragment extends Fragment {
     Button buttonUpdateAllDatabase;
     Button buttonEstimate;
     Button buttonPushEstimationResult;
+    TextView editTextRealX;
+    TextView editTextRealY;
     TextView textResultEstimateWiFi2G;
     TextView textResultEstimateWiFi5G;
     TextView textEstimateReason;
@@ -87,6 +89,9 @@ public class EstimateFragment extends Fragment {
         buttonUpdateAllDatabase = rootView.findViewById(R.id.buttonUpdateAllDatabase);
         buttonEstimate = rootView.findViewById(R.id.buttonEstimate);
         buttonPushEstimationResult = rootView.findViewById(R.id.buttonPushEstimationResult);
+
+        editTextRealX = rootView.findViewById(R.id.editTextRealX);
+        editTextRealY = rootView.findViewById(R.id.editTextRealY);
         textResultEstimateWiFi2G = rootView.findViewById(R.id.textResultEstimateWiFi2G);
         textResultEstimateWiFi5G = rootView.findViewById(R.id.textResultEstimateWiFi5G);
         textEstimateReason = rootView.findViewById(R.id.textEstimateReason);
@@ -115,7 +120,66 @@ public class EstimateFragment extends Fragment {
         buttonPushEstimationResult.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                EstimatedResult copy2G = null;
+                EstimatedResult copy5G = null;
 
+                if (estimatedResultWiFi2G != null) {
+                    copy2G = new EstimatedResult(estimatedResultWiFi2G);
+                    copy2G.setUuid(copy2G.getUuid() + "-2G");
+                }
+
+                if (estimatedResultWiFi5G != null) {
+                    copy5G = new EstimatedResult(estimatedResultWiFi5G);
+                    copy5G.setUuid(copy5G.getUuid() + "-5G");
+                }
+
+                for (EstimatedResult er : new EstimatedResult[] {copy2G, copy5G}) {
+                    if (er == null) {
+                        continue;
+                    }
+
+                    try {
+                        double x = Double.parseDouble(editTextRealX.getText().toString());
+                        double y = Double.parseDouble(editTextRealY.getText().toString());
+                        er.setPositionRealX(x);
+                        er.setPositionRealY(y);
+                    }
+                    catch (NumberFormatException e) {
+                        er.setPositionRealX(-1);
+                        er.setPositionRealY(-1);
+                    }
+                    catch (NullPointerException e) {
+                        continue;
+                    }
+
+                    RetrofitAPI retrofit_api = RetrofitClient.getRetrofitAPI();
+                    retrofit_api.postData(er).enqueue(new Callback<PushResultModel>() {
+                        @Override
+                        public void onResponse(Call<PushResultModel> call, Response<PushResultModel> response) {
+                            PushResultModel r = response.body();
+                            if (r.getSuccess().equals("true")) {
+                                getActivity().runOnUiThread(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        Toast.makeText(context, "PUSH 성공", Toast.LENGTH_SHORT).show();
+                                    }
+                                });
+                            } else {
+                                getActivity().runOnUiThread(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        Toast.makeText(context, "PUSH 실패", Toast.LENGTH_SHORT).show();
+                                    }
+                                });
+                            }
+                        }
+
+                        @Override
+                        public void onFailure(Call<PushResultModel> call, Throwable t) {
+                            t.printStackTrace();
+                        }
+                    });
+                }
             }
         });
 
@@ -175,8 +239,8 @@ public class EstimateFragment extends Fragment {
         }
         imageview_map3.setEstimateSpot(result);
 
-        textEstimateReason.setText("");
-        textEstimateReason.setText(textEstimateReason.getText() + "\n\nWiFi 2Ghz\n");
+        textEstimateReason.setText(MainActivity.uuid + "\n" + MainActivity.building + ", " + MainActivity.ssid + "\n");
+        textEstimateReason.setText(textEstimateReason.getText() + "\nWiFi 2Ghz\n");
         if (estimatedResultWiFi2G != null) {
             textEstimateReason.setText(textEstimateReason.getText() + estimatedResultWiFi2G.getEstimateReason().toString());
         }
