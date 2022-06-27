@@ -32,19 +32,12 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
 
-        <androidx.constraintlayout.widget.Guideline
-            android:id="@+id/guidelineEstimateButton"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
-            app:layout_constraintGuide_percent="0.5" />
-
         <androidx.appcompat.widget.AppCompatButton
             android:id="@+id/buttonUpdateAllDatabase"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:text="UPDATE DB"
-            app:layout_constraintEnd_toStartOf="@+id/guidelineEstimateButton"
+            app:layout_constraintEnd_toStartOf="@+id/buttonEstimate"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
@@ -54,7 +47,7 @@
             android:layout_height="wrap_content"
             android:text="ESTIMATE"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="@+id/guidelineEstimateButton"
+            app:layout_constraintStart_toEndOf="@+id/buttonUpdateAllDatabase"
             app:layout_constraintTop_toTopOf="parent" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
@@ -68,18 +61,11 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/constraintLayoutSetRealLocation">
 
-        <androidx.constraintlayout.widget.Guideline
-            android:id="@+id/guidelineEstimateResult"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
-            app:layout_constraintGuide_percent="0.5" />
-
         <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/constraintLayoutEstimateWiFi2G"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            app:layout_constraintEnd_toStartOf="@+id/guidelineEstimateResult"
+            app:layout_constraintEnd_toStartOf="@+id/constraintLayoutEstimateWiFi5G"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent">
 
@@ -98,7 +84,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
                 android:text="(X (m), Y (m))"
-                android:textSize="14sp"
+                android:textSize="12sp"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/textTitleEstimateWiFi2G" />
@@ -108,7 +94,7 @@
             android:id="@+id/constraintLayoutEstimateWiFi5G"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintEnd_toStartOf="@+id/constraintLayoutEstimateBLE"
             app:layout_constraintStart_toEndOf="@+id/constraintLayoutEstimateWiFi2G"
             app:layout_constraintTop_toTopOf="parent">
 
@@ -127,10 +113,39 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
                 android:text="(X (m), Y (m))"
-                android:textSize="14sp"
+                android:textSize="12sp"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/textTitleEstimateWiFi5G" />
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/constraintLayoutEstimateBLE"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@+id/constraintLayoutEstimateWiFi5G"
+            app:layout_constraintTop_toTopOf="parent">
+
+            <TextView
+                android:id="@+id/textTitleEstimateBLE"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="BLE"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <TextView
+                android:id="@+id/textResultEstimateBLE"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:text="(X (m), Y (m))"
+                android:textSize="12sp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/textTitleEstimateBLE" />
         </androidx.constraintlayout.widget.ConstraintLayout>
     </androidx.constraintlayout.widget.ConstraintLayout>
 
