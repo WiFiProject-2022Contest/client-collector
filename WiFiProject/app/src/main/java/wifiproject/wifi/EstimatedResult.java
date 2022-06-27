@@ -3,7 +3,9 @@ package wifilocation.wifi;
 import com.google.gson.annotations.SerializedName;
 
 public class EstimatedResult {
+    @SerializedName("building")
     String building;
+    @SerializedName("SSID")
     String ssid;
     @SerializedName("pos_x")
     double positionRealX;
@@ -15,10 +17,14 @@ public class EstimatedResult {
     double positionEstimatedY;
     @SerializedName("uuid")
     String uuid;
+    @SerializedName("method")
+    String method;
     @SerializedName("k")
     int K;
     @SerializedName("threshold")
     int threshold;
+    @SerializedName("algorithmVersion")
+    int algorithmVersion;
     StringBuilder estimateReason;
 
     public EstimatedResult() {
@@ -29,8 +35,10 @@ public class EstimatedResult {
         this.positionEstimatedX = 0;
         this.positionEstimatedY = 0;
         this.uuid = null;
+        this.method = null;
         this.K = -1;
         this.threshold = -1;
+        this.algorithmVersion = 0;
         this.estimateReason = new StringBuilder();
     }
 
@@ -42,8 +50,10 @@ public class EstimatedResult {
         this.positionEstimatedX = estimatedResult.getPositionEstimatedX();
         this.positionEstimatedY = estimatedResult.getPositionEstimatedY();
         this.uuid = estimatedResult.getUuid();
+        this.method = estimatedResult.getMethod();
         this.K = estimatedResult.getK();
         this.threshold = estimatedResult.getThreshold();
+        this.algorithmVersion = estimatedResult.getAlgorithmVersion();
         this.estimateReason = estimatedResult.getEstimateReason();
     }
 
@@ -55,11 +65,13 @@ public class EstimatedResult {
         this.uuid = uuid;
     }
 
-    public EstimatedResult(String building, String ssid, String uuid, int K, int threshold) {
+    public EstimatedResult(String building, String ssid, String uuid, String method, int K, int threshold, int algorithmVersion) {
         this(building, ssid, uuid);
 
+        this.method = method;
         this.K = K;
         this.threshold = threshold;
+        this.algorithmVersion = algorithmVersion;
     }
 
     public String getBuilding() {
@@ -118,6 +130,14 @@ public class EstimatedResult {
         this.uuid = uuid;
     }
 
+    public String getMethod() {
+        return this.method;
+    }
+
+    public void setMethod(String method) {
+        this.method = method;
+    }
+
     public int getK() {
         return this.K;
     }
@@ -132,6 +152,14 @@ public class EstimatedResult {
 
     public void setThreshold(int threshold) {
         this.threshold = threshold;
+    }
+
+    public int getAlgorithmVersion() {
+        return this.algorithmVersion;
+    }
+
+    public void setAlgorithmVersion(int algorithmVersion) {
+        this.algorithmVersion = algorithmVersion;
     }
 
     public StringBuilder getEstimateReason() {
