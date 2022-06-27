@@ -222,8 +222,8 @@ public class EstimateFragment extends Fragment {
         }
 
         ArrayList<PointF> result = new ArrayList<PointF>();
-        estimatedResultWiFi2G = PositioningAlgorithm.run(userData, databaseAllData, MainActivity.building, MainActivity.ssid, MainActivity.uuid, 2);
-        estimatedResultWiFi5G = PositioningAlgorithm.run(userData, databaseAllData, MainActivity.building, MainActivity.ssid, MainActivity.uuid, 5);
+        estimatedResultWiFi2G = PositioningAlgorithm.run(userData, databaseAllData, MainActivity.building, MainActivity.ssid, MainActivity.uuid, "WiFi", 2);
+        estimatedResultWiFi5G = PositioningAlgorithm.run(userData, databaseAllData, MainActivity.building, MainActivity.ssid, MainActivity.uuid, "WiFi", 5);
 
         if (estimatedResultWiFi2G != null) {
             textResultEstimateWiFi2G.setText(String.format("(%s, %s)", String.format("%.6f", estimatedResultWiFi2G.getPositionEstimatedX()), String.format("%.6f", estimatedResultWiFi2G.getPositionEstimatedY())));

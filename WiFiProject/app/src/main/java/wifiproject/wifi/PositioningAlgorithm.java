@@ -25,7 +25,7 @@ public class PositioningAlgorithm {
     static int lastMinValidAPNum = 0;
     static int lastMinDbm = 0;
 
-    public static EstimatedResult run(List<WiFiItem> userData, List<WiFiItem> databaseData, String targetBuilding, String targetSSID, String targetUUID, int targetGHZ) {
+    public static EstimatedResult run(List<WiFiItem> userData, List<WiFiItem> databaseData, String targetBuilding, String targetSSID, String targetUUID, String method, int targetGHZ) {
         int K = 0;
         int minValidAPNum = 0;
         int minDbm = 0;
@@ -59,7 +59,7 @@ public class PositioningAlgorithm {
         }
 
         // 변환된 정보를 함수에 넣어서 추정값을 반환받습니다.
-        EstimatedResult estimatedResult = new EstimatedResult(targetBuilding, targetSSID, targetUUID, K, minDbm);
+        EstimatedResult estimatedResult = new EstimatedResult(targetBuilding, targetSSID, targetUUID, method + targetGHZ + "Ghz", K, minDbm, 1);
         double[] positionResult = estimate(tp.get(0), rp, K, minValidAPNum, minDbm, estimatedResult.getEstimateReason());
         if (positionResult == null) {
             return null;
