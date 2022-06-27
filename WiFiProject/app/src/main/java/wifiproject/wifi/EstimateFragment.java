@@ -120,7 +120,66 @@ public class EstimateFragment extends Fragment {
         buttonPushEstimationResult.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                EstimatedResult copy2G = null;
+                EstimatedResult copy5G = null;
 
+                if (estimatedResultWiFi2G != null) {
+                    copy2G = new EstimatedResult(estimatedResultWiFi2G);
+                    copy2G.setUuid(copy2G.getUuid() + "-2G");
+                }
+
+                if (estimatedResultWiFi5G != null) {
+                    copy5G = new EstimatedResult(estimatedResultWiFi5G);
+                    copy5G.setUuid(copy5G.getUuid() + "-5G");
+                }
+
+                for (EstimatedResult er : new EstimatedResult[] {copy2G, copy5G}) {
+                    if (er == null) {
+                        continue;
+                    }
+
+                    try {
+                        double x = Double.parseDouble(editTextRealX.getText().toString());
+                        double y = Double.parseDouble(editTextRealY.getText().toString());
+                        er.setPositionRealX(x);
+                        er.setPositionRealY(y);
+                    }
+                    catch (NumberFormatException e) {
+                        er.setPositionRealX(-1);
+                        er.setPositionRealY(-1);
+                    }
+                    catch (NullPointerException e) {
+                        continue;
+                    }
+
+                    RetrofitAPI retrofit_api = RetrofitClient.getRetrofitAPI();
+                    retrofit_api.postData(er).enqueue(new Callback<PushResultModel>() {
+                        @Override
+                        public void onResponse(Call<PushResultModel> call, Response<PushResultModel> response) {
+                            PushResultModel r = response.body();
+                            if (r.getSuccess().equals("true")) {
+                                getActivity().runOnUiThread(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        Toast.makeText(context, "PUSH 성공", Toast.LENGTH_SHORT).show();
+                                    }
+                                });
+                            } else {
+                                getActivity().runOnUiThread(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        Toast.makeText(context, "PUSH 실패", Toast.LENGTH_SHORT).show();
+                                    }
+                                });
+                            }
+                        }
+
+                        @Override
+                        public void onFailure(Call<PushResultModel> call, Throwable t) {
+                            t.printStackTrace();
+                        }
+                    });
+                }
             }
         });
 
