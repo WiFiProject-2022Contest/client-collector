@@ -45,12 +45,14 @@ public class EstimateFragment extends Fragment {
     TextView editTextRealY;
     TextView textResultEstimateWiFi2G;
     TextView textResultEstimateWiFi5G;
+    TextView textResultEstimateBLE;
     TextView textEstimateReason;
 
     SpotImageView imageview_map3;
     List<WiFiItem> databaseAllData = null;
     EstimatedResult estimatedResultWiFi2G;
     EstimatedResult estimatedResultWiFi5G;
+    EstimatedResult estimatedResultBLE;
 
     private BroadcastReceiver wifi_receiver = new BroadcastReceiver() {
         @Override
@@ -94,6 +96,7 @@ public class EstimateFragment extends Fragment {
         editTextRealY = rootView.findViewById(R.id.editTextRealY);
         textResultEstimateWiFi2G = rootView.findViewById(R.id.textResultEstimateWiFi2G);
         textResultEstimateWiFi5G = rootView.findViewById(R.id.textResultEstimateWiFi5G);
+        textResultEstimateBLE = rootView.findViewById(R.id.textResultEstimateBLE);
         textEstimateReason = rootView.findViewById(R.id.textEstimateReason);
         textEstimateReason.setMovementMethod(new ScrollingMovementMethod());
 
@@ -122,18 +125,21 @@ public class EstimateFragment extends Fragment {
             public void onClick(View view) {
                 EstimatedResult copy2G = null;
                 EstimatedResult copy5G = null;
+                EstimatedResult copyBLE = null;
 
                 if (estimatedResultWiFi2G != null) {
                     copy2G = new EstimatedResult(estimatedResultWiFi2G);
-                    copy2G.setUuid(copy2G.getUuid() + "-2G");
                 }
 
                 if (estimatedResultWiFi5G != null) {
                     copy5G = new EstimatedResult(estimatedResultWiFi5G);
-                    copy5G.setUuid(copy5G.getUuid() + "-5G");
                 }
 
-                for (EstimatedResult er : new EstimatedResult[] {copy2G, copy5G}) {
+                if (estimatedResultBLE != null) {
+                    copyBLE = new EstimatedResult(estimatedResultBLE);
+                }
+
+                for (EstimatedResult er : new EstimatedResult[] {copy2G, copy5G, copyBLE}) {
                     if (er == null) {
                         continue;
                     }
@@ -226,13 +232,13 @@ public class EstimateFragment extends Fragment {
         estimatedResultWiFi5G = PositioningAlgorithm.run(userData, databaseAllData, MainActivity.building, MainActivity.ssid, MainActivity.uuid, "WiFi", 5);
 
         if (estimatedResultWiFi2G != null) {
-            textResultEstimateWiFi2G.setText(String.format("(%s, %s)", String.format("%.6f", estimatedResultWiFi2G.getPositionEstimatedX()), String.format("%.6f", estimatedResultWiFi2G.getPositionEstimatedY())));
+            textResultEstimateWiFi2G.setText(String.format("(%s, %s)", String.format("%.2f", estimatedResultWiFi2G.getPositionEstimatedX()), String.format("%.2f", estimatedResultWiFi2G.getPositionEstimatedY())));
             result.add(new PointF((float)estimatedResultWiFi2G.getPositionEstimatedX(), (float)estimatedResultWiFi2G.getPositionEstimatedY()));
         } else {
             textResultEstimateWiFi2G.setText("Out of Service");
         }
         if (estimatedResultWiFi5G != null) {
-            textResultEstimateWiFi5G.setText(String.format("(%s, %s)", String.format("%.6f", estimatedResultWiFi5G.getPositionEstimatedX()), String.format("%.6f", estimatedResultWiFi5G.getPositionEstimatedY())));
+            textResultEstimateWiFi5G.setText(String.format("(%s, %s)", String.format("%.2f", estimatedResultWiFi5G.getPositionEstimatedX()), String.format("%.2f", estimatedResultWiFi5G.getPositionEstimatedY())));
             result.add(new PointF((float)estimatedResultWiFi5G.getPositionEstimatedX(), (float)estimatedResultWiFi5G.getPositionEstimatedY()));
         } else {
             textResultEstimateWiFi5G.setText("Out of Service");
@@ -247,6 +253,10 @@ public class EstimateFragment extends Fragment {
         textEstimateReason.setText(textEstimateReason.getText() + "\nWiFi 5Ghz\n");
         if (estimatedResultWiFi5G != null) {
             textEstimateReason.setText(textEstimateReason.getText() + estimatedResultWiFi5G.getEstimateReason().toString());
+        }
+        textEstimateReason.setText(textEstimateReason.getText() + "\nBLE\n");
+        if (estimatedResultBLE != null) {
+            textEstimateReason.setText(textEstimateReason.getText() + estimatedResultBLE.getEstimateReason().toString());
         }
         Toast.makeText(context, "Estimation finished.", Toast.LENGTH_SHORT).show();
     }
