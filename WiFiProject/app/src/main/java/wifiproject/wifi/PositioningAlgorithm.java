@@ -59,7 +59,7 @@ public class PositioningAlgorithm {
         }
 
         // 변환된 정보를 함수에 넣어서 추정값을 반환받습니다.
-        EstimatedResult estimatedResult = new EstimatedResult(targetBuilding, targetSSID, targetUUID, method + targetGHZ + "Ghz", K, minDbm, 1);
+        EstimatedResult estimatedResult = new EstimatedResult(targetBuilding, targetSSID, targetUUID, method + "-" + targetGHZ + "Ghz", K, minDbm, 1);
         double[] positionResult = estimate(tp.get(0), rp, K, minValidAPNum, minDbm, estimatedResult.getEstimateReason());
         if (positionResult == null) {
             return null;
