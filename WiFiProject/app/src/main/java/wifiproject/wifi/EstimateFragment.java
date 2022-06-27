@@ -41,6 +41,8 @@ public class EstimateFragment extends Fragment {
     Button buttonUpdateAllDatabase;
     Button buttonEstimate;
     Button buttonPushEstimationResult;
+    TextView editTextRealX;
+    TextView editTextRealY;
     TextView textResultEstimateWiFi2G;
     TextView textResultEstimateWiFi5G;
     TextView textEstimateReason;
@@ -87,6 +89,9 @@ public class EstimateFragment extends Fragment {
         buttonUpdateAllDatabase = rootView.findViewById(R.id.buttonUpdateAllDatabase);
         buttonEstimate = rootView.findViewById(R.id.buttonEstimate);
         buttonPushEstimationResult = rootView.findViewById(R.id.buttonPushEstimationResult);
+
+        editTextRealX = rootView.findViewById(R.id.editTextRealX);
+        editTextRealY = rootView.findViewById(R.id.editTextRealY);
         textResultEstimateWiFi2G = rootView.findViewById(R.id.textResultEstimateWiFi2G);
         textResultEstimateWiFi5G = rootView.findViewById(R.id.textResultEstimateWiFi5G);
         textEstimateReason = rootView.findViewById(R.id.textEstimateReason);
@@ -175,8 +180,8 @@ public class EstimateFragment extends Fragment {
         }
         imageview_map3.setEstimateSpot(result);
 
-        textEstimateReason.setText("");
-        textEstimateReason.setText(textEstimateReason.getText() + "\n\nWiFi 2Ghz\n");
+        textEstimateReason.setText(MainActivity.uuid + "\n" + MainActivity.building + ", " + MainActivity.ssid + "\n");
+        textEstimateReason.setText(textEstimateReason.getText() + "\nWiFi 2Ghz\n");
         if (estimatedResultWiFi2G != null) {
             textEstimateReason.setText(textEstimateReason.getText() + estimatedResultWiFi2G.getEstimateReason().toString());
         }
