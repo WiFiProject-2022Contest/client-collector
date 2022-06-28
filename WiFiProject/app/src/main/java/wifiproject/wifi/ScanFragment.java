@@ -1,8 +1,6 @@
 package wifilocation.wifi;
 
-import android.Manifest;
 import android.bluetooth.BluetoothAdapter;
-import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothManager;
 import android.bluetooth.le.BluetoothLeScanner;
 import android.bluetooth.le.ScanCallback;
@@ -10,22 +8,13 @@ import android.bluetooth.le.ScanFilter;
 import android.bluetooth.le.ScanSettings;
 import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.pm.PackageManager;
 import android.graphics.PointF;
 import android.net.wifi.ScanResult;
 import android.net.wifi.WifiManager;
 import android.os.Bundle;
-
-import androidx.core.app.ActivityCompat;
-import androidx.fragment.app.Fragment;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
-
-import android.telephony.TelephonyManager;
-import android.util.Log;
-import android.view.GestureDetector;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
@@ -34,14 +23,17 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
-import com.davemorrissey.labs.subscaleview.ImageSource;
-import com.davemorrissey.labs.subscaleview.SubsamplingScaleImageView;
+import android.app.AlertDialog;
+import androidx.fragment.app.Fragment;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
-import java.text.ParseException;
+import com.davemorrissey.labs.subscaleview.ImageSource;
+
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 
+import wifilocation.wifi.database.DatabaseHelper;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -65,12 +57,12 @@ public class ScanFragment extends Fragment {
     private BroadcastReceiver wifi_receiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-        boolean success = intent.getBooleanExtra(WifiManager.EXTRA_RESULTS_UPDATED, false);
-        if (success) {
-            scanSuccess();
-        } else {
-            scanFailure();
-        }
+            boolean success = intent.getBooleanExtra(WifiManager.EXTRA_RESULTS_UPDATED, false);
+            if (success) {
+                scanSuccess();
+            } else {
+                scanFailure();
+            }
         }
     };
 
@@ -87,7 +79,7 @@ public class ScanFragment extends Fragment {
         recyclerview_scanned.setLayoutManager(new LinearLayoutManager(context, LinearLayoutManager.VERTICAL, false));
 
         imageview_map = rootview.findViewById(R.id.imageViewMap);
-        switch(MainActivity.building) {
+        switch (MainActivity.building) {
             case "Library5F":
                 imageview_map.setImage(ImageSource.resource(R.drawable.skku_example));
                 break;
@@ -158,8 +150,7 @@ public class ScanFragment extends Fragment {
 
                     bleScanRequired = false;
                     bluetoothLeScanner.stopScan(bluetoothLeScanCallback);
-                }
-                catch (SecurityException e) {
+                } catch (SecurityException e) {
                     Toast.makeText(context, "블루투스 권한 실패", Toast.LENGTH_SHORT).show();
                     return;
                 }
@@ -200,11 +191,9 @@ public class ScanFragment extends Fragment {
                     bleScanRequired = true;
                     //bluetoothLeScanner.flushPendingScanResults(bluetoothLeScanCallback);
                     bluetoothLeScanner.startScan(new ArrayList<ScanFilter>(), bluetoothLeScanSettings, bluetoothLeScanCallback);
-                }
-                catch (SecurityException e) {
+                } catch (SecurityException e) {
                     Toast.makeText(context, "블루투스 권한 실패", Toast.LENGTH_SHORT).show();
-                }
-                catch (Exception e) {
+                } catch (Exception e) {
                     Toast.makeText(context, "블루투스 스캔 실패", Toast.LENGTH_SHORT).show();
                 }
             }
@@ -214,35 +203,31 @@ public class ScanFragment extends Fragment {
         button_push.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                RetrofitAPI retrofit_api = RetrofitClient.getRetrofitAPI();
-
-                retrofit_api.postData(wifiitem_adpater.getItems().get(0).getX(), wifiitem_adpater.getItems().get(0).getY(),
-                        wifiitem_adpater.getItems()).enqueue(new Callback<PushResultModel>() {
+                AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(getActivity());
+                alertDialogBuilder.setTitle("어디로 PUSH?");
+                alertDialogBuilder.setCancelable(true);
+                alertDialogBuilder.setPositiveButton("서버", new DialogInterface.OnClickListener() {
                     @Override
-                    public void onResponse(Call<PushResultModel> call, Response<PushResultModel> response) {
-                        PushResultModel r = response.body();
-                        if (r.getSuccess().equals("true")) {
-                            getActivity().runOnUiThread(new Runnable() {
-                                @Override
-                                public void run() {
-                                    Toast.makeText(context, "PUSH 성공", Toast.LENGTH_SHORT).show();
-                                }
-                            });
-                        } else {
-                            getActivity().runOnUiThread(new Runnable() {
-                                @Override
-                                public void run() {
-                                    Toast.makeText(context, "PUSH 실패", Toast.LENGTH_SHORT).show();
-                                }
-                            });
-                        }
-                    }
-
-                    @Override
-                    public void onFailure(Call<PushResultModel> call, Throwable t) {
-                        t.printStackTrace();
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        pushRemote();
                     }
                 });
+                alertDialogBuilder.setNegativeButton("로컬", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        pushLocal();
+                    }
+                });
+                alertDialogBuilder.setNeutralButton("둘 다", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        pushRemote();
+                        pushLocal();
+                    }
+                });
+
+                AlertDialog alertDialog = alertDialogBuilder.create();
+                alertDialog.show();
             }
         });
 
@@ -277,5 +262,42 @@ public class ScanFragment extends Fragment {
     private void scanFailure() {
         Toast.makeText(context, "WiFi Scan failed.", Toast.LENGTH_SHORT).show();
         wm.getScanResults();
+    }
+
+    private void pushRemote() {
+        RetrofitAPI retrofit_api = RetrofitClient.getRetrofitAPI();
+
+        retrofit_api.postData(wifiitem_adpater.getItems().get(0).getX(), wifiitem_adpater.getItems().get(0).getY(),
+                wifiitem_adpater.getItems()).enqueue(new Callback<PushResultModel>() {
+            @Override
+            public void onResponse(Call<PushResultModel> call, Response<PushResultModel> response) {
+                PushResultModel r = response.body();
+                if (r.getSuccess().equals("true")) {
+                    getActivity().runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            Toast.makeText(context, "서버에 PUSH 성공", Toast.LENGTH_SHORT).show();
+                        }
+                    });
+                } else {
+                    getActivity().runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            Toast.makeText(context, "서버에 PUSH 실패", Toast.LENGTH_SHORT).show();
+                        }
+                    });
+                }
+            }
+
+            @Override
+            public void onFailure(Call<PushResultModel> call, Throwable t) {
+                t.printStackTrace();
+            }
+        });
+    }
+
+    private void pushLocal() {
+        DatabaseHelper dbHelper = new DatabaseHelper(context);
+        dbHelper.insertIntoWiFiInfo(wifiitem_adpater.getItems());
     }
 }

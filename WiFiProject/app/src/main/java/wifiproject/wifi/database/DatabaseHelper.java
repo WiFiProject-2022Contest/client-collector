@@ -4,6 +4,7 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.util.Log;
 
 import androidx.annotation.Nullable;
 
@@ -17,16 +18,8 @@ import wifilocation.wifi.WiFiItem;
 /**
  * example)
  * DatabaseHelper dbHelper = new DatabaseHelper(context);
- * SQLiteDatabase db = dbHelper.getWritableDatabase(); or dbHelper.getReadableDatabase();
- *
- * dbHelper.getWritableDatabase(); 시에는
- * insertIntoWiFiInfo
- * searchFromWiFiInfo
- * 둘 다 사용 가능
- *
- * dbHelper.getReadableDatabase(); 시에는
- * searchFromWiFiInfo
- * 만 사용 가능
+ * dbHelper.insertIntoWiFiInfo(parameters);
+ * List<WiFiItem> items = dbHelper.searchFromWiFiInfo(parameters);
  *
  */
 public class DatabaseHelper extends SQLiteOpenHelper {
@@ -74,7 +67,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
     @Override
     public void onUpgrade(SQLiteDatabase sqLiteDatabase, int oldVersion, int newVersion) {
-        if (newVersion > VERSION) {
+        if (newVersion > 1) {
             sqLiteDatabase.execSQL("DROP TABLE IF EXISTS " + TABLE_WIFIINFO);
             onCreate(sqLiteDatabase);
         }
@@ -90,12 +83,13 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             return;
         }
         long currentTimeMillis = System.currentTimeMillis();
-        String sql = "insert " + TABLE_WIFIINFO + String.format(" (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s) ", POS_X, POS_Y, SSID, BSSID, FREQUENCY, LEVEL, DATE, UUID, BUILDING, METHOD) + " values ";
+        String sql = "insert into " + TABLE_WIFIINFO + String.format(" (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s) ", POS_X, POS_Y, SSID, BSSID, FREQUENCY, LEVEL, DATE, UUID, BUILDING, METHOD) + " values ";
         for (WiFiItem item : items) {
             sql += String.format("(%f, %f, '%s', '%s', %d, %d, %d, '%s', '%s', '%s'), ",
                     item.getX(), item.getY(), item.getSSID(), item.getBSSID(), item.getFrequency(), item.getRSSI(), currentTimeMillis, item.getUuid(), item.getBuilding(), item.getMethod());
         }
         sql = sql.substring(0, sql.length() - 2); // 끝에 붙은 ,<공백> 제거
+        Log.d(getClass().getName(), sql);
         SQLiteDatabase db = getReadableDatabase();
         db.execSQL(sql);
     }
@@ -158,5 +152,25 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                     cursor.getString(8)));
         }
         return result;
+    }
+
+    public void logAll() {
+        String sql = "select " + String.format("%s, %s, %s, %s, %s, %s, %s, %s, %s", POS_X, POS_Y, SSID, BSSID, LEVEL, FREQUENCY, UUID, BUILDING, METHOD) + " from " + TABLE_WIFIINFO;
+        SQLiteDatabase readableDatabase = getReadableDatabase();
+        Cursor cursor = readableDatabase.rawQuery(sql, null);
+        int count = cursor.getCount();
+        for (int i = 0; i < count; i++) {
+            cursor.moveToNext();
+            WiFiItem wiFiItem = new WiFiItem(cursor.getFloat(0),
+                    cursor.getFloat(1),
+                    cursor.getString(2),
+                    cursor.getString(3),
+                    cursor.getInt(4),
+                    cursor.getInt(5),
+                    cursor.getString(6),
+                    cursor.getString(7),
+                    cursor.getString(8));
+            Log.d(getClass().getName(), wiFiItem.toString());
+        }
     }
 }

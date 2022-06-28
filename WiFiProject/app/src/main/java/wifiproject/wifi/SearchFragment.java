@@ -1,14 +1,9 @@
 package wifilocation.wifi;
 
 import android.content.Context;
+import android.content.DialogInterface;
 import android.graphics.PointF;
 import android.os.Bundle;
-
-import androidx.fragment.app.DialogFragment;
-import androidx.fragment.app.Fragment;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
-
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
@@ -16,13 +11,19 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
-import android.widget.Toast;
+
+import android.app.AlertDialog;
+import androidx.fragment.app.DialogFragment;
+import androidx.fragment.app.Fragment;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.davemorrissey.labs.subscaleview.ImageSource;
 
 import java.util.ArrayList;
 import java.util.List;
 
+import wifilocation.wifi.database.DatabaseHelper;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -33,13 +34,14 @@ public class SearchFragment extends Fragment {
     WiFiItemAdapter wifiitem_adapter = new WiFiItemAdapter();
     EditText edittext_x2, edittext_y2;
     TextView textview_date;
+    Context context;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         ViewGroup rootview = (ViewGroup) inflater.inflate(R.layout.fragment_search, container, false);
 
-        Context context = getActivity().getApplicationContext();
+        context = getActivity().getApplicationContext();
         edittext_x2 = rootview.findViewById(R.id.editTextX2);
         edittext_y2 = rootview.findViewById(R.id.editTextY2);
 
@@ -103,27 +105,34 @@ public class SearchFragment extends Fragment {
                     target_x = null;
                     target_y = null;
                 }
-                RetrofitAPI retrofit_api = RetrofitClient.getRetrofitAPI();
-                // TODO: SSID 설정
-                retrofit_api.getData(MainActivity.building, MainActivity.ssid, target_x, target_y, textview_date_from.getText().toString(), textview_date_to.getText().toString()).enqueue(new Callback<List<WiFiItem>>() {
+                String from = textview_date_from.getText().toString();
+                String to = textview_date_to.getText().toString();
+                AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(getActivity());
+                alertDialogBuilder.setTitle("어디서 SEARCH?");
+                alertDialogBuilder.setCancelable(true);
+                Float finalTarget_x = target_x;
+                Float finalTarget_y = target_y;
+                alertDialogBuilder.setPositiveButton("서버", new DialogInterface.OnClickListener() {
                     @Override
-                    public void onResponse(Call<List<WiFiItem>> call, Response<List<WiFiItem>> response) {
-                        ArrayList<WiFiItem> items = new ArrayList<WiFiItem>();
-                        items.addAll(response.body());
-                        wifiitem_adapter.setItems(items);
-                        getActivity().runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                recyclerview_searched.setAdapter(wifiitem_adapter);
-                                imageview_map2.setSpot(items);
-                            }
-                        });
-                    }
-
-                    @Override
-                    public void onFailure(Call<List<WiFiItem>> call, Throwable t) {
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        searchRemote(finalTarget_x, finalTarget_y, from, to);
                     }
                 });
+                alertDialogBuilder.setNegativeButton("로컬", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        searchLocal(finalTarget_x, finalTarget_y, from, to);
+                    }
+                });
+                alertDialogBuilder.setNeutralButton("둘 다", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        searchBoth(finalTarget_x, finalTarget_y, from, to);
+                    }
+                });
+
+                AlertDialog alertDialog = alertDialogBuilder.create();
+                alertDialog.show();
             }
         });
 
@@ -132,5 +141,50 @@ public class SearchFragment extends Fragment {
 
     public void setDateText(String date) {
         textview_date.setText(date);
+    }
+
+    private List<WiFiItem> searchRemote(Float target_x, Float target_y, String from, String to) {
+        RetrofitAPI retrofit_api = RetrofitClient.getRetrofitAPI();
+        ArrayList<WiFiItem> items = new ArrayList<WiFiItem>();
+        retrofit_api.getData(MainActivity.building, MainActivity.ssid, target_x, target_y, from, to).enqueue(new Callback<List<WiFiItem>>() {
+            @Override
+            public void onResponse(Call<List<WiFiItem>> call, Response<List<WiFiItem>> response) {
+                items.addAll(response.body());
+                wifiitem_adapter.setItems(items);
+                getActivity().runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        recyclerview_searched.setAdapter(wifiitem_adapter);
+                        imageview_map2.setSpot(items);
+                    }
+                });
+            }
+
+            @Override
+            public void onFailure(Call<List<WiFiItem>> call, Throwable t) {
+            }
+        });
+        return items;
+    }
+
+    private List<WiFiItem> searchLocal(Float target_x, Float target_y, String from, String to) {
+        DatabaseHelper dbHelper = new DatabaseHelper(context);
+        ArrayList<WiFiItem> items = new ArrayList<WiFiItem>();
+        items.addAll(dbHelper.searchFromWiFiInfo(MainActivity.building, MainActivity.ssid, target_x, target_y, from.equals("") ? null : from, to.equals("") ? null : to));
+        wifiitem_adapter.setItems(items);
+        recyclerview_searched.setAdapter(wifiitem_adapter);
+        imageview_map2.setSpot(items);
+        dbHelper.logAll();
+        return items;
+    }
+
+    private void searchBoth(Float target_x, Float target_y, String from, String to) {
+        List<WiFiItem> items_ = searchRemote(target_x, target_y, from, to);
+        items_.addAll(searchLocal(target_x, target_y, from, to));
+        ArrayList<WiFiItem> items = new ArrayList<WiFiItem>();
+        items.addAll(items_);
+        wifiitem_adapter.setItems(items);
+        recyclerview_searched.setAdapter(wifiitem_adapter);
+        imageview_map2.setSpot(items);
     }
 }

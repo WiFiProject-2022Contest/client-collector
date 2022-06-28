@@ -105,4 +105,19 @@ public class WiFiItem {
     public void setMethod(String building) {
         this.method = method;
     }
+
+    @Override
+    public String toString() {
+        return "WiFiItem{" +
+                "x=" + x +
+                ", y=" + y +
+                ", SSID='" + SSID + '\'' +
+                ", BSSID='" + BSSID + '\'' +
+                ", RSSI=" + RSSI +
+                ", frequency=" + frequency +
+                ", uuid='" + uuid + '\'' +
+                ", building='" + building + '\'' +
+                ", method='" + method + '\'' +
+                '}';
+    }
 }
