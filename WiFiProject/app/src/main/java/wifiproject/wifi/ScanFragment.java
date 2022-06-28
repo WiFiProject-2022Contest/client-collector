@@ -58,7 +58,7 @@ public class ScanFragment extends Fragment {
     Context context;
     EditText edittext_x, edittext_y;
 
-    ArrayList<WiFiItem> items;
+    ArrayList<WiFiItem> items = new ArrayList<WiFiItem>();;
     boolean bleScanRequired = false;
 
     private BroadcastReceiver wifi_receiver = new BroadcastReceiver() {
@@ -183,7 +183,7 @@ public class ScanFragment extends Fragment {
         button_scan.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                items = new ArrayList<WiFiItem>();
+                items.clear();
 
                 try {
                     Float.parseFloat(edittext_x.getText().toString());
