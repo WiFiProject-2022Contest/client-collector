@@ -21,6 +21,7 @@ public class WiFiItem {
     String uuid;
     @SerializedName("building")
     String building;
+    @SerializedName("method")
     String method;
 
     public WiFiItem(float x, float y, String SSID, String BSSID, int RSSI, int frequency, String uuid, String building, String method) {
