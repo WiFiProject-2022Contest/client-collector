@@ -54,6 +54,7 @@ public class ScanFragment extends Fragment {
     BluetoothManager bm;
     BluetoothAdapter bluetoothAdapter;
     BluetoothLeScanner bluetoothLeScanner;
+    ScanSettings bluetoothLeScanSettings;
     ScanCallback bluetoothLeScanCallback;
     Context context;
     EditText edittext_x, edittext_y;
@@ -114,7 +115,7 @@ public class ScanFragment extends Fragment {
         bm = (BluetoothManager) context.getSystemService(Context.BLUETOOTH_SERVICE);
         bluetoothAdapter = bm.getAdapter();
         bluetoothLeScanner = bluetoothAdapter.getBluetoothLeScanner();
-        ScanSettings bluetoothLeScanSettings = new ScanSettings.Builder().setScanMode(ScanSettings.SCAN_MODE_LOW_LATENCY).setReportDelay(3000).build();
+        bluetoothLeScanSettings = new ScanSettings.Builder().setScanMode(ScanSettings.SCAN_MODE_LOW_LATENCY).setReportDelay(3000).build();
 
         bluetoothLeScanCallback = new ScanCallback() {
             /*
@@ -152,20 +153,15 @@ public class ScanFragment extends Fragment {
 
                     wifiitem_adpater.setItems(items);
                     recyclerview_scanned.setAdapter(wifiitem_adpater);
-                }
-                catch (SecurityException e) {
-                    Toast.makeText(context, "Security Exception", Toast.LENGTH_SHORT).show();
-                    return;
-                }
 
-                Toast.makeText(context, "BLE scan success", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(context, "BLE scan success", Toast.LENGTH_SHORT).show();
 
-                try {
                     bleScanRequired = false;
                     bluetoothLeScanner.stopScan(bluetoothLeScanCallback);
                 }
                 catch (SecurityException e) {
                     Toast.makeText(context, "블루투스 권한 실패", Toast.LENGTH_SHORT).show();
+                    return;
                 }
             }
 
@@ -196,6 +192,11 @@ public class ScanFragment extends Fragment {
                 wm.startScan();
 
                 try {
+                    bluetoothAdapter.enable();
+                    while (!bluetoothAdapter.isEnabled()) {
+                        Thread.sleep(100);
+                    }
+
                     bleScanRequired = true;
                     //bluetoothLeScanner.flushPendingScanResults(bluetoothLeScanCallback);
                     bluetoothLeScanner.startScan(new ArrayList<ScanFilter>(), bluetoothLeScanSettings, bluetoothLeScanCallback);
@@ -274,7 +275,7 @@ public class ScanFragment extends Fragment {
     }
 
     private void scanFailure() {
-        Toast.makeText(context, "Scan failed.", Toast.LENGTH_SHORT).show();
+        Toast.makeText(context, "WiFi Scan failed.", Toast.LENGTH_SHORT).show();
         wm.getScanResults();
     }
 }

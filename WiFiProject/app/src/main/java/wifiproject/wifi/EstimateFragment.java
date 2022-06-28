@@ -1,6 +1,12 @@
 package wifilocation.wifi;
 
 import android.Manifest;
+import android.bluetooth.BluetoothAdapter;
+import android.bluetooth.BluetoothManager;
+import android.bluetooth.le.BluetoothLeScanner;
+import android.bluetooth.le.ScanCallback;
+import android.bluetooth.le.ScanFilter;
+import android.bluetooth.le.ScanSettings;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -40,6 +46,12 @@ import retrofit2.Response;
 public class EstimateFragment extends Fragment {
     Context context;
     WifiManager wm;
+    BluetoothManager bm;
+    BluetoothAdapter bluetoothAdapter;
+    BluetoothLeScanner bluetoothLeScanner;
+    ScanSettings bluetoothLeScanSettings;
+    ScanCallback bluetoothLeScanCallback;
+
     Button buttonUpdateAllDatabase;
     Button buttonEstimate;
     Button buttonPushEstimationResult;
@@ -57,6 +69,7 @@ public class EstimateFragment extends Fragment {
     EstimatedResult estimatedResultBLE;
 
     CountDownLatch scanTaskCount;
+    boolean bleScanRequired = false;
 
     private BroadcastReceiver wifi_receiver = new BroadcastReceiver() {
         @Override
@@ -86,6 +99,61 @@ public class EstimateFragment extends Fragment {
 
         context = getActivity().getApplicationContext();
         wm = (WifiManager) context.getSystemService(Context.WIFI_SERVICE);
+        bm = (BluetoothManager) context.getSystemService(Context.BLUETOOTH_SERVICE);
+        bluetoothAdapter = bm.getAdapter();
+        bluetoothLeScanner = bluetoothAdapter.getBluetoothLeScanner();
+        bluetoothLeScanSettings = new ScanSettings.Builder().setScanMode(ScanSettings.SCAN_MODE_LOW_LATENCY).setReportDelay(3000).build();
+
+        bluetoothLeScanCallback = new ScanCallback() {
+            /*
+            @Override
+            public void onScanResult(int callbackType, android.bluetooth.le.ScanResult result) {
+                super.onScanResult(callbackType, result);
+            }
+             */
+
+            @Override
+            public void onBatchScanResults(List<android.bluetooth.le.ScanResult> results) {
+                super.onBatchScanResults(results);
+
+                if (!bleScanRequired) {
+                    return;
+                }
+                try {
+                    List<WiFiItem> userData = new ArrayList<>();
+
+                    for (android.bluetooth.le.ScanResult scanResult : results) {
+                        String SSID = scanResult.getScanRecord().getDeviceName();
+                        String BSSID = scanResult.getDevice().getAddress();
+                        int level = scanResult.getRssi();
+                        int frequency = 0;
+
+                        userData.add(new WiFiItem(0, 0, SSID, BSSID, level, frequency, MainActivity.uuid, MainActivity.building, "BLE"));
+                    }
+
+                    bleScanRequired = false;
+                    bluetoothLeScanner.stopScan(bluetoothLeScanCallback);
+
+                    //estimatedResultBLE = PositioningAlgorithm.run(userData, databaseAllData, MainActivity.building, MainActivity.ssid, MainActivity.uuid, "BLE", 2);
+                }
+                catch (SecurityException e) {
+                    Toast.makeText(context, "블루투스 권한 실패", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+                finally {
+                    scanTaskCount.countDown();
+                }
+            }
+
+            @Override
+            public void onScanFailed(int errorCode) {
+                super.onScanFailed(errorCode);
+                Toast.makeText(context, "BLE scan failed", Toast.LENGTH_SHORT).show();
+
+                scanTaskCount.countDown();
+            }
+        };
+
         IntentFilter filter = new IntentFilter();
         filter.addAction(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION);
         context.registerReceiver(wifi_receiver, filter);
@@ -253,9 +321,29 @@ public class EstimateFragment extends Fragment {
                 return null;
             }
 
-            scanTaskCount = new CountDownLatch(1);
+            scanTaskCount = new CountDownLatch(2);
 
             wm.startScan();
+
+            try {
+                bluetoothAdapter.enable();
+                while (!bluetoothAdapter.isEnabled()) {
+                    Thread.sleep(100);
+                }
+
+                bleScanRequired = true;
+                //bluetoothLeScanner.flushPendingScanResults(bluetoothLeScanCallback);
+                bluetoothLeScanner.startScan(new ArrayList<ScanFilter>(), bluetoothLeScanSettings, bluetoothLeScanCallback);
+            }
+            catch (SecurityException e) {
+                Toast.makeText(context, "블루투스 권한 실패", Toast.LENGTH_SHORT).show();
+                scanTaskCount.countDown();
+            }
+            catch (Exception e) {
+                Toast.makeText(context, "블루투스 실패", Toast.LENGTH_SHORT).show();
+                scanTaskCount.countDown();
+            }
+
             getActivity().runOnUiThread(new Runnable() {
                 public void run() {
                     Toast.makeText(context, "Scan started.", Toast.LENGTH_SHORT).show();
@@ -283,6 +371,12 @@ public class EstimateFragment extends Fragment {
                         result.add(new PointF((float)estimatedResultWiFi5G.getPositionEstimatedX(), (float)estimatedResultWiFi5G.getPositionEstimatedY()));
                     } else {
                         textResultEstimateWiFi5G.setText("Out of Service");
+                    }
+                    if (estimatedResultBLE != null) {
+                        textResultEstimateBLE.setText(String.format("(%s, %s)", String.format("%.2f", estimatedResultBLE.getPositionEstimatedX()), String.format("%.2f", estimatedResultBLE.getPositionEstimatedY())));
+                        result.add(new PointF((float)estimatedResultBLE.getPositionEstimatedX(), (float)estimatedResultBLE.getPositionEstimatedY()));
+                    } else {
+                        textResultEstimateBLE.setText("Out of Service");
                     }
                     imageview_map3.setEstimateSpot(result);
 
