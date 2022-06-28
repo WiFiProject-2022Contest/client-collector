@@ -1,6 +1,13 @@
 package wifilocation.wifi;
 
 import android.Manifest;
+import android.bluetooth.BluetoothAdapter;
+import android.bluetooth.BluetoothDevice;
+import android.bluetooth.BluetoothManager;
+import android.bluetooth.le.BluetoothLeScanner;
+import android.bluetooth.le.ScanCallback;
+import android.bluetooth.le.ScanFilter;
+import android.bluetooth.le.ScanSettings;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -44,8 +51,14 @@ public class ScanFragment extends Fragment {
     WiFiItemAdapter wifiitem_adpater = new WiFiItemAdapter();
     ScalableSpotImageView imageview_map;
     WifiManager wm;
+    BluetoothManager bm;
+    BluetoothAdapter bluetoothAdapter;
+    BluetoothLeScanner bluetoothLeScanner;
+    ScanCallback bluetoothLeScanCallback;
     Context context;
     EditText edittext_x, edittext_y;
+
+    boolean bleScanRequired = false;
 
     private BroadcastReceiver wifi_receiver = new BroadcastReceiver() {
         @Override
@@ -97,6 +110,58 @@ public class ScanFragment extends Fragment {
         });
 
         wm = (WifiManager) context.getSystemService(Context.WIFI_SERVICE);
+        bm = (BluetoothManager) context.getSystemService(Context.BLUETOOTH_SERVICE);
+        bluetoothAdapter = bm.getAdapter();
+        bluetoothLeScanner = bluetoothAdapter.getBluetoothLeScanner();
+        ScanSettings bluetoothLeScanSettings = new ScanSettings.Builder().setScanMode(ScanSettings.SCAN_MODE_LOW_LATENCY).setReportDelay(3000).build();
+
+        bluetoothLeScanCallback = new ScanCallback() {
+            /*
+            @Override
+            public void onScanResult(int callbackType, android.bluetooth.le.ScanResult result) {
+                super.onScanResult(callbackType, result);
+            }
+             */
+
+            @Override
+            public void onBatchScanResults(List<android.bluetooth.le.ScanResult> results) {
+                super.onBatchScanResults(results);
+
+                if (!bleScanRequired) {
+                    return;
+                }
+
+                for (android.bluetooth.le.ScanResult scanResult : results) {
+                    BluetoothDevice bluetoothDevice = scanResult.getDevice();
+                    try {
+                        String s = scanResult.getScanRecord().getDeviceName();
+                        if (s != null) {
+                        }
+                    }
+                    catch (SecurityException e) {
+                        Toast.makeText(context, "Security Exception", Toast.LENGTH_SHORT).show();
+                        return;
+                    }
+                }
+
+                Toast.makeText(context, "BLE scan success", Toast.LENGTH_SHORT).show();
+
+                try {
+                    bleScanRequired = false;
+                    bluetoothLeScanner.stopScan(bluetoothLeScanCallback);
+                }
+                catch (SecurityException e) {
+                    Toast.makeText(context, "블루투스 권한 실패", Toast.LENGTH_SHORT).show();
+                }
+            }
+
+            @Override
+            public void onScanFailed(int errorCode) {
+                super.onScanFailed(errorCode);
+                Toast.makeText(context, "BLE scan failed", Toast.LENGTH_SHORT).show();
+            }
+        };
+
         IntentFilter filter = new IntentFilter();
         filter.addAction(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION);
         context.registerReceiver(wifi_receiver, filter);
@@ -111,7 +176,20 @@ public class ScanFragment extends Fragment {
                     Toast.makeText(context, "올바른 형식의 좌표 입력 필요", Toast.LENGTH_SHORT).show();
                     return;
                 }
+
                 wm.startScan();
+
+                try {
+                    bleScanRequired = true;
+                    //bluetoothLeScanner.flushPendingScanResults(bluetoothLeScanCallback);
+                    bluetoothLeScanner.startScan(new ArrayList<ScanFilter>(), bluetoothLeScanSettings, bluetoothLeScanCallback);
+                }
+                catch (SecurityException e) {
+                    Toast.makeText(context, "블루투스 권한 실패", Toast.LENGTH_SHORT).show();
+                }
+                catch (Exception e) {
+                    Toast.makeText(context, "블루투스 스캔 실패", Toast.LENGTH_SHORT).show();
+                }
             }
         });
 
