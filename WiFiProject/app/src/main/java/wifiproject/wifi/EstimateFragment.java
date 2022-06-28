@@ -184,6 +184,14 @@ public class EstimateFragment extends Fragment {
         buttonEstimate.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                if (scanTaskCount != null) {
+                    // Release previous task
+                    while (scanTaskCount.getCount() > 0) {
+                        scanTaskCount.countDown();
+                    }
+                }
+                scanTaskCount = new CountDownLatch(2);
+
                 ScanResultTask scanResultTask = new ScanResultTask();
                 scanResultTask.execute();
             }
@@ -320,8 +328,6 @@ public class EstimateFragment extends Fragment {
                 });
                 return null;
             }
-
-            scanTaskCount = new CountDownLatch(2);
 
             wm.startScan();
 
