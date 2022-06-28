@@ -4,6 +4,8 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:focusable="true"
+    android:focusableInTouchMode="true"
     tools:context=".ScanFragment">
 
     <androidx.appcompat.widget.AppCompatButton
@@ -31,7 +33,6 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:ems="10"
-        android:focusable="false"
         android:hint="X 좌표(m)"
         android:inputType="numberDecimal"
         android:minHeight="48dp"
@@ -45,7 +46,6 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:ems="10"
-        android:focusable="false"
         android:hint="Y 좌표(m)"
         android:inputType="numberDecimal"
         android:minHeight="48dp"
