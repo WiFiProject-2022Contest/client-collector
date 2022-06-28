@@ -10,6 +10,7 @@ import android.graphics.Point;
 import android.graphics.PointF;
 import android.net.wifi.ScanResult;
 import android.net.wifi.WifiManager;
+import android.os.AsyncTask;
 import android.os.Bundle;
 
 import androidx.annotation.Nullable;
@@ -110,13 +111,8 @@ public class EstimateFragment extends Fragment {
         buttonEstimate.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if (databaseAllData == null) {
-                    Toast.makeText(context, "You should get database first.", Toast.LENGTH_SHORT).show();
-                    return;
-                }
-
-                wm.startScan();
-                Toast.makeText(context, "Scan started.", Toast.LENGTH_SHORT).show();
+                ScanResultTask scanResultTask = new ScanResultTask();
+                scanResultTask.execute();
             }
         });
 
@@ -220,7 +216,6 @@ public class EstimateFragment extends Fragment {
     private void scanSuccess() {
         // 스캔 리스트를 받아오는 과정
         List<ScanResult> results = wm.getScanResults();
-        Toast.makeText(context, "Scan finished.", Toast.LENGTH_SHORT).show();
 
         List<WiFiItem> userData = new ArrayList<>();
         for (ScanResult result : results) {
@@ -258,11 +253,43 @@ public class EstimateFragment extends Fragment {
         if (estimatedResultBLE != null) {
             textEstimateReason.setText(textEstimateReason.getText() + estimatedResultBLE.getEstimateReason().toString());
         }
-        Toast.makeText(context, "Estimation finished.", Toast.LENGTH_SHORT).show();
+
+        getActivity().runOnUiThread(new Runnable() {
+            public void run() {
+                Toast.makeText(context, "Estimation finished.", Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 
     private void scanFailure() {
-        Toast.makeText(context, "Scan failed.", Toast.LENGTH_SHORT).show();
+        getActivity().runOnUiThread(new Runnable() {
+            public void run() {
+                Toast.makeText(context, "Scan failed.", Toast.LENGTH_SHORT).show();
+            }
+        });
+
         wm.getScanResults();
+    }
+
+    private class ScanResultTask extends AsyncTask<Void, Void, Void> {
+        @Override
+        protected Void doInBackground(Void... voids) {
+            if (databaseAllData == null) {
+                getActivity().runOnUiThread(new Runnable() {
+                    public void run() {
+                        Toast.makeText(context, "You should get database first.", Toast.LENGTH_SHORT).show();
+                    }
+                });
+                return null;
+            }
+
+            wm.startScan();
+            getActivity().runOnUiThread(new Runnable() {
+                public void run() {
+                    Toast.makeText(context, "Scan started.", Toast.LENGTH_SHORT).show();
+                }
+            });
+            return null;
+        }
     }
 }
