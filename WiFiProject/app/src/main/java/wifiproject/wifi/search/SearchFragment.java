@@ -1,4 +1,4 @@
-package wifilocation.wifi;
+package wifilocation.wifi.search;
 
 import android.content.Context;
 import android.content.DialogInterface;
@@ -23,7 +23,14 @@ import com.davemorrissey.labs.subscaleview.ImageSource;
 import java.util.ArrayList;
 import java.util.List;
 
+import wifilocation.wifi.MainActivity;
+import wifilocation.wifi.R;
+import wifilocation.wifi.model.WiFiItem;
+import wifilocation.wifi.model.WiFiItemAdapter;
+import wifilocation.wifi.customviews.SpotImageView;
 import wifilocation.wifi.database.DatabaseHelper;
+import wifilocation.wifi.serverconnection.RetrofitAPI;
+import wifilocation.wifi.serverconnection.RetrofitClient;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -174,7 +181,6 @@ public class SearchFragment extends Fragment {
         wifiitem_adapter.setItems(items);
         recyclerview_searched.setAdapter(wifiitem_adapter);
         imageview_map2.setSpot(items);
-        dbHelper.logAll();
         return items;
     }
 

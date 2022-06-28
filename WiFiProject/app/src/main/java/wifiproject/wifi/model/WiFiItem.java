@@ -1,4 +1,4 @@
-package wifilocation.wifi;
+package wifilocation.wifi.model;
 
 import com.google.gson.annotations.SerializedName;
 

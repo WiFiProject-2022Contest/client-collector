@@ -13,7 +13,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 
-import wifilocation.wifi.WiFiItem;
+import wifilocation.wifi.model.WiFiItem;
 
 /**
  * example)
@@ -89,7 +89,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                     item.getX(), item.getY(), item.getSSID(), item.getBSSID(), item.getFrequency(), item.getRSSI(), currentTimeMillis, item.getUuid(), item.getBuilding(), item.getMethod());
         }
         sql = sql.substring(0, sql.length() - 2); // 끝에 붙은 ,<공백> 제거
-        Log.d(getClass().getName(), sql);
         SQLiteDatabase db = getReadableDatabase();
         db.execSQL(sql);
     }
@@ -129,7 +128,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         }
         // 위치 조건 추가
         if (x != null && y != null) {
-            sql += String.format(" and ((%s between %f and %f) and (%s between %f and %f)) ", POS_X, x - 1, x + 1, POS_Y, y - 1, y + 1);
+            sql += String.format(" and ((%s between %f and %f) and (%s between %f and %f))", POS_X, x - 1, x + 1, POS_Y, y - 1, y + 1);
         }
 
 

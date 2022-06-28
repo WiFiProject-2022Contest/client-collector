@@ -1,10 +1,10 @@
-package wifilocation.wifi;
+package wifilocation.wifi.serverconnection;
 
-import org.json.JSONObject;
-
-import java.util.ArrayList;
 import java.util.List;
 
+import wifilocation.wifi.estimate.EstimatedResult;
+import wifilocation.wifi.model.PushResultModel;
+import wifilocation.wifi.model.WiFiItem;
 import retrofit2.Call;
 import retrofit2.http.Body;
 import retrofit2.http.GET;

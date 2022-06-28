@@ -1,4 +1,4 @@
-package wifilocation.wifi;
+package wifilocation.wifi.scan;
 
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothManager;
@@ -33,7 +33,15 @@ import com.davemorrissey.labs.subscaleview.ImageSource;
 import java.util.ArrayList;
 import java.util.List;
 
+import wifilocation.wifi.MainActivity;
+import wifilocation.wifi.model.PushResultModel;
+import wifilocation.wifi.R;
+import wifilocation.wifi.model.WiFiItem;
+import wifilocation.wifi.model.WiFiItemAdapter;
+import wifilocation.wifi.customviews.ScalableSpotImageView;
 import wifilocation.wifi.database.DatabaseHelper;
+import wifilocation.wifi.serverconnection.RetrofitAPI;
+import wifilocation.wifi.serverconnection.RetrofitClient;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;

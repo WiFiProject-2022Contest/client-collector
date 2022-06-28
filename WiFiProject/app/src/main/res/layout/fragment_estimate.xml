@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".EstimateFragment">
+    tools:context=".estimate.EstimateFragment">
 
     <TextView
         android:id="@+id/textEstimateReason"
@@ -149,7 +149,7 @@
         </androidx.constraintlayout.widget.ConstraintLayout>
     </androidx.constraintlayout.widget.ConstraintLayout>
 
-    <wifilocation.wifi.SpotImageView
+    <wifilocation.wifi.customviews.SpotImageView
         android:id="@+id/imageViewMap3"
         android:layout_width="match_parent"
         android:layout_height="250dp"

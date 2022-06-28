@@ -1,4 +1,4 @@
-package wifilocation.wifi;
+package wifilocation.wifi.estimate;
 
 import java.util.HashMap;
 import java.util.Map;

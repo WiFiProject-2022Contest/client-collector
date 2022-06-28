@@ -1,6 +1,5 @@
-package wifilocation.wifi;
+package wifilocation.wifi.estimate;
 
-import android.Manifest;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothManager;
 import android.bluetooth.le.BluetoothLeScanner;
@@ -11,8 +10,6 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.pm.PackageManager;
-import android.graphics.Point;
 import android.graphics.PointF;
 import android.net.wifi.ScanResult;
 import android.net.wifi.WifiManager;
@@ -20,10 +17,8 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 
 import androidx.annotation.Nullable;
-import androidx.core.app.ActivityCompat;
 import androidx.fragment.app.Fragment;
 
-import android.telephony.TelephonyManager;
 import android.text.method.ScrollingMovementMethod;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -36,9 +31,15 @@ import com.davemorrissey.labs.subscaleview.ImageSource;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 import java.util.concurrent.CountDownLatch;
 
+import wifilocation.wifi.MainActivity;
+import wifilocation.wifi.R;
+import wifilocation.wifi.customviews.SpotImageView;
+import wifilocation.wifi.model.PushResultModel;
+import wifilocation.wifi.model.WiFiItem;
+import wifilocation.wifi.serverconnection.RetrofitAPI;
+import wifilocation.wifi.serverconnection.RetrofitClient;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -279,7 +280,6 @@ public class EstimateFragment extends Fragment {
     private void getDatabaseAllData() {
         // DB 전체 다 받아오기
         RetrofitAPI retrofit_api = RetrofitClient.getRetrofitAPI();
-        // TODO: SSID 설정
         retrofit_api.getData(MainActivity.building, MainActivity.ssid, null, null, null, null).enqueue(new Callback<List<WiFiItem>>() {
             @Override
             public void onResponse(Call<List<WiFiItem>> call, Response<List<WiFiItem>> response) {

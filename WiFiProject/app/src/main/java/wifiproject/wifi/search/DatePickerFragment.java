@@ -1,4 +1,4 @@
-package wifilocation.wifi;
+package wifilocation.wifi.search;
 
 import android.app.DatePickerDialog;
 import android.app.Dialog;
@@ -15,6 +15,8 @@ import android.view.ViewGroup;
 import android.widget.DatePicker;
 
 import java.util.Calendar;
+
+import wifilocation.wifi.MainActivity;
 
 public class DatePickerFragment extends DialogFragment
         implements DatePickerDialog.OnDateSetListener {

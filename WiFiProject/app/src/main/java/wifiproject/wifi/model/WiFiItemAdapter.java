@@ -1,4 +1,4 @@
-package wifilocation.wifi;
+package wifilocation.wifi.model;
 
 import android.view.LayoutInflater;
 import android.view.View;
@@ -9,6 +9,8 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.ArrayList;
+
+import wifilocation.wifi.R;
 
 public class WiFiItemAdapter extends RecyclerView.Adapter<WiFiItemAdapter.ViewHolder> {
     ArrayList<WiFiItem> items = new ArrayList<WiFiItem>();

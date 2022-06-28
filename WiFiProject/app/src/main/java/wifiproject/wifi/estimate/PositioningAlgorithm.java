@@ -1,10 +1,4 @@
-package wifilocation.wifi;
-
-import android.content.BroadcastReceiver;
-import android.content.Context;
-import android.content.Intent;
-import android.icu.text.AlphabeticIndex;
-import android.net.wifi.WifiManager;
+package wifilocation.wifi.estimate;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -14,6 +8,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+
+import wifilocation.wifi.model.WiFiItem;
 
 public class PositioningAlgorithm {
     static List<RecordPoint> tp;

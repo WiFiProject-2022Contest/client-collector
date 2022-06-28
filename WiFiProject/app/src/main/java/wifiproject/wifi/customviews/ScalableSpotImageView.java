@@ -1,4 +1,4 @@
-package wifilocation.wifi;
+package wifilocation.wifi.customviews;
 
 
 import android.content.Context;
@@ -12,6 +12,8 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.davemorrissey.labs.subscaleview.SubsamplingScaleImageView;
+
+import wifilocation.wifi.R;
 
 public class ScalableSpotImageView extends SubsamplingScaleImageView {
 

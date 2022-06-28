@@ -1,4 +1,4 @@
-package wifilocation.wifi;
+package wifilocation.wifi.serverconnection;
 
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;

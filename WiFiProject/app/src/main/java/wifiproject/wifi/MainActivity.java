@@ -17,11 +17,15 @@ import com.google.android.material.tabs.TabLayout;
 
 import java.util.UUID;
 
+import wifilocation.wifi.estimate.EstimateFragment;
+import wifilocation.wifi.scan.ScanFragment;
+import wifilocation.wifi.search.SearchFragment;
+
 public class MainActivity extends AppCompatActivity {
-    ScanFragment scan_fragment;
-    SearchFragment search_fragment;
-    EstimateFragment estimate_fragment;
-    int now_fragment = 1; // 1은 scan, 2는 search
+    public ScanFragment scan_fragment;
+    public SearchFragment search_fragment;
+    public EstimateFragment estimate_fragment;
+    public int now_fragment = 1; // 1은 scan, 2는 search
 
     public static String building = "Library5F";
     public static String ssid = "SKKU";

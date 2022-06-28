@@ -1,4 +1,4 @@
-package wifilocation.wifi;
+package wifilocation.wifi.customviews;
 
 
 import android.content.Context;
@@ -7,7 +7,6 @@ import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.PointF;
 import android.util.AttributeSet;
-import android.util.Log;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -16,6 +15,9 @@ import androidx.annotation.Nullable;
 import com.davemorrissey.labs.subscaleview.SubsamplingScaleImageView;
 
 import java.util.ArrayList;
+
+import wifilocation.wifi.R;
+import wifilocation.wifi.model.WiFiItem;
 
 public class SpotImageView extends SubsamplingScaleImageView {
 
