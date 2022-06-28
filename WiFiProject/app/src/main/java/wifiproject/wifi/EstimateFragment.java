@@ -31,6 +31,7 @@ import com.davemorrissey.labs.subscaleview.ImageSource;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.CountDownLatch;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -55,6 +56,8 @@ public class EstimateFragment extends Fragment {
     EstimatedResult estimatedResultWiFi5G;
     EstimatedResult estimatedResultBLE;
 
+    CountDownLatch scanTaskCount;
+
     private BroadcastReceiver wifi_receiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -64,6 +67,8 @@ public class EstimateFragment extends Fragment {
             } else {
                 scanFailure();
             }
+
+            scanTaskCount.countDown();
         }
     };
 
@@ -222,43 +227,8 @@ public class EstimateFragment extends Fragment {
             userData.add(new WiFiItem(0, 0, result.SSID, result.BSSID, result.level, result.frequency, MainActivity.uuid, MainActivity.building, "WiFi"));
         }
 
-        ArrayList<PointF> result = new ArrayList<PointF>();
         estimatedResultWiFi2G = PositioningAlgorithm.run(userData, databaseAllData, MainActivity.building, MainActivity.ssid, MainActivity.uuid, "WiFi", 2);
         estimatedResultWiFi5G = PositioningAlgorithm.run(userData, databaseAllData, MainActivity.building, MainActivity.ssid, MainActivity.uuid, "WiFi", 5);
-
-        if (estimatedResultWiFi2G != null) {
-            textResultEstimateWiFi2G.setText(String.format("(%s, %s)", String.format("%.2f", estimatedResultWiFi2G.getPositionEstimatedX()), String.format("%.2f", estimatedResultWiFi2G.getPositionEstimatedY())));
-            result.add(new PointF((float)estimatedResultWiFi2G.getPositionEstimatedX(), (float)estimatedResultWiFi2G.getPositionEstimatedY()));
-        } else {
-            textResultEstimateWiFi2G.setText("Out of Service");
-        }
-        if (estimatedResultWiFi5G != null) {
-            textResultEstimateWiFi5G.setText(String.format("(%s, %s)", String.format("%.2f", estimatedResultWiFi5G.getPositionEstimatedX()), String.format("%.2f", estimatedResultWiFi5G.getPositionEstimatedY())));
-            result.add(new PointF((float)estimatedResultWiFi5G.getPositionEstimatedX(), (float)estimatedResultWiFi5G.getPositionEstimatedY()));
-        } else {
-            textResultEstimateWiFi5G.setText("Out of Service");
-        }
-        imageview_map3.setEstimateSpot(result);
-
-        textEstimateReason.setText(MainActivity.uuid + "\n" + MainActivity.building + ", " + MainActivity.ssid + "\n");
-        textEstimateReason.setText(textEstimateReason.getText() + "\nWiFi 2Ghz\n");
-        if (estimatedResultWiFi2G != null) {
-            textEstimateReason.setText(textEstimateReason.getText() + estimatedResultWiFi2G.getEstimateReason().toString());
-        }
-        textEstimateReason.setText(textEstimateReason.getText() + "\nWiFi 5Ghz\n");
-        if (estimatedResultWiFi5G != null) {
-            textEstimateReason.setText(textEstimateReason.getText() + estimatedResultWiFi5G.getEstimateReason().toString());
-        }
-        textEstimateReason.setText(textEstimateReason.getText() + "\nBLE\n");
-        if (estimatedResultBLE != null) {
-            textEstimateReason.setText(textEstimateReason.getText() + estimatedResultBLE.getEstimateReason().toString());
-        }
-
-        getActivity().runOnUiThread(new Runnable() {
-            public void run() {
-                Toast.makeText(context, "Estimation finished.", Toast.LENGTH_SHORT).show();
-            }
-        });
     }
 
     private void scanFailure() {
@@ -283,12 +253,57 @@ public class EstimateFragment extends Fragment {
                 return null;
             }
 
+            scanTaskCount = new CountDownLatch(1);
+
             wm.startScan();
             getActivity().runOnUiThread(new Runnable() {
                 public void run() {
                     Toast.makeText(context, "Scan started.", Toast.LENGTH_SHORT).show();
                 }
             });
+
+            try {
+                scanTaskCount.await();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+                return null;
+            }
+
+            getActivity().runOnUiThread(new Runnable() {
+                public void run() {
+                    ArrayList<PointF> result = new ArrayList<PointF>();
+                    if (estimatedResultWiFi2G != null) {
+                        textResultEstimateWiFi2G.setText(String.format("(%s, %s)", String.format("%.2f", estimatedResultWiFi2G.getPositionEstimatedX()), String.format("%.2f", estimatedResultWiFi2G.getPositionEstimatedY())));
+                        result.add(new PointF((float)estimatedResultWiFi2G.getPositionEstimatedX(), (float)estimatedResultWiFi2G.getPositionEstimatedY()));
+                    } else {
+                        textResultEstimateWiFi2G.setText("Out of Service");
+                    }
+                    if (estimatedResultWiFi5G != null) {
+                        textResultEstimateWiFi5G.setText(String.format("(%s, %s)", String.format("%.2f", estimatedResultWiFi5G.getPositionEstimatedX()), String.format("%.2f", estimatedResultWiFi5G.getPositionEstimatedY())));
+                        result.add(new PointF((float)estimatedResultWiFi5G.getPositionEstimatedX(), (float)estimatedResultWiFi5G.getPositionEstimatedY()));
+                    } else {
+                        textResultEstimateWiFi5G.setText("Out of Service");
+                    }
+                    imageview_map3.setEstimateSpot(result);
+
+                    textEstimateReason.setText(MainActivity.uuid + "\n" + MainActivity.building + ", " + MainActivity.ssid + "\n");
+                    textEstimateReason.setText(textEstimateReason.getText() + "\nWiFi 2Ghz\n");
+                    if (estimatedResultWiFi2G != null) {
+                        textEstimateReason.setText(textEstimateReason.getText() + estimatedResultWiFi2G.getEstimateReason().toString());
+                    }
+                    textEstimateReason.setText(textEstimateReason.getText() + "\nWiFi 5Ghz\n");
+                    if (estimatedResultWiFi5G != null) {
+                        textEstimateReason.setText(textEstimateReason.getText() + estimatedResultWiFi5G.getEstimateReason().toString());
+                    }
+                    textEstimateReason.setText(textEstimateReason.getText() + "\nBLE\n");
+                    if (estimatedResultBLE != null) {
+                        textEstimateReason.setText(textEstimateReason.getText() + estimatedResultBLE.getEstimateReason().toString());
+                    }
+
+                    Toast.makeText(context, "Estimation finished.", Toast.LENGTH_SHORT).show();
+                }
+            });
+
             return null;
         }
     }
