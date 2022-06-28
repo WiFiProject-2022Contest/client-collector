@@ -58,6 +58,7 @@ public class ScanFragment extends Fragment {
     Context context;
     EditText edittext_x, edittext_y;
 
+    ArrayList<WiFiItem> items;
     boolean bleScanRequired = false;
 
     private BroadcastReceiver wifi_receiver = new BroadcastReceiver() {
@@ -131,17 +132,30 @@ public class ScanFragment extends Fragment {
                     return;
                 }
 
-                for (android.bluetooth.le.ScanResult scanResult : results) {
-                    BluetoothDevice bluetoothDevice = scanResult.getDevice();
-                    try {
-                        String s = scanResult.getScanRecord().getDeviceName();
-                        if (s != null) {
-                        }
+                float target_x, target_y;
+                try {
+                    target_x = Float.parseFloat(edittext_x.getText().toString());
+                    target_y = Float.parseFloat(edittext_y.getText().toString());
+                } catch (Exception e) {
+                    return;
+                }
+
+                try {
+                    for (android.bluetooth.le.ScanResult scanResult : results) {
+                        String SSID = scanResult.getScanRecord().getDeviceName();
+                        String BSSID = scanResult.getDevice().getAddress();
+                        int level = scanResult.getRssi();
+                        int frequency = 0;
+
+                        items.add(new WiFiItem(target_x, target_y, SSID, BSSID, level, frequency, MainActivity.uuid, MainActivity.building, "BLE"));
                     }
-                    catch (SecurityException e) {
-                        Toast.makeText(context, "Security Exception", Toast.LENGTH_SHORT).show();
-                        return;
-                    }
+
+                    wifiitem_adpater.setItems(items);
+                    recyclerview_scanned.setAdapter(wifiitem_adpater);
+                }
+                catch (SecurityException e) {
+                    Toast.makeText(context, "Security Exception", Toast.LENGTH_SHORT).show();
+                    return;
                 }
 
                 Toast.makeText(context, "BLE scan success", Toast.LENGTH_SHORT).show();
@@ -169,6 +183,8 @@ public class ScanFragment extends Fragment {
         button_scan.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                items = new ArrayList<WiFiItem>();
+
                 try {
                     Float.parseFloat(edittext_x.getText().toString());
                     Float.parseFloat(edittext_y.getText().toString());
@@ -241,7 +257,7 @@ public class ScanFragment extends Fragment {
 
     private void scanSuccess() {
         List<ScanResult> results = wm.getScanResults();
-        ArrayList<WiFiItem> items = new ArrayList<WiFiItem>();
+
         float target_x, target_y;
         try {
             target_x = Float.parseFloat(edittext_x.getText().toString());
@@ -251,7 +267,7 @@ public class ScanFragment extends Fragment {
         }
         for (ScanResult result : results) {
 //            if (!result.SSID.equalsIgnoreCase("WiFiLocation@PDA")) continue;
-            items.add(new WiFiItem(target_x, target_y, result.SSID, result.BSSID, result.level, result.frequency, MainActivity.uuid, MainActivity.building));
+            items.add(new WiFiItem(target_x, target_y, result.SSID, result.BSSID, result.level, result.frequency, MainActivity.uuid, MainActivity.building, "WiFi"));
         }
         wifiitem_adpater.setItems(items);
         recyclerview_scanned.setAdapter(wifiitem_adpater);

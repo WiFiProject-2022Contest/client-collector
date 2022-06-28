@@ -224,7 +224,7 @@ public class EstimateFragment extends Fragment {
 
         List<WiFiItem> userData = new ArrayList<>();
         for (ScanResult result : results) {
-            userData.add(new WiFiItem(0, 0, result.SSID, result.BSSID, result.level, result.frequency, MainActivity.uuid, MainActivity.building));
+            userData.add(new WiFiItem(0, 0, result.SSID, result.BSSID, result.level, result.frequency, MainActivity.uuid, MainActivity.building, "WiFi"));
         }
 
         ArrayList<PointF> result = new ArrayList<PointF>();

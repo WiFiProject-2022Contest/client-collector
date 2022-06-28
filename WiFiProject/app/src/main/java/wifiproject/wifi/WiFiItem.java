@@ -21,8 +21,9 @@ public class WiFiItem {
     String uuid;
     @SerializedName("building")
     String building;
+    String method;
 
-    public WiFiItem(float x, float y, String SSID, String BSSID, int RSSI, int frequency, String uuid, String building) {
+    public WiFiItem(float x, float y, String SSID, String BSSID, int RSSI, int frequency, String uuid, String building, String method) {
         this.x = x;
         this.y = y;
         this.SSID = SSID;
@@ -31,6 +32,7 @@ public class WiFiItem {
         this.frequency = frequency;
         this.uuid = uuid;
         this.building = building;
+        this.method = method;
     }
 
     public float getX() {
@@ -93,5 +95,13 @@ public class WiFiItem {
 
     public void setBuilding(String building) {
         this.building = building;
+    }
+
+    public String getMethod() {
+        return method;
+    }
+
+    public void setMethod(String building) {
+        this.method = method;
     }
 }

@@ -24,8 +24,6 @@
         android:text="PUSH"
         app:layout_constraintBottom_toBottomOf="@+id/editTextY"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.5"
-        app:layout_constraintStart_toEndOf="@+id/editTextX"
         app:layout_constraintTop_toTopOf="@+id/editTextX" />
 
     <EditText
@@ -33,11 +31,11 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:ems="10"
+        android:focusable="false"
         android:hint="X 좌표(m)"
-        android:inputType="text"
+        android:inputType="numberDecimal"
         android:minHeight="48dp"
-        app:layout_constraintEnd_toStartOf="@+id/buttonPush"
-        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintEnd_toStartOf="@+id/editTextY"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/buttonScan"
         tools:ignore="SpeakableTextPresentCheck" />
@@ -47,12 +45,13 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:ems="10"
+        android:focusable="false"
         android:hint="Y 좌표(m)"
-        android:inputType="text"
+        android:inputType="numberDecimal"
         android:minHeight="48dp"
         app:layout_constraintEnd_toStartOf="@+id/buttonPush"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/editTextX"
+        app:layout_constraintStart_toEndOf="@+id/editTextX"
+        app:layout_constraintTop_toBottomOf="@+id/buttonScan"
         tools:ignore="SpeakableTextPresentCheck" />
 
     <View
@@ -61,6 +60,7 @@
         android:layout_height="2dp"
         android:layout_marginTop="3dp"
         android:background="#DADADA"
+        android:focusable="auto"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/buttonPush" />
