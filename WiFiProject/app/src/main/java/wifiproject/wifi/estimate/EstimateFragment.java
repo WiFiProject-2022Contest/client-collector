@@ -131,6 +131,10 @@ public class EstimateFragment extends Fragment {
                         int level = scanResult.getRssi();
                         int frequency = 0;
 
+                        if (SSID == null) {
+                            SSID = "";
+                        }
+
                         userData.add(new WiFiItem(0, 0, SSID, BSSID, level, frequency, MainActivity.uuid, MainActivity.building, "BLE"));
                     }
 
