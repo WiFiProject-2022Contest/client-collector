@@ -42,13 +42,13 @@ public class PositioningAlgorithm {
         // 데이터베이스는 한 줄에 하나의 AP 정보가 담겨있기 때문에
         // 이것을 다루기 쉽게 한 측정 지점에서 측정한 RSSI 값들을 모두 하나의 RecordPoint 객체에 담아주는 과정입니다.
         // 데이터베이스에 대한 작업은 기존에 변환한 정보가 없거나 받은 데이터베이스 정보가 변경되었을 때만 시행합니다.
-        tp = getRecordPointList(userData, targetBuilding, targetSSID, targetGHZ, minDbm);
+        tp = getRecordPointList(userData, targetBuilding, method, targetSSID, targetGHZ, minDbm);
         if (tp.size() == 0) {
             return null;
         }
 
         if (databaseData != previousDatabase || lastGHZ != targetGHZ || lastK != K || lastMinValidAPNum != minValidAPNum || lastMinDbm != minDbm) {
-            rp = getRecordPointList(databaseData, targetBuilding, targetSSID, targetGHZ, minDbm);
+            rp = getRecordPointList(databaseData, targetBuilding, method, targetSSID, targetGHZ, minDbm);
 
             previousDatabase = databaseData;
             lastGHZ = targetGHZ;
@@ -68,14 +68,14 @@ public class PositioningAlgorithm {
         return estimatedResult;
     }
 
-    static List<RecordPoint> getRecordPointList(List<WiFiItem> databaseData, String targetBuilding, String targetSSID, int targetGHZ, int minDbm) {
+    static List<RecordPoint> getRecordPointList(List<WiFiItem> databaseData, String targetBuilding, String method, String targetSSID, int targetGHZ, int minDbm) {
         List<RecordPoint> rp = new ArrayList<>();
 
         for (WiFiItem databaseRow : databaseData) {
             RecordPoint workingRP = null;
 
-            if (databaseRow.getBuilding().equals(targetBuilding) == false || databaseRow.getSSID().equals(targetSSID) == false
-                                || databaseRow.getFrequency() / 1000 != targetGHZ || databaseRow.getRSSI() < minDbm) {
+            if (!targetBuilding.equals(databaseRow.getBuilding()) || !method.equals(databaseRow.getMethod()) || targetSSID != null && !targetSSID.equals(databaseRow.getSSID())
+                                || databaseRow.getFrequency() != 0 && databaseRow.getFrequency() / 1000 != targetGHZ || databaseRow.getRSSI() < minDbm) {
                 continue;
             }
 

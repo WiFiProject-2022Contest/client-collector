@@ -135,7 +135,7 @@ public class EstimateFragment extends Fragment {
                     bleScanRequired = false;
                     bluetoothLeScanner.stopScan(bluetoothLeScanCallback);
 
-                    //estimatedResultBLE = PositioningAlgorithm.run(userData, databaseAllData, MainActivity.building, MainActivity.ssid, MainActivity.uuid, "BLE", 2);
+                    estimatedResultBLE = PositioningAlgorithm.run(userData, databaseAllData, MainActivity.building, MainActivity.ssid, MainActivity.uuid, "BLE", 2);
                 }
                 catch (SecurityException e) {
                     estimatedResultBLE = null;
