@@ -138,6 +138,8 @@ public class EstimateFragment extends Fragment {
                     //estimatedResultBLE = PositioningAlgorithm.run(userData, databaseAllData, MainActivity.building, MainActivity.ssid, MainActivity.uuid, "BLE", 2);
                 }
                 catch (SecurityException e) {
+                    estimatedResultBLE = null;
+
                     Toast.makeText(context, "블루투스 권한 실패", Toast.LENGTH_SHORT).show();
                     return;
                 }

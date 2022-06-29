@@ -26,14 +26,17 @@ public class PositioningAlgorithm {
         int minValidAPNum = 0;
         int minDbm = 0;
 
-        if (targetGHZ == 2) {
+        if (method.equals("WiFi") && targetGHZ == 2) {
             K = 5;
             minValidAPNum = 1;
             minDbm = -50; // 55도 가능
-        } else if (targetGHZ == 5) {
+        } else if (method.equals("WiFi") && targetGHZ == 5) {
             K = 3;
             minValidAPNum = 1;
             minDbm = -50; // 65도 가능
+        }
+        else {
+            return null;
         }
 
         // 데이터베이스는 한 줄에 하나의 AP 정보가 담겨있기 때문에
