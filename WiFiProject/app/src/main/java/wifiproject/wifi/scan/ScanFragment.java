@@ -212,7 +212,7 @@ public class ScanFragment extends Fragment {
             @Override
             public void onClick(View view) {
                 AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(getActivity());
-                alertDialogBuilder.setTitle("어디로 PUSH?");
+                alertDialogBuilder.setTitle("데이터베이스 선택");
                 alertDialogBuilder.setCancelable(true);
                 alertDialogBuilder.setPositiveButton("서버", new DialogInterface.OnClickListener() {
                     @Override
@@ -226,7 +226,7 @@ public class ScanFragment extends Fragment {
                         pushLocal();
                     }
                 });
-                alertDialogBuilder.setNeutralButton("둘 다", new DialogInterface.OnClickListener() {
+                alertDialogBuilder.setNeutralButton("모두", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i) {
                         pushRemote();
