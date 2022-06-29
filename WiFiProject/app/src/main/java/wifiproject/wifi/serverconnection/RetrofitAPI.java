@@ -19,5 +19,5 @@ public interface RetrofitAPI {
     Call<PushResultModel> postData(@Query("pos_x") float x, @Query("pos_y") float y, @Body List<WiFiItem> data);
 
     @POST("/fingerprint")
-    Call<PushResultModel> postData(@Body EstimatedResult estimatedResult);
+    Call<PushResultModel> postData(@Body List<EstimatedResult> data);
 }

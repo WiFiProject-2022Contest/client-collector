@@ -30,6 +30,7 @@ import android.widget.Toast;
 import com.davemorrissey.labs.subscaleview.ImageSource;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
 
@@ -219,6 +220,7 @@ public class EstimateFragment extends Fragment {
                     copyBLE = new EstimatedResult(estimatedResultBLE);
                 }
 
+                List<EstimatedResult> listForPost = new ArrayList<>();
                 for (EstimatedResult er : new EstimatedResult[] {copy2G, copy5G, copyBLE}) {
                     if (er == null) {
                         continue;
@@ -238,34 +240,36 @@ public class EstimateFragment extends Fragment {
                         continue;
                     }
 
-                    RetrofitAPI retrofit_api = RetrofitClient.getRetrofitAPI();
-                    retrofit_api.postData(er).enqueue(new Callback<PushResultModel>() {
-                        @Override
-                        public void onResponse(Call<PushResultModel> call, Response<PushResultModel> response) {
-                            PushResultModel r = response.body();
-                            if (r.getSuccess().equals("true")) {
-                                getActivity().runOnUiThread(new Runnable() {
-                                    @Override
-                                    public void run() {
-                                        Toast.makeText(context, "PUSH 성공", Toast.LENGTH_SHORT).show();
-                                    }
-                                });
-                            } else {
-                                getActivity().runOnUiThread(new Runnable() {
-                                    @Override
-                                    public void run() {
-                                        Toast.makeText(context, "PUSH 실패", Toast.LENGTH_SHORT).show();
-                                    }
-                                });
-                            }
-                        }
-
-                        @Override
-                        public void onFailure(Call<PushResultModel> call, Throwable t) {
-                            t.printStackTrace();
-                        }
-                    });
+                    listForPost.add(er);
                 }
+
+                RetrofitAPI retrofit_api = RetrofitClient.getRetrofitAPI();
+                retrofit_api.postData(listForPost).enqueue(new Callback<PushResultModel>() {
+                    @Override
+                    public void onResponse(Call<PushResultModel> call, Response<PushResultModel> response) {
+                        PushResultModel r = response.body();
+                        if (r.getSuccess().equals("true")) {
+                            getActivity().runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    Toast.makeText(context, "PUSH 성공", Toast.LENGTH_SHORT).show();
+                                }
+                            });
+                        } else {
+                            getActivity().runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    Toast.makeText(context, "PUSH 실패", Toast.LENGTH_SHORT).show();
+                                }
+                            });
+                        }
+                    }
+
+                    @Override
+                    public void onFailure(Call<PushResultModel> call, Throwable t) {
+                        t.printStackTrace();
+                    }
+                });
             }
         });
 
