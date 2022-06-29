@@ -115,7 +115,7 @@ public class SearchFragment extends Fragment {
                 String from = textview_date_from.getText().toString();
                 String to = textview_date_to.getText().toString();
                 AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(getActivity());
-                alertDialogBuilder.setTitle("어디서 SEARCH?");
+                alertDialogBuilder.setTitle("데이터베이스 선택");
                 alertDialogBuilder.setCancelable(true);
                 Float finalTarget_x = target_x;
                 Float finalTarget_y = target_y;
@@ -131,7 +131,7 @@ public class SearchFragment extends Fragment {
                         searchLocal(finalTarget_x, finalTarget_y, from, to);
                     }
                 });
-                alertDialogBuilder.setNeutralButton("둘 다", new DialogInterface.OnClickListener() {
+                alertDialogBuilder.setNeutralButton("모두", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i) {
                         searchBoth(finalTarget_x, finalTarget_y, from, to);
