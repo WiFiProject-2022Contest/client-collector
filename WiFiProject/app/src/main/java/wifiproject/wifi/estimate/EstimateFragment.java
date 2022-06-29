@@ -30,7 +30,6 @@ import android.widget.Toast;
 import com.davemorrissey.labs.subscaleview.ImageSource;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
 
@@ -92,7 +91,7 @@ public class EstimateFragment extends Fragment {
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        getDatabaseAllData();
+        getRemote();
     }
 
     @Override
@@ -186,7 +185,7 @@ public class EstimateFragment extends Fragment {
         buttonUpdateAllDatabase.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                getDatabaseAllData();
+                getRemote();
             }
         });
 
@@ -248,33 +247,7 @@ public class EstimateFragment extends Fragment {
                     listForPost.add(er);
                 }
 
-                RetrofitAPI retrofit_api = RetrofitClient.getRetrofitAPI();
-                retrofit_api.postData(listForPost).enqueue(new Callback<PushResultModel>() {
-                    @Override
-                    public void onResponse(Call<PushResultModel> call, Response<PushResultModel> response) {
-                        PushResultModel r = response.body();
-                        if (r.getSuccess().equals("true")) {
-                            getActivity().runOnUiThread(new Runnable() {
-                                @Override
-                                public void run() {
-                                    Toast.makeText(context, "PUSH 성공", Toast.LENGTH_SHORT).show();
-                                }
-                            });
-                        } else {
-                            getActivity().runOnUiThread(new Runnable() {
-                                @Override
-                                public void run() {
-                                    Toast.makeText(context, "PUSH 실패", Toast.LENGTH_SHORT).show();
-                                }
-                            });
-                        }
-                    }
-
-                    @Override
-                    public void onFailure(Call<PushResultModel> call, Throwable t) {
-                        t.printStackTrace();
-                    }
-                });
+                pushRemote(listForPost);
             }
         });
 
@@ -288,7 +261,7 @@ public class EstimateFragment extends Fragment {
         context.unregisterReceiver(wifi_receiver);
     }
 
-    private void getDatabaseAllData() {
+    private void getRemote() {
         // DB 전체 다 받아오기
         RetrofitAPI retrofit_api_wifi = RetrofitClient.getRetrofitAPI();
         retrofit_api_wifi.getData(MainActivity.building, MainActivity.ssid, null, null, null, null).enqueue(new Callback<List<WiFiItem>>() {
@@ -315,6 +288,36 @@ public class EstimateFragment extends Fragment {
             @Override
             public void onFailure(Call<List<WiFiItem>> call, Throwable t) {
                 Toast.makeText(context, "Database failed.", Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+    private void pushRemote(List<EstimatedResult> listForPost) {
+        RetrofitAPI retrofit_api = RetrofitClient.getRetrofitAPI();
+        retrofit_api.postData(listForPost).enqueue(new Callback<PushResultModel>() {
+            @Override
+            public void onResponse(Call<PushResultModel> call, Response<PushResultModel> response) {
+                PushResultModel r = response.body();
+                if (r.getSuccess().equals("true")) {
+                    getActivity().runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            Toast.makeText(context, "PUSH 성공", Toast.LENGTH_SHORT).show();
+                        }
+                    });
+                } else {
+                    getActivity().runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            Toast.makeText(context, "PUSH 실패", Toast.LENGTH_SHORT).show();
+                        }
+                    });
+                }
+            }
+
+            @Override
+            public void onFailure(Call<PushResultModel> call, Throwable t) {
+                t.printStackTrace();
             }
         });
     }

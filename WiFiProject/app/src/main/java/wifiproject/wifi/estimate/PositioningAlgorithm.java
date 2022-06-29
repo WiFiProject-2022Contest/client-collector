@@ -34,7 +34,7 @@ public class PositioningAlgorithm {
         } else if (method.equals("WiFi") && targetGHZ == 5) {
             K = 7;
             minValidAPNum = 1;
-            minDbm = -45;
+            minDbm = -55;
         }
         else if (method.equals("BLE") && targetGHZ == 2) {
             K = 3;
