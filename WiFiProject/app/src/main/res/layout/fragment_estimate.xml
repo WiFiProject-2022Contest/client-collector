@@ -33,10 +33,10 @@
         app:layout_constraintTop_toTopOf="parent">
 
         <androidx.appcompat.widget.AppCompatButton
-            android:id="@+id/buttonUpdateAllDatabase"
+            android:id="@+id/buttonGetAllDatabase"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:text="UPDATE DB"
+            android:text="GET FINGERPRINT"
             app:layout_constraintEnd_toStartOf="@+id/buttonEstimate"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
@@ -47,7 +47,7 @@
             android:layout_height="wrap_content"
             android:text="ESTIMATE"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toEndOf="@+id/buttonUpdateAllDatabase"
+            app:layout_constraintStart_toEndOf="@+id/buttonGetAllDatabase"
             app:layout_constraintTop_toTopOf="parent" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>

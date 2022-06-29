@@ -56,7 +56,7 @@ public class EstimateFragment extends Fragment {
     ScanSettings bluetoothLeScanSettings;
     ScanCallback bluetoothLeScanCallback;
 
-    Button buttonUpdateAllDatabase;
+    Button buttonGetAllDatabase;
     Button buttonEstimate;
     Button buttonPushEstimationResult;
     TextView editTextRealX;
@@ -173,7 +173,7 @@ public class EstimateFragment extends Fragment {
         imageview_map3 = rootView.findViewById(R.id.imageViewMap3);
         imageview_map3.setImage(ImageSource.resource(R.drawable.skku_example));
 
-        buttonUpdateAllDatabase = rootView.findViewById(R.id.buttonUpdateAllDatabase);
+        buttonGetAllDatabase = rootView.findViewById(R.id.buttonGetAllDatabase);
         buttonEstimate = rootView.findViewById(R.id.buttonEstimate);
         buttonPushEstimationResult = rootView.findViewById(R.id.buttonPushEstimationResult);
 
@@ -185,7 +185,7 @@ public class EstimateFragment extends Fragment {
         textEstimateReason = rootView.findViewById(R.id.textEstimateReason);
         textEstimateReason.setMovementMethod(new ScrollingMovementMethod());
 
-        buttonUpdateAllDatabase.setOnClickListener(new View.OnClickListener() {
+        buttonGetAllDatabase.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(getActivity());
