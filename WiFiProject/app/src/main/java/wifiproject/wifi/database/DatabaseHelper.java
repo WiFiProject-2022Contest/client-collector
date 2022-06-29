@@ -38,6 +38,19 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     public static final String BUILDING = "building";
     public static final String METHOD = "method";
 
+    public static final String TABLE_FINGERPRINT = "fingerprint";
+    // POS_X
+    // POS_Y
+    // UUID
+    // DATE
+    public static final String EST_X = "est_x";
+    public static final String EST_Y = "est_y";
+    public static final String K = "k";
+    public static final String THRESHOLD = "threshold";
+    // BUILDING
+    // SSID
+    public static final String ALGORITHM_VERSION = "algorithmVersion";
+    // METHOD
 
     public DatabaseHelper(@Nullable Context context) {
         super(context, DBNAME, null, VERSION);
@@ -57,6 +70,22 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 DATE + " integer, " +
                 UUID + " text, " +
                 BUILDING + " text, " +
+                METHOD + " text)");
+        
+        // fingerprint 테이블 생성
+        sqLiteDatabase.execSQL("create table if not exists " + TABLE_FINGERPRINT + " (" +
+                "id integer PRIMARY KEY autoincrement, " +
+                POS_X + " real, " +
+                POS_Y + " real, " +
+                UUID + " text, " +
+                DATE + " integer, " +
+                EST_X + " real, " +
+                EST_Y + " real, " +
+                K + " integer, " +
+                THRESHOLD + " integer, " +
+                BUILDING + " text, " +
+                SSID + " text, " +
+                ALGORITHM_VERSION + " integer, " +
                 METHOD + " text)");
     }
 
@@ -153,7 +182,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         return result;
     }
 
-    public void logAll() {
+    public void logAllWiFiInfo() {
         String sql = "select " + String.format("%s, %s, %s, %s, %s, %s, %s, %s, %s", POS_X, POS_Y, SSID, BSSID, LEVEL, FREQUENCY, UUID, BUILDING, METHOD) + " from " + TABLE_WIFIINFO;
         SQLiteDatabase readableDatabase = getReadableDatabase();
         Cursor cursor = readableDatabase.rawQuery(sql, null);
