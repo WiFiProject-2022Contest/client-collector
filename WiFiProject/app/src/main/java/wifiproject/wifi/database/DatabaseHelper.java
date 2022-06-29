@@ -13,6 +13,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 
+import wifilocation.wifi.estimate.EstimatedResult;
 import wifilocation.wifi.model.WiFiItem;
 
 /**
@@ -38,6 +39,19 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     public static final String BUILDING = "building";
     public static final String METHOD = "method";
 
+    public static final String TABLE_FINGERPRINT = "fingerprint";
+    // POS_X
+    // POS_Y
+    // UUID
+    // DATE
+    public static final String EST_X = "est_x";
+    public static final String EST_Y = "est_y";
+    public static final String K = "k";
+    public static final String THRESHOLD = "threshold";
+    // BUILDING
+    // SSID
+    public static final String ALGORITHM_VERSION = "algorithmVersion";
+    // METHOD
 
     public DatabaseHelper(@Nullable Context context) {
         super(context, DBNAME, null, VERSION);
@@ -58,6 +72,22 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 UUID + " text, " +
                 BUILDING + " text, " +
                 METHOD + " text)");
+        
+        // fingerprint 테이블 생성
+        sqLiteDatabase.execSQL("create table if not exists " + TABLE_FINGERPRINT + " (" +
+                "id integer PRIMARY KEY autoincrement, " +
+                POS_X + " real, " +
+                POS_Y + " real, " +
+                UUID + " text, " +
+                DATE + " integer, " +
+                EST_X + " real, " +
+                EST_Y + " real, " +
+                K + " integer, " +
+                THRESHOLD + " integer, " +
+                BUILDING + " text, " +
+                SSID + " text, " +
+                ALGORITHM_VERSION + " integer, " +
+                METHOD + " text)");
     }
 
     @Override
@@ -69,6 +99,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     public void onUpgrade(SQLiteDatabase sqLiteDatabase, int oldVersion, int newVersion) {
         if (newVersion > 1) {
             sqLiteDatabase.execSQL("DROP TABLE IF EXISTS " + TABLE_WIFIINFO);
+            sqLiteDatabase.execSQL("DROP TABLE IF EXISTS " + TABLE_FINGERPRINT);
             onCreate(sqLiteDatabase);
         }
     }
@@ -89,7 +120,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                     item.getX(), item.getY(), item.getSSID(), item.getBSSID(), item.getFrequency(), item.getRSSI(), currentTimeMillis, item.getUuid(), item.getBuilding(), item.getMethod());
         }
         sql = sql.substring(0, sql.length() - 2); // 끝에 붙은 ,<공백> 제거
-        SQLiteDatabase db = getReadableDatabase();
+        SQLiteDatabase db = getWritableDatabase();
         db.execSQL(sql);
     }
 
@@ -153,7 +184,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         return result;
     }
 
-    public void logAll() {
+    public void logAllWiFiInfo() {
         String sql = "select " + String.format("%s, %s, %s, %s, %s, %s, %s, %s, %s", POS_X, POS_Y, SSID, BSSID, LEVEL, FREQUENCY, UUID, BUILDING, METHOD) + " from " + TABLE_WIFIINFO;
         SQLiteDatabase readableDatabase = getReadableDatabase();
         Cursor cursor = readableDatabase.rawQuery(sql, null);
@@ -171,5 +202,27 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                     cursor.getString(8));
             Log.d(getClass().getName(), wiFiItem.toString());
         }
+    }
+
+    /**
+     * fingerprint 테이블에 데이터 추가
+     * 
+     * @param items 추정된 위치 정보 리스트 전달
+     */
+    public void insertIntoFingerprint(List<EstimatedResult> items) {
+        if (items.size() == 0) {
+            return;
+        }
+        long currentTimeMillis = System.currentTimeMillis();
+        String sql = "insert into " + TABLE_FINGERPRINT + String.format(" (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)", POS_X, POS_Y, UUID, DATE, EST_X, EST_Y, K, THRESHOLD, BUILDING, SSID, ALGORITHM_VERSION, METHOD) + " values ";
+        for (EstimatedResult item : items) {
+            sql += String.format("(%f, %f, '%s', %d, %f, %f, %d, %d, '%s', '%s', %d, '%s'), ",
+                    item.getPositionRealX(), item.getPositionRealY(), item.getUuid(), currentTimeMillis, item.getPositionEstimatedX(), item.getPositionEstimatedY(),
+                    item.getK(), item.getThreshold(), item.getBuilding(), item.getSsid(), item.getAlgorithmVersion(), item.getMethod());
+        }
+        sql = sql.substring(0, sql.length() - 2);
+
+        SQLiteDatabase db = getWritableDatabase();
+        db.execSQL(sql);
     }
 }
