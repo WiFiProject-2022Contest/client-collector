@@ -148,6 +148,10 @@ public class ScanFragment extends Fragment {
                         int level = scanResult.getRssi();
                         int frequency = 0;
 
+                        if (SSID == null) {
+                            SSID = "";
+                        }
+
                         items.add(new WiFiItem(target_x, target_y, SSID, BSSID, level, frequency, MainActivity.uuid, MainActivity.building, "BLE"));
                     }
 
