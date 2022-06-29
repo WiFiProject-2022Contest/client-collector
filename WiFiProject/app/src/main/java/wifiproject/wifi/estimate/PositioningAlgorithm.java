@@ -53,7 +53,7 @@ public class PositioningAlgorithm {
             return null;
         }
 
-        if (databaseData != previousDatabase || !lastMethod.equals(method) || lastGHZ != targetGHZ || lastK != K || lastMinValidAPNum != minValidAPNum || lastMinDbm != minDbm) {
+        if (databaseData != previousDatabase || !method.equals(lastMethod) || lastGHZ != targetGHZ || lastK != K || lastMinValidAPNum != minValidAPNum || lastMinDbm != minDbm) {
             rp = getRecordPointList(databaseData, targetBuilding, method, targetSSID, targetGHZ, minDbm);
 
             previousDatabase = databaseData;
@@ -81,8 +81,11 @@ public class PositioningAlgorithm {
         for (WiFiItem databaseRow : databaseData) {
             RecordPoint workingRP = null;
 
-            if (!targetBuilding.equals(databaseRow.getBuilding()) || !method.equals(databaseRow.getMethod()) || targetSSID != null && !targetSSID.equals(databaseRow.getSSID())
-                                || databaseRow.getFrequency() != 0 && databaseRow.getFrequency() / 1000 != targetGHZ || databaseRow.getRSSI() < minDbm) {
+            if (!targetBuilding.equals(databaseRow.getBuilding())
+                    || !method.equals(databaseRow.getMethod())
+                    || !targetSSID.equals(databaseRow.getSSID())
+                    || databaseRow.getFrequency() != 0 && databaseRow.getFrequency() / 1000 != targetGHZ
+                    || databaseRow.getRSSI() < minDbm) {
                 continue;
             }
 

@@ -29,6 +29,7 @@ public class MainActivity extends AppCompatActivity {
 
     public static String building = "Library5F";
     public static String ssid = "SKKU";
+    public static String bleName = "";
     public static String uuid;
 
     String[] PERMISSIONS = {
@@ -70,10 +71,12 @@ public class MainActivity extends AppCompatActivity {
             case R.id.map_skku:
                 building = "Library5F";
                 ssid = "SKKU";
+                bleName = "";
                 break;
             case R.id.map_wifilocation:
                 building = "wifilocation";
                 ssid = "WiFiLocation@PDA";
+                bleName = "";
                 break;
             default:
                 break;

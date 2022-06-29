@@ -65,7 +65,8 @@ public class EstimateFragment extends Fragment {
     TextView textEstimateReason;
 
     SpotImageView imageview_map3;
-    List<WiFiItem> databaseAllData = null;
+    List<WiFiItem> databaseAllWiFiData = null;
+    List<WiFiItem> databaseAllBleData = null;
     EstimatedResult estimatedResultWiFi2G;
     EstimatedResult estimatedResultWiFi5G;
     EstimatedResult estimatedResultBLE;
@@ -136,7 +137,7 @@ public class EstimateFragment extends Fragment {
                     bleScanRequired = false;
                     bluetoothLeScanner.stopScan(bluetoothLeScanCallback);
 
-                    estimatedResultBLE = PositioningAlgorithm.run(userData, databaseAllData, MainActivity.building, null, MainActivity.uuid, "BLE", 2);
+                    estimatedResultBLE = PositioningAlgorithm.run(userData, databaseAllBleData, MainActivity.building, MainActivity.bleName, MainActivity.uuid, "BLE", 2);
                 }
                 catch (SecurityException e) {
                     estimatedResultBLE = null;
@@ -285,11 +286,25 @@ public class EstimateFragment extends Fragment {
 
     private void getDatabaseAllData() {
         // DB 전체 다 받아오기
-        RetrofitAPI retrofit_api = RetrofitClient.getRetrofitAPI();
-        retrofit_api.getData(MainActivity.building, MainActivity.ssid, null, null, null, null).enqueue(new Callback<List<WiFiItem>>() {
+        RetrofitAPI retrofit_api_wifi = RetrofitClient.getRetrofitAPI();
+        retrofit_api_wifi.getData(MainActivity.building, MainActivity.ssid, null, null, null, null).enqueue(new Callback<List<WiFiItem>>() {
             @Override
             public void onResponse(Call<List<WiFiItem>> call, Response<List<WiFiItem>> response) {
-                databaseAllData = response.body();
+                databaseAllWiFiData = response.body();
+                Toast.makeText(context, "Database loaded.", Toast.LENGTH_SHORT).show();
+            }
+
+            @Override
+            public void onFailure(Call<List<WiFiItem>> call, Throwable t) {
+                Toast.makeText(context, "Database failed.", Toast.LENGTH_SHORT).show();
+            }
+        });
+
+        RetrofitAPI retrofit_api_ble = RetrofitClient.getRetrofitAPI();
+        retrofit_api_ble.getData(MainActivity.building, MainActivity.bleName, null, null, null, null).enqueue(new Callback<List<WiFiItem>>() {
+            @Override
+            public void onResponse(Call<List<WiFiItem>> call, Response<List<WiFiItem>> response) {
+                databaseAllBleData = response.body();
                 Toast.makeText(context, "Database loaded.", Toast.LENGTH_SHORT).show();
             }
 
@@ -309,8 +324,8 @@ public class EstimateFragment extends Fragment {
             userData.add(new WiFiItem(0, 0, result.SSID, result.BSSID, result.level, result.frequency, MainActivity.uuid, MainActivity.building, "WiFi"));
         }
 
-        estimatedResultWiFi2G = PositioningAlgorithm.run(userData, databaseAllData, MainActivity.building, MainActivity.ssid, MainActivity.uuid, "WiFi", 2);
-        estimatedResultWiFi5G = PositioningAlgorithm.run(userData, databaseAllData, MainActivity.building, MainActivity.ssid, MainActivity.uuid, "WiFi", 5);
+        estimatedResultWiFi2G = PositioningAlgorithm.run(userData, databaseAllWiFiData, MainActivity.building, MainActivity.ssid, MainActivity.uuid, "WiFi", 2);
+        estimatedResultWiFi5G = PositioningAlgorithm.run(userData, databaseAllWiFiData, MainActivity.building, MainActivity.ssid, MainActivity.uuid, "WiFi", 5);
     }
 
     private void scanFailure() {
@@ -326,7 +341,7 @@ public class EstimateFragment extends Fragment {
     private class ScanResultTask extends AsyncTask<Void, Void, Void> {
         @Override
         protected Void doInBackground(Void... voids) {
-            if (databaseAllData == null) {
+            if (databaseAllWiFiData == null || databaseAllBleData == null) {
                 getActivity().runOnUiThread(new Runnable() {
                     public void run() {
                         Toast.makeText(context, "You should get database first.", Toast.LENGTH_SHORT).show();
@@ -392,7 +407,7 @@ public class EstimateFragment extends Fragment {
                     }
                     imageview_map3.setEstimateSpot(result);
 
-                    textEstimateReason.setText(MainActivity.uuid + "\n" + MainActivity.building + ", " + MainActivity.ssid + "\n");
+                    textEstimateReason.setText(MainActivity.uuid + "\n" + MainActivity.building + ", " + MainActivity.ssid + ", " + MainActivity.bleName + "\n");
                     textEstimateReason.setText(textEstimateReason.getText() + "\nWiFi 2Ghz\n");
                     if (estimatedResultWiFi2G != null) {
                         textEstimateReason.setText(textEstimateReason.getText() + estimatedResultWiFi2G.getEstimateReason().toString());
