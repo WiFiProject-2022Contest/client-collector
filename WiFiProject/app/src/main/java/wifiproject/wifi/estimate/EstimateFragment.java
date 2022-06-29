@@ -1,5 +1,6 @@
 package wifilocation.wifi.estimate;
 
+import android.app.AlertDialog;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothManager;
 import android.bluetooth.le.BluetoothLeScanner;
@@ -8,6 +9,7 @@ import android.bluetooth.le.ScanFilter;
 import android.bluetooth.le.ScanSettings;
 import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.graphics.PointF;
@@ -36,6 +38,7 @@ import java.util.concurrent.CountDownLatch;
 import wifilocation.wifi.MainActivity;
 import wifilocation.wifi.R;
 import wifilocation.wifi.customviews.SpotImageView;
+import wifilocation.wifi.database.DatabaseHelper;
 import wifilocation.wifi.model.PushResultModel;
 import wifilocation.wifi.model.WiFiItem;
 import wifilocation.wifi.serverconnection.RetrofitAPI;
@@ -185,7 +188,31 @@ public class EstimateFragment extends Fragment {
         buttonUpdateAllDatabase.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                getRemote();
+                AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(getActivity());
+                alertDialogBuilder.setTitle("데이터베이스 선택");
+                alertDialogBuilder.setCancelable(true);
+                alertDialogBuilder.setPositiveButton("서버", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        getRemote();
+                    }
+                });
+                alertDialogBuilder.setNegativeButton("로컬", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        getLocal();
+                    }
+                });
+                /*
+                alertDialogBuilder.setNeutralButton("모두", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                    }
+                });
+                 */
+
+                AlertDialog alertDialog = alertDialogBuilder.create();
+                alertDialog.show();
             }
         });
 
@@ -247,7 +274,31 @@ public class EstimateFragment extends Fragment {
                     listForPost.add(er);
                 }
 
-                pushRemote(listForPost);
+                AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(getActivity());
+                alertDialogBuilder.setTitle("데이터베이스 선택");
+                alertDialogBuilder.setCancelable(true);
+                alertDialogBuilder.setPositiveButton("서버", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        pushRemote(listForPost);
+                    }
+                });
+                alertDialogBuilder.setNegativeButton("로컬", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        pushLocal(listForPost);
+                    }
+                });
+                alertDialogBuilder.setNeutralButton("모두", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        pushRemote(listForPost);
+                        pushLocal(listForPost);
+                    }
+                });
+
+                AlertDialog alertDialog = alertDialogBuilder.create();
+                alertDialog.show();
             }
         });
 
@@ -292,6 +343,14 @@ public class EstimateFragment extends Fragment {
         });
     }
 
+    private void getLocal() {
+        DatabaseHelper dbHelper = new DatabaseHelper(context);
+        databaseAllWiFiData = dbHelper.searchFromWiFiInfo(MainActivity.building, MainActivity.ssid, null, null, null, null);
+        databaseAllBleData = dbHelper.searchFromWiFiInfo(MainActivity.building, MainActivity.bleName, null, null, null, null);
+
+        Toast.makeText(context, "Local database loaded.", Toast.LENGTH_SHORT).show();
+    }
+
     private void pushRemote(List<EstimatedResult> listForPost) {
         RetrofitAPI retrofit_api = RetrofitClient.getRetrofitAPI();
         retrofit_api.postData(listForPost).enqueue(new Callback<PushResultModel>() {
@@ -320,6 +379,13 @@ public class EstimateFragment extends Fragment {
                 t.printStackTrace();
             }
         });
+    }
+
+    private void pushLocal(List<EstimatedResult> listForPost) {
+        DatabaseHelper dbHelper = new DatabaseHelper(context);
+        dbHelper.insertIntoFingerprint(listForPost);
+
+        Toast.makeText(context, "Local database push", Toast.LENGTH_SHORT).show();
     }
 
     private void scanSuccess() {
