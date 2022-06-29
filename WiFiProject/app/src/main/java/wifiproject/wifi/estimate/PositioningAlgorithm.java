@@ -16,6 +16,7 @@ public class PositioningAlgorithm {
     static List<RecordPoint> rp;
     static List<WiFiItem> previousDatabase = null;
 
+    static String lastMethod = "";
     static int lastGHZ = 0;
     static int lastK = 0;
     static int lastMinValidAPNum = 0;
@@ -27,13 +28,18 @@ public class PositioningAlgorithm {
         int minDbm = 0;
 
         if (method.equals("WiFi") && targetGHZ == 2) {
-            K = 5;
+            K = 7;
             minValidAPNum = 1;
-            minDbm = -50; // 55도 가능
+            minDbm = -50;
         } else if (method.equals("WiFi") && targetGHZ == 5) {
+            K = 7;
+            minValidAPNum = 1;
+            minDbm = -45;
+        }
+        else if (method.equals("BLE") && targetGHZ == 2) {
             K = 3;
             minValidAPNum = 1;
-            minDbm = -50; // 65도 가능
+            minDbm = -70;
         }
         else {
             return null;
@@ -47,10 +53,11 @@ public class PositioningAlgorithm {
             return null;
         }
 
-        if (databaseData != previousDatabase || lastGHZ != targetGHZ || lastK != K || lastMinValidAPNum != minValidAPNum || lastMinDbm != minDbm) {
+        if (databaseData != previousDatabase || !lastMethod.equals(method) || lastGHZ != targetGHZ || lastK != K || lastMinValidAPNum != minValidAPNum || lastMinDbm != minDbm) {
             rp = getRecordPointList(databaseData, targetBuilding, method, targetSSID, targetGHZ, minDbm);
 
             previousDatabase = databaseData;
+            lastMethod = method;
             lastGHZ = targetGHZ;
             lastK = K;
             lastMinValidAPNum = minValidAPNum;
