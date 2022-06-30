@@ -17,6 +17,7 @@ import com.google.android.material.tabs.TabLayout;
 
 import java.util.UUID;
 
+import wifilocation.wifi.database.DatabaseHelper;
 import wifilocation.wifi.estimate.EstimateFragment;
 import wifilocation.wifi.scan.ScanFragment;
 import wifilocation.wifi.search.SearchFragment;
@@ -77,6 +78,10 @@ public class MainActivity extends AppCompatActivity {
                 building = "wifilocation";
                 ssid = "WiFiLocation@PDA";
                 bleName = "";
+                break;
+            case R.id.menu_synchronize:
+                DatabaseHelper dbHelper = new DatabaseHelper(this);
+                dbHelper.synchronize();
                 break;
             default:
                 break;
