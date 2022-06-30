@@ -2,6 +2,8 @@ package wifilocation.wifi.estimate;
 
 import com.google.gson.annotations.SerializedName;
 
+import java.util.Date;
+
 public class EstimatedResult {
     @SerializedName("building")
     String building;
@@ -26,7 +28,7 @@ public class EstimatedResult {
     @SerializedName("algorithmVersion")
     int algorithmVersion;
     @SerializedName("date")
-    long date;
+    Date date;
     StringBuilder estimateReason;
 
     public EstimatedResult() {
@@ -41,7 +43,7 @@ public class EstimatedResult {
         this.K = -1;
         this.threshold = -1;
         this.algorithmVersion = 0;
-        this.date = System.currentTimeMillis();
+        this.date = new Date(System.currentTimeMillis());
         this.estimateReason = new StringBuilder();
     }
 
@@ -81,7 +83,7 @@ public class EstimatedResult {
     public EstimatedResult(String building, String ssid, String uuid, String method, int K, int threshold, int algorithmVersion, long date) {
         this(building, ssid, uuid, method, K, threshold, algorithmVersion);
 
-        this.date = date;
+        this.date = new Date(date);
     }
 
     public EstimatedResult(String building, String ssid, double positionRealX, double positionRealY, double positionEstimatedX, double positionEstimatedY,
@@ -99,7 +101,7 @@ public class EstimatedResult {
         this.K = K;
         this.threshold = threshold;
         this.algorithmVersion = algorithmVersion;
-        this.date = date;
+        this.date = new Date(date);
     }
 
     public String getBuilding() {
@@ -190,15 +192,11 @@ public class EstimatedResult {
         this.algorithmVersion = algorithmVersion;
     }
 
-    public long getDate() {
-        return this.date;
+    public Date getDate() {
+        return date;
     }
 
-    public void setDate() {
-        this.date = System.currentTimeMillis();
-    }
-
-    public void setDate(long date) {
+    public void setDate(Date date) {
         this.date = date;
     }
 

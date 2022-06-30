@@ -126,7 +126,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         String sql = "insert into " + TABLE_WIFIINFO + String.format(" (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s) ", POS_X, POS_Y, SSID, BSSID, FREQUENCY, LEVEL, DATE, UUID, BUILDING, METHOD) + " values ";
         for (WiFiItem item : items) {
             sql += String.format("(%f, %f, '%s', '%s', %d, %d, %d, '%s', '%s', '%s'), ",
-                    item.getX(), item.getY(), item.getSSID(), item.getBSSID(), item.getFrequency(), item.getRSSI(), item.getDate(), item.getUuid(), item.getBuilding(), item.getMethod());
+                    item.getX(), item.getY(), item.getSSID(), item.getBSSID(), item.getFrequency(), item.getRSSI(), item.getDate().getTime(), item.getUuid(), item.getBuilding(), item.getMethod());
         }
         sql = sql.substring(0, sql.length() - 2); // 끝에 붙은 ,<공백> 제거
         SQLiteDatabase db = getWritableDatabase();
@@ -241,7 +241,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         String sql = "insert into " + TABLE_FINGERPRINT + String.format(" (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)", POS_X, POS_Y, UUID, DATE, EST_X, EST_Y, K, THRESHOLD, BUILDING, SSID, ALGORITHM_VERSION, METHOD) + " values ";
         for (EstimatedResult item : items) {
             sql += String.format("(%f, %f, '%s', %d, %f, %f, %d, %d, '%s', '%s', %d, '%s'), ",
-                    item.getPositionRealX(), item.getPositionRealY(), item.getUuid(), item.getDate(), item.getPositionEstimatedX(), item.getPositionEstimatedY(),
+                    item.getPositionRealX(), item.getPositionRealY(), item.getUuid(), item.getDate().getTime(), item.getPositionEstimatedX(), item.getPositionEstimatedY(),
                     item.getK(), item.getThreshold(), item.getBuilding(), item.getSsid(), item.getAlgorithmVersion(), item.getMethod());
         }
         sql = sql.substring(0, sql.length() - 2);
