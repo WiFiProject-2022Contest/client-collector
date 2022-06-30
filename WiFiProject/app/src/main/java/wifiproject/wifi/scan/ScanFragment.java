@@ -15,6 +15,7 @@ import android.graphics.PointF;
 import android.net.wifi.ScanResult;
 import android.net.wifi.WifiManager;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
@@ -65,10 +66,13 @@ public class ScanFragment extends Fragment {
     private BroadcastReceiver wifi_receiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
+            Log.d("tag", "진입!!!!");
             boolean success = intent.getBooleanExtra(WifiManager.EXTRA_RESULTS_UPDATED, false);
             if (success) {
+                Log.d("tag", "성공!!!!");
                 scanSuccess();
             } else {
+                Log.d("tag", "실패!!!!");
                 scanFailure();
             }
         }
@@ -191,6 +195,7 @@ public class ScanFragment extends Fragment {
                     Toast.makeText(context, "올바른 형식의 좌표 입력 필요", Toast.LENGTH_SHORT).show();
                     return;
                 }
+                wm.startScan();
 
                 try {
                     bluetoothAdapter.enable();
