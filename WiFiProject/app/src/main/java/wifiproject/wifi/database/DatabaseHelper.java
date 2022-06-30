@@ -63,6 +63,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     // SSID
     public static final String ALGORITHM_VERSION = "algorithmVersion";
     // METHOD
+    // NEW
 
     public DatabaseHelper(@Nullable Context context) {
         super(context, DBNAME, null, VERSION);
@@ -132,7 +133,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         String values = "";
         for (int i = 0; i < items.size(); i++) {
             WiFiItem item = items.get(i);
-            values += String.format("(%f, %f, '%s', '%s', %d, %d, %d, '%s', '%s', '%s', %d), ",
+            values += String.format(" (%f, %f, '%s', '%s', %d, %d, %d, '%s', '%s', '%s', %d), ",
                     item.getX(), item.getY(), item.getSSID(), item.getBSSID(), item.getFrequency(), item.getRSSI(), item.getDate().getTime(), item.getUuid(), item.getBuilding(), item.getMethod(), _new);
 
             if (i % 1000 == 0) {
@@ -185,7 +186,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         }
         // 위치 조건 추가
         if (x != null && y != null) {
-            conditions.add(String.format(" ((%s between %f and %f) and (%s between %f and %f))", POS_X, x - 1, x + 1, POS_Y, y - 1, y + 1));
+            conditions.add(String.format(" ((%s between %f and %f) and (%s between %f and %f)) ", POS_X, x - 1, x + 1, POS_Y, y - 1, y + 1));
         }
         // 로컬에만 있는 데이터 검색할건지 조건 추가
         if (_new != null) {
@@ -257,7 +258,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         String values = "";
         for (int i = 0; i < items.size(); i++) {
             EstimatedResult item = items.get(i);
-            values += String.format("(%f, %f, '%s', %d, %f, %f, %d, %d, '%s', '%s', %d, '%s', %d), ",
+            values += String.format(" (%f, %f, '%s', %d, %f, %f, %d, %d, '%s', '%s', %d, '%s', %d), ",
                     item.getPositionRealX(), item.getPositionRealY(), item.getUuid(), item.getDate().getTime(), item.getPositionEstimatedX(), item.getPositionEstimatedY(),
                     item.getK(), item.getThreshold(), item.getBuilding(), item.getSsid(), item.getAlgorithmVersion(), item.getMethod(), _new);
 
