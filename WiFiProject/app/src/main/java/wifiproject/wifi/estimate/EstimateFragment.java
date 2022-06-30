@@ -315,7 +315,7 @@ public class EstimateFragment extends Fragment {
                         }
                     });
                 } else {
-                    getActivity().runOnUiThread(new Runnable() {
+                    getActivity()   .runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
                             Toast.makeText(context, "PUSH 실패", Toast.LENGTH_SHORT).show();

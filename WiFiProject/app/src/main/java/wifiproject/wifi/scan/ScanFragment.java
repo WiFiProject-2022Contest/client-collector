@@ -220,7 +220,9 @@ public class ScanFragment extends Fragment {
         button_push.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(getActivity());
+                pushLocal();
+
+                /* AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(getActivity());
                 alertDialogBuilder.setTitle("데이터베이스 선택");
                 alertDialogBuilder.setCancelable(true);
                 alertDialogBuilder.setPositiveButton("서버", new DialogInterface.OnClickListener() {
@@ -244,7 +246,7 @@ public class ScanFragment extends Fragment {
                 });
 
                 AlertDialog alertDialog = alertDialogBuilder.create();
-                alertDialog.show();
+                alertDialog.show(); */
             }
         });
 
@@ -315,5 +317,6 @@ public class ScanFragment extends Fragment {
     private void pushLocal() {
         DatabaseHelper dbHelper = new DatabaseHelper(context);
         dbHelper.insertIntoWiFiInfo(wifiitem_adpater.getItems());
+        Toast.makeText(context, "push 성공!", Toast.LENGTH_SHORT).show();
     }
 }

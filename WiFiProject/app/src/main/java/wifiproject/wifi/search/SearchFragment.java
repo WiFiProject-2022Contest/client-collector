@@ -13,6 +13,8 @@ import android.widget.EditText;
 import android.widget.TextView;
 
 import android.app.AlertDialog;
+import android.widget.Toast;
+
 import androidx.fragment.app.DialogFragment;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -114,11 +116,14 @@ public class SearchFragment extends Fragment {
                 }
                 String from = textview_date_from.getText().toString();
                 String to = textview_date_to.getText().toString();
-                AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(getActivity());
-                alertDialogBuilder.setTitle("데이터베이스 선택");
-                alertDialogBuilder.setCancelable(true);
+
                 Float finalTarget_x = target_x;
                 Float finalTarget_y = target_y;
+                searchLocal(finalTarget_x, finalTarget_y, from, to);
+
+                /* AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(getActivity());
+                alertDialogBuilder.setTitle("데이터베이스 선택");
+                alertDialogBuilder.setCancelable(true);
                 alertDialogBuilder.setPositiveButton("서버", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i) {
@@ -139,7 +144,7 @@ public class SearchFragment extends Fragment {
                 });
 
                 AlertDialog alertDialog = alertDialogBuilder.create();
-                alertDialog.show();
+                alertDialog.show(); */
             }
         });
 
@@ -181,6 +186,8 @@ public class SearchFragment extends Fragment {
         wifiitem_adapter.setItems(items);
         recyclerview_searched.setAdapter(wifiitem_adapter);
         imageview_map2.setSpot(items);
+
+        Toast.makeText(context, "로컬 서치 완료", Toast.LENGTH_SHORT).show();
         return items;
     }
 
