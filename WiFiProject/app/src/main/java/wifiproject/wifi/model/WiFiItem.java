@@ -39,6 +39,11 @@ public class WiFiItem {
         this.date = System.currentTimeMillis();
     }
 
+    public WiFiItem(Float x, Float y, String SSID, String BSSID, int RSSI, int frequency, String uuid, String building, String method, long date) {
+        this(x, y, SSID, BSSID, RSSI, frequency, uuid, building, method);
+        this.date = date;
+    }
+
     public float getX() {
         return x;
     }
@@ -107,6 +112,14 @@ public class WiFiItem {
 
     public void setMethod(String building) {
         this.method = method;
+    }
+
+    public long getDate() {
+        return date;
+    }
+
+    public void setDate(long date) {
+        this.date = date;
     }
 
     @Override
