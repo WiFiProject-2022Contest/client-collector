@@ -1,15 +1,18 @@
 package wifilocation.wifi.database;
 
 import android.annotation.SuppressLint;
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.os.AsyncTask;
 import android.util.Log;
 import android.widget.Toast;
 
 import androidx.annotation.Nullable;
 
+import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -45,6 +48,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     public static final String UUID = "uuid";
     public static final String BUILDING = "building";
     public static final String METHOD = "method";
+    public static final String NEW = "new";
 
     public static final String TABLE_FINGERPRINT = "fingerprint";
     // POS_X
@@ -80,7 +84,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 UUID + " text, " +
                 BUILDING + " text, " +
                 METHOD + " text, " +
-                "new integer default 0)");
+                NEW + " integer default 0)");
 
         // fingerprint 테이블 생성
         sqLiteDatabase.execSQL("create table if not exists " + TABLE_FINGERPRINT + " (" +
@@ -97,7 +101,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 SSID + " text, " +
                 ALGORITHM_VERSION + " integer, " +
                 METHOD + " text, " +
-                "new integer default 0)");
+                NEW + " integer default 0)");
     }
 
     @Override
@@ -119,17 +123,17 @@ public class DatabaseHelper extends SQLiteOpenHelper {
      *
      * @param items 스캔한 WiFiItem 전달, DB에 저장
      */
-    public void insertIntoWiFiInfo(List<WiFiItem> items) {
+    public void insertIntoWiFiInfo(List<WiFiItem> items, int _new) {
         if (items.size() == 0) {
             return;
         }
         SQLiteDatabase db = getWritableDatabase();
-        String sql = "insert into " + TABLE_WIFIINFO + String.format(" (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s) ", POS_X, POS_Y, SSID, BSSID, FREQUENCY, LEVEL, DATE, UUID, BUILDING, METHOD) + " values ";
+        String sql = "insert into " + TABLE_WIFIINFO + String.format(" (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s) ", POS_X, POS_Y, SSID, BSSID, FREQUENCY, LEVEL, DATE, UUID, BUILDING, METHOD, NEW) + " values ";
         String values = "";
         for (int i = 0; i < items.size(); i++) {
             WiFiItem item = items.get(i);
-            values += String.format("(%f, %f, '%s', '%s', %d, %d, %d, '%s', '%s', '%s'), ",
-                    item.getX(), item.getY(), item.getSSID(), item.getBSSID(), item.getFrequency(), item.getRSSI(), item.getDate().getTime(), item.getUuid(), item.getBuilding(), item.getMethod());
+            values += String.format("(%f, %f, '%s', '%s', %d, %d, %d, '%s', '%s', '%s', %d), ",
+                    item.getX(), item.getY(), item.getSSID(), item.getBSSID(), item.getFrequency(), item.getRSSI(), item.getDate().getTime(), item.getUuid(), item.getBuilding(), item.getMethod(), _new);
 
             if (i % 1000 == 0) {
                 try {
@@ -185,7 +189,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         }
         // 로컬에만 있는 데이터 검색할건지 조건 추가
         if (_new != null) {
-            conditions.add(" (new = 1) ");
+            conditions.add(String.format(" (%s = 1) ", NEW));
         }
         if (conditions.size() != 0) {
             sql += " where ";
@@ -244,18 +248,18 @@ public class DatabaseHelper extends SQLiteOpenHelper {
      *
      * @param items 추정된 위치 정보 리스트 전달
      */
-    public void insertIntoFingerprint(List<EstimatedResult> items) {
+    public void insertIntoFingerprint(List<EstimatedResult> items, int _new) {
         if (items.size() == 0) {
             return;
         }
         SQLiteDatabase db = getWritableDatabase();
-        String sql = "insert into " + TABLE_FINGERPRINT + String.format(" (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)", POS_X, POS_Y, UUID, DATE, EST_X, EST_Y, K, THRESHOLD, BUILDING, SSID, ALGORITHM_VERSION, METHOD) + " values ";
+        String sql = "insert into " + TABLE_FINGERPRINT + String.format(" (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)", POS_X, POS_Y, UUID, DATE, EST_X, EST_Y, K, THRESHOLD, BUILDING, SSID, ALGORITHM_VERSION, METHOD, NEW) + " values ";
         String values = "";
         for (int i = 0; i < items.size(); i++) {
             EstimatedResult item = items.get(i);
-            values += String.format("(%f, %f, '%s', %d, %f, %f, %d, %d, '%s', '%s', %d, '%s'), ",
+            values += String.format("(%f, %f, '%s', %d, %f, %f, %d, %d, '%s', '%s', %d, '%s', %d), ",
                     item.getPositionRealX(), item.getPositionRealY(), item.getUuid(), item.getDate().getTime(), item.getPositionEstimatedX(), item.getPositionEstimatedY(),
-                    item.getK(), item.getThreshold(), item.getBuilding(), item.getSsid(), item.getAlgorithmVersion(), item.getMethod());
+                    item.getK(), item.getThreshold(), item.getBuilding(), item.getSsid(), item.getAlgorithmVersion(), item.getMethod(), _new);
 
             if (i % 1000 == 0) {
                 try {
@@ -282,7 +286,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         List<String> conditions = new ArrayList<String>();
         // 로컬에만 있는 데이터만 조회할지에 대한 조건 추가
         if (_new != null) {
-            conditions.add(" (new = 1) ");
+            conditions.add(String.format(" (%s = 1) ", NEW));
         }
         if (conditions.size() != 0) {
             sql += " where ";
@@ -322,54 +326,75 @@ public class DatabaseHelper extends SQLiteOpenHelper {
      * 서버와 DB 동기화
      */
     public void synchronize() {
-        // 서버에 new가 1인 데이터 올리기
-        pushRemoteNewData();
-        // 로컬에 있는 데이터 삭제
-        deleteAllLocal();
-        // 서버로부터 데이터 받아오기
-        getAllFromRemote();
-        Toast.makeText(context, "동기화 종료", Toast.LENGTH_SHORT).show();
+        SynchronizeTask synchronizeTask = new SynchronizeTask();
+        synchronizeTask.execute();
     }
 
-    private void pushRemoteNewData() {
-        List<WiFiItem> wiFiItems = searchFromWiFiInfo(null, null, null, null, null, null, 1);
-        List<EstimatedResult> estimatedResults = searchFromFingerprint(1);
-        RetrofitAPI retrofitAPI = RetrofitClient.getRetrofitAPI();
-        retrofitAPI.postDataWiFiItem(wiFiItems);
-        retrofitAPI.postDataEstimatedResult(estimatedResults);
-    }
+    private class SynchronizeTask extends AsyncTask<String, String, String> {
 
-    private void deleteAllLocal() {
-        SQLiteDatabase db = getWritableDatabase();
-        db.execSQL("delete from " + TABLE_WIFIINFO);
-        db.execSQL("delete from " + TABLE_FINGERPRINT);
-    }
+        ProgressDialog progressDialog = new ProgressDialog(context);
 
-    private void getAllFromRemote() {
-        RetrofitAPI retrofitAPI = RetrofitClient.getRetrofitAPI();
-        retrofitAPI.getDataWiFiItem(null, null, null, null, null, null).enqueue(new Callback<List<WiFiItem>>() {
-            @Override
-            public void onResponse(Call<List<WiFiItem>> call, Response<List<WiFiItem>> response) {
-                List<WiFiItem> body = response.body();
-                insertIntoWiFiInfo(body);
-            }
+        @Override
+        protected void onPreExecute() {
+            progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+            progressDialog.setCancelable(false);
+            progressDialog.show();
+            super.onPreExecute();
+        }
 
-            @Override
-            public void onFailure(Call<List<WiFiItem>> call, Throwable t) {
-                Toast.makeText(context, "데이터 동기화 - 서버로부터 로드 실패 (WiFiItem)", Toast.LENGTH_SHORT).show();
-            }
-        });
-        retrofitAPI.getDataEstimateResult(null, null).enqueue(new Callback<List<EstimatedResult>>() {
-            @Override
-            public void onResponse(Call<List<EstimatedResult>> call, Response<List<EstimatedResult>> response) {
-                List<EstimatedResult> body = response.body();
-                insertIntoFingerprint(body);
-            }
+        @Override
+        protected String doInBackground(String... strings) {
+            // 서버에 new가 1인 데이터 올리기
+            publishProgress("서버에 신규 데이터 업로드 중...");
+            pushRemoteNewData();
+            // 로컬에 있는 데이터 삭제
+            publishProgress("로컬 DB의 데이터 삭제 중...");
+            deleteAllLocal();
+            // 서버로부터 데이터 받아오기
+            publishProgress("서버로부터 데이터를 받아오는 중...");
+            getAllFromRemote();
+            return "동기화 종료";
+        }
 
-            @Override
-            public void onFailure(Call<List<EstimatedResult>> call, Throwable t) {
-                Toast.makeText(context, "데이터 동기화 - 서버로부터 로드 실패 (EstimatedResult)", Toast.LENGTH_SHORT).show();
+        @Override
+        protected void onProgressUpdate(String... progress) {
+            if (progress.length > 0) {
+                progressDialog.setMessage(progress[0]);
             }
-        });
+            super.onProgressUpdate(progress);
+        }
+
+        @Override
+        protected void onPostExecute(String result) {
+            progressDialog.dismiss();
+            Toast.makeText(context, result, Toast.LENGTH_SHORT).show();
+            super.onPostExecute(result);
+        }
+
+        private void pushRemoteNewData() {
+            List<WiFiItem> wiFiItems = searchFromWiFiInfo(null, null, null, null, null, null, 1);
+            List<EstimatedResult> estimatedResults = searchFromFingerprint(1);
+            RetrofitAPI retrofitAPI = RetrofitClient.getRetrofitAPI();
+            retrofitAPI.postDataWiFiItem(wiFiItems);
+            retrofitAPI.postDataEstimatedResult(estimatedResults);
+        }
+
+        private void deleteAllLocal() {
+            SQLiteDatabase db = getWritableDatabase();
+            db.execSQL("delete from " + TABLE_WIFIINFO);
+            db.execSQL("delete from " + TABLE_FINGERPRINT);
+        }
+
+        private void getAllFromRemote() {
+            RetrofitAPI retrofitAPI = RetrofitClient.getRetrofitAPI();
+            try {
+                List<WiFiItem> wiFiItems = retrofitAPI.getDataWiFiItem(null, null, null, null, null, null).execute().body();
+                List<EstimatedResult> estimatedResults = retrofitAPI.getDataEstimateResult(null, null).execute().body();
+                insertIntoWiFiInfo(wiFiItems, 0);
+                insertIntoFingerprint(estimatedResults, 0);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
     }
 }

@@ -334,7 +334,7 @@ public class EstimateFragment extends Fragment {
 
     private void pushLocal(List<EstimatedResult> listForPost) {
         DatabaseHelper dbHelper = new DatabaseHelper(context);
-        dbHelper.insertIntoFingerprint(listForPost);
+        dbHelper.insertIntoFingerprint(listForPost, 1);
 
         Toast.makeText(context, "Local database push", Toast.LENGTH_SHORT).show();
     }
