@@ -315,7 +315,7 @@ public class EstimateFragment extends Fragment {
     private void getRemote() {
         // DB 전체 다 받아오기
         RetrofitAPI retrofit_api_wifi = RetrofitClient.getRetrofitAPI();
-        retrofit_api_wifi.getData(MainActivity.building, MainActivity.ssid, null, null, null, null).enqueue(new Callback<List<WiFiItem>>() {
+        retrofit_api_wifi.getDataWiFiItem(MainActivity.building, MainActivity.ssid, null, null, null, null).enqueue(new Callback<List<WiFiItem>>() {
             @Override
             public void onResponse(Call<List<WiFiItem>> call, Response<List<WiFiItem>> response) {
                 databaseAllWiFiData = response.body();
@@ -329,7 +329,7 @@ public class EstimateFragment extends Fragment {
         });
 
         RetrofitAPI retrofit_api_ble = RetrofitClient.getRetrofitAPI();
-        retrofit_api_ble.getData(MainActivity.building, MainActivity.bleName, null, null, null, null).enqueue(new Callback<List<WiFiItem>>() {
+        retrofit_api_ble.getDataWiFiItem(MainActivity.building, MainActivity.bleName, null, null, null, null).enqueue(new Callback<List<WiFiItem>>() {
             @Override
             public void onResponse(Call<List<WiFiItem>> call, Response<List<WiFiItem>> response) {
                 databaseAllBleData = response.body();
@@ -345,15 +345,15 @@ public class EstimateFragment extends Fragment {
 
     private void getLocal() {
         DatabaseHelper dbHelper = new DatabaseHelper(context);
-        databaseAllWiFiData = dbHelper.searchFromWiFiInfo(MainActivity.building, MainActivity.ssid, null, null, null, null);
-        databaseAllBleData = dbHelper.searchFromWiFiInfo(MainActivity.building, MainActivity.bleName, null, null, null, null);
+        databaseAllWiFiData = dbHelper.searchFromWiFiInfo(MainActivity.building, MainActivity.ssid, null, null, null, null, null);
+        databaseAllBleData = dbHelper.searchFromWiFiInfo(MainActivity.building, MainActivity.bleName, null, null, null, null, null);
 
         Toast.makeText(context, "Local database loaded.", Toast.LENGTH_SHORT).show();
     }
 
     private void pushRemote(List<EstimatedResult> listForPost) {
         RetrofitAPI retrofit_api = RetrofitClient.getRetrofitAPI();
-        retrofit_api.postData(listForPost).enqueue(new Callback<PushResultModel>() {
+        retrofit_api.postDataEstimatedResult(listForPost).enqueue(new Callback<PushResultModel>() {
             @Override
             public void onResponse(Call<PushResultModel> call, Response<PushResultModel> response) {
                 PushResultModel r = response.body();
