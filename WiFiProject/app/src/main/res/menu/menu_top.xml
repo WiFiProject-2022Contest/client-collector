@@ -12,4 +12,9 @@
         android:icon="@android:drawable/ic_menu_view"
         android:title="WiFiLocation"
         app:showAsAction="never" />
+    <item
+        android:id="@+id/menu_synchronize"
+        android:icon="@android:drawable/ic_menu_rotate"
+        android:title="동기화"
+        app:showAsAction="always" />
 </menu>
