@@ -123,14 +123,24 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         if (items.size() == 0) {
             return;
         }
-        String sql = "insert into " + TABLE_WIFIINFO + String.format(" (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s) ", POS_X, POS_Y, SSID, BSSID, FREQUENCY, LEVEL, DATE, UUID, BUILDING, METHOD) + " values ";
-        for (WiFiItem item : items) {
-            sql += String.format("(%f, %f, '%s', '%s', %d, %d, %d, '%s', '%s', '%s'), ",
-                    item.getX(), item.getY(), item.getSSID(), item.getBSSID(), item.getFrequency(), item.getRSSI(), item.getDate().getTime(), item.getUuid(), item.getBuilding(), item.getMethod());
-        }
-        sql = sql.substring(0, sql.length() - 2); // 끝에 붙은 ,<공백> 제거
         SQLiteDatabase db = getWritableDatabase();
-        db.execSQL(sql);
+        String sql = "insert into " + TABLE_WIFIINFO + String.format(" (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s) ", POS_X, POS_Y, SSID, BSSID, FREQUENCY, LEVEL, DATE, UUID, BUILDING, METHOD) + " values ";
+        String values = "";
+        for (int i = 0; i < items.size(); i++) {
+            WiFiItem item = items.get(i);
+            values += String.format("(%f, %f, '%s', '%s', %d, %d, %d, '%s', '%s', '%s'), ",
+                    item.getX(), item.getY(), item.getSSID(), item.getBSSID(), item.getFrequency(), item.getRSSI(), item.getDate().getTime(), item.getUuid(), item.getBuilding(), item.getMethod());
+
+            if (i % 1000 == 0) {
+                try {
+                    db.execSQL(sql + values.substring(0, values.length() - 2));
+                } catch (Exception e) {
+                    e.printStackTrace();
+                } finally {
+                    values = "";
+                }
+            }
+        }
     }
 
     /**
@@ -238,16 +248,25 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         if (items.size() == 0) {
             return;
         }
+        SQLiteDatabase db = getWritableDatabase();
         String sql = "insert into " + TABLE_FINGERPRINT + String.format(" (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)", POS_X, POS_Y, UUID, DATE, EST_X, EST_Y, K, THRESHOLD, BUILDING, SSID, ALGORITHM_VERSION, METHOD) + " values ";
-        for (EstimatedResult item : items) {
-            sql += String.format("(%f, %f, '%s', %d, %f, %f, %d, %d, '%s', '%s', %d, '%s'), ",
+        String values = "";
+        for (int i = 0; i < items.size(); i++) {
+            EstimatedResult item = items.get(i);
+            values += String.format("(%f, %f, '%s', %d, %f, %f, %d, %d, '%s', '%s', %d, '%s'), ",
                     item.getPositionRealX(), item.getPositionRealY(), item.getUuid(), item.getDate().getTime(), item.getPositionEstimatedX(), item.getPositionEstimatedY(),
                     item.getK(), item.getThreshold(), item.getBuilding(), item.getSsid(), item.getAlgorithmVersion(), item.getMethod());
-        }
-        sql = sql.substring(0, sql.length() - 2);
 
-        SQLiteDatabase db = getWritableDatabase();
-        db.execSQL(sql);
+            if (i % 1000 == 0) {
+                try {
+                    db.execSQL(sql + values.substring(0, values.length() - 2));
+                } catch (Exception e) {
+                    e.printStackTrace();
+                } finally {
+                    values = "";
+                }
+            }
+        }
     }
 
     /**
