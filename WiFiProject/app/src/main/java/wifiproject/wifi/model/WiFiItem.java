@@ -23,6 +23,8 @@ public class WiFiItem {
     String building;
     @SerializedName("method")
     String method;
+    @SerializedName("date")
+    long date;
 
     public WiFiItem(float x, float y, String SSID, String BSSID, int RSSI, int frequency, String uuid, String building, String method) {
         this.x = x;
@@ -34,6 +36,7 @@ public class WiFiItem {
         this.uuid = uuid;
         this.building = building;
         this.method = method;
+        this.date = System.currentTimeMillis();
     }
 
     public float getX() {
