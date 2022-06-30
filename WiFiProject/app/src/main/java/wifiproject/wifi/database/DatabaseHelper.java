@@ -129,20 +129,20 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             return;
         }
         SQLiteDatabase db = getWritableDatabase();
-        String sql = "insert into " + TABLE_WIFIINFO + String.format(" (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s) ", POS_X, POS_Y, SSID, BSSID, FREQUENCY, LEVEL, DATE, UUID, BUILDING, METHOD, NEW) + " values ";
-        String values = "";
+        StringBuilder sql = new StringBuilder("insert into " + TABLE_WIFIINFO + String.format(" (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s) ", POS_X, POS_Y, SSID, BSSID, FREQUENCY, LEVEL, DATE, UUID, BUILDING, METHOD, NEW) + " values ");
+        int sqlLength = sql.length();
         for (int i = 0; i < items.size(); i++) {
             WiFiItem item = items.get(i);
-            values += String.format(" (%f, %f, '%s', '%s', %d, %d, %d, '%s', '%s', '%s', %d), ",
-                    item.getX(), item.getY(), item.getSSID(), item.getBSSID(), item.getFrequency(), item.getRSSI(), item.getDate().getTime(), item.getUuid(), item.getBuilding(), item.getMethod(), _new);
+            sql.append(String.format(" (%f, %f, '%s', '%s', %d, %d, %d, '%s', '%s', '%s', %d), ",
+                    item.getX(), item.getY(), item.getSSID(), item.getBSSID(), item.getFrequency(), item.getRSSI(), item.getDate().getTime(), item.getUuid(), item.getBuilding(), item.getMethod(), _new));
 
             if (i % 1000 == 0) {
                 try {
-                    db.execSQL(sql + values.substring(0, values.length() - 2));
+                    db.execSQL(sql.substring(0, sql.length() - 2));
                 } catch (Exception e) {
                     e.printStackTrace();
                 } finally {
-                    values = "";
+                    sql.setLength(sqlLength);
                 }
             }
         }
@@ -162,7 +162,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
      */
     @SuppressLint("Range")
     public List<WiFiItem> searchFromWiFiInfo(String building, String ssid, Float x, Float y, String from, String to, Integer _new) {
-        String sql = "select " + String.format("%s, %s, %s, %s, %s, %s, %s, %s, %s, %s", POS_X, POS_Y, SSID, BSSID, LEVEL, FREQUENCY, UUID, BUILDING, METHOD, DATE) + " from " + TABLE_WIFIINFO;
+        StringBuilder sql = new StringBuilder("select " + String.format("%s, %s, %s, %s, %s, %s, %s, %s, %s, %s", POS_X, POS_Y, SSID, BSSID, LEVEL, FREQUENCY, UUID, BUILDING, METHOD, DATE) + " from " + TABLE_WIFIINFO);
         List<String> conditions = new ArrayList<String>();
         // 빌딩 조건 추가
         if (building != null) {
@@ -193,17 +193,17 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             conditions.add(String.format(" (%s = 1) ", NEW));
         }
         if (conditions.size() != 0) {
-            sql += " where ";
+            sql.append(" where ");
         }
         for (int i = 0; i < conditions.size(); i++) {
-            sql += conditions.get(i);
+            sql.append(conditions.get(i));
             if (i != conditions.size() - 1) {
-                sql += " and ";
+                sql.append(" and ");
             }
         }
 
         SQLiteDatabase db = getReadableDatabase();
-        Cursor cursor = db.rawQuery(sql, null);
+        Cursor cursor = db.rawQuery(sql.toString(), null);
 
         List<WiFiItem> result = new ArrayList<WiFiItem>();
 
@@ -254,21 +254,21 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             return;
         }
         SQLiteDatabase db = getWritableDatabase();
-        String sql = "insert into " + TABLE_FINGERPRINT + String.format(" (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)", POS_X, POS_Y, UUID, DATE, EST_X, EST_Y, K, THRESHOLD, BUILDING, SSID, ALGORITHM_VERSION, METHOD, NEW) + " values ";
-        String values = "";
+        StringBuilder sql = new StringBuilder("insert into " + TABLE_FINGERPRINT + String.format(" (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)", POS_X, POS_Y, UUID, DATE, EST_X, EST_Y, K, THRESHOLD, BUILDING, SSID, ALGORITHM_VERSION, METHOD, NEW) + " values ");
+        int sqlLength = sql.length();
         for (int i = 0; i < items.size(); i++) {
             EstimatedResult item = items.get(i);
-            values += String.format(" (%f, %f, '%s', %d, %f, %f, %d, %d, '%s', '%s', %d, '%s', %d), ",
+            sql.append(String.format(" (%f, %f, '%s', %d, %f, %f, %d, %d, '%s', '%s', %d, '%s', %d), ",
                     item.getPositionRealX(), item.getPositionRealY(), item.getUuid(), item.getDate().getTime(), item.getPositionEstimatedX(), item.getPositionEstimatedY(),
-                    item.getK(), item.getThreshold(), item.getBuilding(), item.getSsid(), item.getAlgorithmVersion(), item.getMethod(), _new);
+                    item.getK(), item.getThreshold(), item.getBuilding(), item.getSsid(), item.getAlgorithmVersion(), item.getMethod(), _new));
 
             if (i % 1000 == 0) {
                 try {
-                    db.execSQL(sql + values.substring(0, values.length() - 2));
+                    db.execSQL(sql.substring(0, sql.length() - 2));
                 } catch (Exception e) {
                     e.printStackTrace();
                 } finally {
-                    values = "";
+                    sql.setLength(sqlLength);
                 }
             }
         }
@@ -282,26 +282,26 @@ public class DatabaseHelper extends SQLiteOpenHelper {
      */
     @SuppressLint("Range")
     public List<EstimatedResult> searchFromFingerprint(Integer _new) {
-        String sql = "select " + String.format(" %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s ", POS_X, POS_Y, UUID, DATE, EST_X, EST_Y, K, THRESHOLD, BUILDING, SSID, ALGORITHM_VERSION, METHOD) +
-                " from " + TABLE_FINGERPRINT;
+        StringBuilder sql = new StringBuilder("select " + String.format(" %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s ", POS_X, POS_Y, UUID, DATE, EST_X, EST_Y, K, THRESHOLD, BUILDING, SSID, ALGORITHM_VERSION, METHOD) +
+                " from " + TABLE_FINGERPRINT);
         List<String> conditions = new ArrayList<String>();
         // 로컬에만 있는 데이터만 조회할지에 대한 조건 추가
         if (_new != null) {
             conditions.add(String.format(" (%s = 1) ", NEW));
         }
         if (conditions.size() != 0) {
-            sql += " where ";
+            sql.append(" where ");
         }
         for (int i = 0; i < conditions.size(); i++) {
-            sql += conditions.get(i);
+            sql.append(conditions.get(i));
             if (i != conditions.size() - 1) {
-                sql += " and ";
+                sql.append(" and ");
             }
         }
 
 
         SQLiteDatabase db = getReadableDatabase();
-        Cursor cursor = db.rawQuery(sql, null);
+        Cursor cursor = db.rawQuery(sql.toString(), null);
 
         List<EstimatedResult> result = new ArrayList<EstimatedResult>();
         int count = cursor.getCount();
