@@ -25,6 +25,8 @@ public class EstimatedResult {
     int threshold;
     @SerializedName("algorithmVersion")
     int algorithmVersion;
+    @SerializedName("date")
+    long date;
     StringBuilder estimateReason;
 
     public EstimatedResult() {
@@ -39,6 +41,7 @@ public class EstimatedResult {
         this.K = -1;
         this.threshold = -1;
         this.algorithmVersion = 0;
+        this.date = System.currentTimeMillis();
         this.estimateReason = new StringBuilder();
     }
 
@@ -54,6 +57,7 @@ public class EstimatedResult {
         this.K = estimatedResult.getK();
         this.threshold = estimatedResult.getThreshold();
         this.algorithmVersion = estimatedResult.getAlgorithmVersion();
+        this.date = estimatedResult.getDate();
         this.estimateReason = estimatedResult.getEstimateReason();
     }
 
@@ -72,6 +76,30 @@ public class EstimatedResult {
         this.K = K;
         this.threshold = threshold;
         this.algorithmVersion = algorithmVersion;
+    }
+
+    public EstimatedResult(String building, String ssid, String uuid, String method, int K, int threshold, int algorithmVersion, long date) {
+        this(building, ssid, uuid, method, K, threshold, algorithmVersion);
+
+        this.date = date;
+    }
+
+    public EstimatedResult(String building, String ssid, double positionRealX, double positionRealY, double positionEstimatedX, double positionEstimatedY,
+                            String uuid, String method, int K, int threshold, int algorithmVersion, long date) {
+        this();
+
+        this.building = building;
+        this.ssid = ssid;
+        this.positionRealX = positionRealX;
+        this.positionRealY = positionRealY;
+        this.positionEstimatedX = positionEstimatedX;
+        this.positionEstimatedY = positionEstimatedY;
+        this.uuid = uuid;
+        this.method = method;
+        this.K = K;
+        this.threshold = threshold;
+        this.algorithmVersion = algorithmVersion;
+        this.date = date;
     }
 
     public String getBuilding() {
@@ -160,6 +188,18 @@ public class EstimatedResult {
 
     public void setAlgorithmVersion(int algorithmVersion) {
         this.algorithmVersion = algorithmVersion;
+    }
+
+    public long getDate() {
+        return this.date;
+    }
+
+    public void setDate() {
+        this.date = System.currentTimeMillis();
+    }
+
+    public void setDate(long date) {
+        this.date = date;
     }
 
     public StringBuilder getEstimateReason() {
