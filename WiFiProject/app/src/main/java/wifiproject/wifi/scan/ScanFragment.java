@@ -192,8 +192,6 @@ public class ScanFragment extends Fragment {
                     return;
                 }
 
-                wm.startScan();
-
                 try {
                     bluetoothAdapter.enable();
                     while (!bluetoothAdapter.isEnabled()) {
@@ -279,8 +277,7 @@ public class ScanFragment extends Fragment {
     private void pushRemote() {
         RetrofitAPI retrofit_api = RetrofitClient.getRetrofitAPI();
 
-        retrofit_api.postData(wifiitem_adpater.getItems().get(0).getX(), wifiitem_adpater.getItems().get(0).getY(),
-                wifiitem_adpater.getItems()).enqueue(new Callback<PushResultModel>() {
+        retrofit_api.postDataWiFiItem(wifiitem_adpater.getItems()).enqueue(new Callback<PushResultModel>() {
             @Override
             public void onResponse(Call<PushResultModel> call, Response<PushResultModel> response) {
                 PushResultModel r = response.body();

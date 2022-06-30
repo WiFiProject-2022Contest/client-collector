@@ -7,7 +7,7 @@ android {
 
     defaultConfig {
         applicationId "wifilocation.wifi"
-        minSdk 21
+        minSdk 22
         targetSdk 28
         versionCode 1
         versionName "1.0"

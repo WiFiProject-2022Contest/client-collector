@@ -153,7 +153,7 @@ public class SearchFragment extends Fragment {
     private List<WiFiItem> searchRemote(Float target_x, Float target_y, String from, String to) {
         RetrofitAPI retrofit_api = RetrofitClient.getRetrofitAPI();
         ArrayList<WiFiItem> items = new ArrayList<WiFiItem>();
-        retrofit_api.getData(MainActivity.building, MainActivity.ssid, target_x, target_y, from, to).enqueue(new Callback<List<WiFiItem>>() {
+        retrofit_api.getDataWiFiItem(MainActivity.building, MainActivity.ssid, target_x, target_y, from, to).enqueue(new Callback<List<WiFiItem>>() {
             @Override
             public void onResponse(Call<List<WiFiItem>> call, Response<List<WiFiItem>> response) {
                 items.addAll(response.body());
@@ -177,7 +177,7 @@ public class SearchFragment extends Fragment {
     private List<WiFiItem> searchLocal(Float target_x, Float target_y, String from, String to) {
         DatabaseHelper dbHelper = new DatabaseHelper(context);
         ArrayList<WiFiItem> items = new ArrayList<WiFiItem>();
-        items.addAll(dbHelper.searchFromWiFiInfo(MainActivity.building, MainActivity.ssid, target_x, target_y, from.equals("") ? null : from, to.equals("") ? null : to));
+        items.addAll(dbHelper.searchFromWiFiInfo(MainActivity.building, MainActivity.ssid, target_x, target_y, from.equals("") ? null : from, to.equals("") ? null : to, null));
         wifiitem_adapter.setItems(items);
         recyclerview_searched.setAdapter(wifiitem_adapter);
         imageview_map2.setSpot(items);
