@@ -151,11 +151,12 @@ public class ScanFragment extends Fragment {
                     for (android.bluetooth.le.ScanResult scanResult : results) {
                         String SSID = scanResult.getScanRecord().getDeviceName();
                         if (SSID == null) {
-                            SSID = scanResult.getDevice().getName().replaceAll("\u0000", "");
+                            SSID = scanResult.getDevice().getName();
                         }
                         if (SSID == null) {
                             SSID = "";
                         }
+                        SSID.replaceAll("\u0000", "");
 
                         String BSSID = scanResult.getDevice().getAddress();
                         int level = scanResult.getRssi();

@@ -128,6 +128,7 @@ public class EstimateFragment extends Fragment {
                         if (SSID == null) {
                             SSID = "";
                         }
+                        SSID.replaceAll("\u0000", "");
 
                         String BSSID = scanResult.getDevice().getAddress();
                         int level = scanResult.getRssi();
