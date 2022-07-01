@@ -2,6 +2,8 @@ package wifilocation.wifi.model;
 
 import com.google.gson.annotations.SerializedName;
 
+import java.util.Date;
+
 public class WiFiItem {
     // https://www.notion.so/f61f9f892b254d1d8dbdf2f101ef5fb2?v=e9a507783cde4e3ca3410d92fd295e48
     // TODO: @Expose 추가 고려
@@ -23,6 +25,8 @@ public class WiFiItem {
     String building;
     @SerializedName("method")
     String method;
+    @SerializedName("date")
+    Date date;
 
     public WiFiItem(float x, float y, String SSID, String BSSID, int RSSI, int frequency, String uuid, String building, String method) {
         this.x = x;
@@ -34,6 +38,12 @@ public class WiFiItem {
         this.uuid = uuid;
         this.building = building;
         this.method = method;
+        this.date = new Date(System.currentTimeMillis());
+    }
+
+    public WiFiItem(Float x, Float y, String SSID, String BSSID, int RSSI, int frequency, String uuid, String building, String method, long date) {
+        this(x, y, SSID, BSSID, RSSI, frequency, uuid, building, method);
+        this.date = new Date(date);
     }
 
     public float getX() {
@@ -106,6 +116,14 @@ public class WiFiItem {
         this.method = method;
     }
 
+    public Date getDate() {
+        return date;
+    }
+
+    public void setDate(Date date) {
+        this.date = date;
+    }
+
     @Override
     public String toString() {
         return "WiFiItem{" +
@@ -118,6 +136,7 @@ public class WiFiItem {
                 ", uuid='" + uuid + '\'' +
                 ", building='" + building + '\'' +
                 ", method='" + method + '\'' +
+                ", date.getTime()=" + date.getTime() +
                 '}';
     }
 }

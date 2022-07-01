@@ -14,7 +14,9 @@ import android.content.IntentFilter;
 import android.graphics.PointF;
 import android.net.wifi.ScanResult;
 import android.net.wifi.WifiManager;
+import android.os.Build;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
@@ -65,11 +67,15 @@ public class ScanFragment extends Fragment {
     private BroadcastReceiver wifi_receiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            boolean success = intent.getBooleanExtra(WifiManager.EXTRA_RESULTS_UPDATED, false);
-            if (success) {
+            if(Build.VERSION.SDK_INT <= 22) {
                 scanSuccess();
             } else {
-                scanFailure();
+                boolean success = intent.getBooleanExtra(WifiManager.EXTRA_RESULTS_UPDATED, false);
+                if (success) {
+                    scanSuccess();
+                } else {
+                    scanFailure();
+                }
             }
         }
     };
@@ -204,7 +210,6 @@ public class ScanFragment extends Fragment {
                     Toast.makeText(context, "올바른 형식의 좌표 입력 필요", Toast.LENGTH_SHORT).show();
                     return;
                 }
-
                 wm.startScan();
 
                 try {
@@ -228,7 +233,9 @@ public class ScanFragment extends Fragment {
         button_push.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(getActivity());
+                pushLocal();
+
+                /* AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(getActivity());
                 alertDialogBuilder.setTitle("데이터베이스 선택");
                 alertDialogBuilder.setCancelable(true);
                 alertDialogBuilder.setPositiveButton("서버", new DialogInterface.OnClickListener() {
@@ -252,7 +259,7 @@ public class ScanFragment extends Fragment {
                 });
 
                 AlertDialog alertDialog = alertDialogBuilder.create();
-                alertDialog.show();
+                alertDialog.show(); */
             }
         });
 
@@ -292,8 +299,7 @@ public class ScanFragment extends Fragment {
     private void pushRemote() {
         RetrofitAPI retrofit_api = RetrofitClient.getRetrofitAPI();
 
-        retrofit_api.postData(wifiitem_adpater.getItems().get(0).getX(), wifiitem_adpater.getItems().get(0).getY(),
-                wifiitem_adpater.getItems()).enqueue(new Callback<PushResultModel>() {
+        retrofit_api.postDataWiFiItem(wifiitem_adpater.getItems()).enqueue(new Callback<PushResultModel>() {
             @Override
             public void onResponse(Call<PushResultModel> call, Response<PushResultModel> response) {
                 PushResultModel r = response.body();
@@ -323,6 +329,7 @@ public class ScanFragment extends Fragment {
 
     private void pushLocal() {
         DatabaseHelper dbHelper = new DatabaseHelper(context);
-        dbHelper.insertIntoWiFiInfo(wifiitem_adpater.getItems());
+        dbHelper.insertIntoWiFiInfo(wifiitem_adpater.getItems(), 1);
+        Toast.makeText(context, "push 성공!", Toast.LENGTH_SHORT).show();
     }
 }

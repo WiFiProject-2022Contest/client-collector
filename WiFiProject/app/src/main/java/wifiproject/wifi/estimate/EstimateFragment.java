@@ -91,13 +91,6 @@ public class EstimateFragment extends Fragment {
     };
 
     @Override
-    public void onCreate(@Nullable Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-
-        getRemote();
-    }
-
-    @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         super.onCreateView(inflater, container, savedInstanceState);
@@ -201,31 +194,7 @@ public class EstimateFragment extends Fragment {
         buttonGetAllDatabase.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(getActivity());
-                alertDialogBuilder.setTitle("데이터베이스 선택");
-                alertDialogBuilder.setCancelable(true);
-                alertDialogBuilder.setPositiveButton("서버", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialogInterface, int i) {
-                        getRemote();
-                    }
-                });
-                alertDialogBuilder.setNegativeButton("로컬", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialogInterface, int i) {
-                        getLocal();
-                    }
-                });
-                /*
-                alertDialogBuilder.setNeutralButton("모두", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialogInterface, int i) {
-                    }
-                });
-                 */
-
-                AlertDialog alertDialog = alertDialogBuilder.create();
-                alertDialog.show();
+                getLocal();
             }
         });
 
@@ -287,33 +256,11 @@ public class EstimateFragment extends Fragment {
                     listForPost.add(er);
                 }
 
-                AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(getActivity());
-                alertDialogBuilder.setTitle("데이터베이스 선택");
-                alertDialogBuilder.setCancelable(true);
-                alertDialogBuilder.setPositiveButton("서버", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialogInterface, int i) {
-                        pushRemote(listForPost);
-                    }
-                });
-                alertDialogBuilder.setNegativeButton("로컬", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialogInterface, int i) {
-                        pushLocal(listForPost);
-                    }
-                });
-                alertDialogBuilder.setNeutralButton("모두", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialogInterface, int i) {
-                        pushRemote(listForPost);
-                        pushLocal(listForPost);
-                    }
-                });
-
-                AlertDialog alertDialog = alertDialogBuilder.create();
-                alertDialog.show();
+                pushLocal(listForPost);
             }
         });
+
+        getLocal();
 
         return rootView;
     }
@@ -325,10 +272,11 @@ public class EstimateFragment extends Fragment {
         context.unregisterReceiver(wifi_receiver);
     }
 
+    /*
     private void getRemote() {
         // DB 전체 다 받아오기
         RetrofitAPI retrofit_api_wifi = RetrofitClient.getRetrofitAPI();
-        retrofit_api_wifi.getData(MainActivity.building, MainActivity.ssid, null, null, null, null).enqueue(new Callback<List<WiFiItem>>() {
+        retrofit_api_wifi.getDataWiFiItem(MainActivity.building, MainActivity.ssid, null, null, null, null).enqueue(new Callback<List<WiFiItem>>() {
             @Override
             public void onResponse(Call<List<WiFiItem>> call, Response<List<WiFiItem>> response) {
                 databaseAllWiFiData = response.body();
@@ -342,7 +290,7 @@ public class EstimateFragment extends Fragment {
         });
 
         RetrofitAPI retrofit_api_ble = RetrofitClient.getRetrofitAPI();
-        retrofit_api_ble.getData(MainActivity.building, MainActivity.bleName, null, null, null, null).enqueue(new Callback<List<WiFiItem>>() {
+        retrofit_api_ble.getDataWiFiItem(MainActivity.building, MainActivity.bleName, null, null, null, null).enqueue(new Callback<List<WiFiItem>>() {
             @Override
             public void onResponse(Call<List<WiFiItem>> call, Response<List<WiFiItem>> response) {
                 databaseAllBleData = response.body();
@@ -355,18 +303,20 @@ public class EstimateFragment extends Fragment {
             }
         });
     }
+     */
 
     private void getLocal() {
         DatabaseHelper dbHelper = new DatabaseHelper(context);
-        databaseAllWiFiData = dbHelper.searchFromWiFiInfo(MainActivity.building, MainActivity.ssid, null, null, null, null);
-        databaseAllBleData = dbHelper.searchFromWiFiInfo(MainActivity.building, MainActivity.bleName, null, null, null, null);
+        databaseAllWiFiData = dbHelper.searchFromWiFiInfo(MainActivity.building, MainActivity.ssid, null, null, null, null, null);
+        databaseAllBleData = dbHelper.searchFromWiFiInfo(MainActivity.building, MainActivity.bleName, null, null, null, null, null);
 
         Toast.makeText(context, "Local database loaded.", Toast.LENGTH_SHORT).show();
     }
 
+    /*
     private void pushRemote(List<EstimatedResult> listForPost) {
         RetrofitAPI retrofit_api = RetrofitClient.getRetrofitAPI();
-        retrofit_api.postData(listForPost).enqueue(new Callback<PushResultModel>() {
+        retrofit_api.postDataEstimatedResult(listForPost).enqueue(new Callback<PushResultModel>() {
             @Override
             public void onResponse(Call<PushResultModel> call, Response<PushResultModel> response) {
                 PushResultModel r = response.body();
@@ -378,7 +328,7 @@ public class EstimateFragment extends Fragment {
                         }
                     });
                 } else {
-                    getActivity().runOnUiThread(new Runnable() {
+                    getActivity()   .runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
                             Toast.makeText(context, "PUSH 실패", Toast.LENGTH_SHORT).show();
@@ -393,10 +343,11 @@ public class EstimateFragment extends Fragment {
             }
         });
     }
+     */
 
     private void pushLocal(List<EstimatedResult> listForPost) {
         DatabaseHelper dbHelper = new DatabaseHelper(context);
-        dbHelper.insertIntoFingerprint(listForPost);
+        dbHelper.insertIntoFingerprint(listForPost, 1);
 
         Toast.makeText(context, "Local database push", Toast.LENGTH_SHORT).show();
     }
