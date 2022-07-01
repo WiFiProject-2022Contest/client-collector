@@ -144,14 +144,27 @@ public class ScanFragment extends Fragment {
                 try {
                     for (android.bluetooth.le.ScanResult scanResult : results) {
                         String SSID = scanResult.getScanRecord().getDeviceName();
-                        String BSSID = scanResult.getDevice().getAddress();
-                        int level = scanResult.getRssi();
-                        int frequency = 0;
-
+                        if (SSID == null) {
+                            SSID = scanResult.getDevice().getName();
+                        }
                         if (SSID == null) {
                             SSID = "";
                         }
 
+                        String BSSID = scanResult.getDevice().getAddress();
+                        int level = scanResult.getRssi();
+                        int frequency = 0;
+
+                        boolean alreadyExists = false;
+                        for (WiFiItem elem : items) {
+                            if (BSSID.equals(elem.getBSSID())) {
+                                alreadyExists = true;
+                                break;
+                            }
+                        }
+                        if (alreadyExists) {
+                            continue;
+                        }
                         items.add(new WiFiItem(target_x, target_y, SSID, BSSID, level, frequency, MainActivity.uuid, MainActivity.building, "BLE"));
                     }
 

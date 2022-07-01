@@ -129,14 +129,27 @@ public class EstimateFragment extends Fragment {
 
                     for (android.bluetooth.le.ScanResult scanResult : results) {
                         String SSID = scanResult.getScanRecord().getDeviceName();
-                        String BSSID = scanResult.getDevice().getAddress();
-                        int level = scanResult.getRssi();
-                        int frequency = 0;
-
+                        if (SSID == null) {
+                            SSID = scanResult.getDevice().getName();
+                        }
                         if (SSID == null) {
                             SSID = "";
                         }
 
+                        String BSSID = scanResult.getDevice().getAddress();
+                        int level = scanResult.getRssi();
+                        int frequency = 0;
+
+                        boolean alreadyExists = false;
+                        for (WiFiItem elem : userData) {
+                            if (BSSID.equals(elem.getBSSID())) {
+                                alreadyExists = true;
+                                break;
+                            }
+                        }
+                        if (alreadyExists) {
+                            continue;
+                        }
                         userData.add(new WiFiItem(0, 0, SSID, BSSID, level, frequency, MainActivity.uuid, MainActivity.building, "BLE"));
                     }
 
