@@ -376,8 +376,12 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             List<WiFiItem> wiFiItems = searchFromWiFiInfo(null, null, null, null, null, null, 1);
             List<EstimatedResult> estimatedResults = searchFromFingerprint(1);
             RetrofitAPI retrofitAPI = RetrofitClient.getRetrofitAPI();
-            retrofitAPI.postDataWiFiItem(wiFiItems);
-            retrofitAPI.postDataEstimatedResult(estimatedResults);
+            try {
+                retrofitAPI.postDataWiFiItem(wiFiItems).execute();
+                retrofitAPI.postDataEstimatedResult(estimatedResults).execute();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
 
         private void deleteAllLocal() {
