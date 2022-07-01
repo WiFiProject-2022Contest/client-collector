@@ -137,7 +137,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             sql.append(String.format(" (%f, %f, '%s', '%s', %d, %d, %d, '%s', '%s', '%s', %d), ",
                     item.getX(), item.getY(), item.getSSID(), item.getBSSID(), item.getFrequency(), item.getRSSI(), item.getDate().getTime(), item.getUuid(), item.getBuilding(), item.getMethod(), _new));
 
-            if (i % 1000 == 0) {
+            if (i % 500 == 0) {
                 try {
                     db.execSQL(sql.substring(0, sql.length() - 2));
                 } catch (Exception e) {
@@ -264,7 +264,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                     item.getPositionRealX(), item.getPositionRealY(), item.getUuid(), item.getDate().getTime(), item.getPositionEstimatedX(), item.getPositionEstimatedY(),
                     item.getK(), item.getThreshold(), item.getBuilding(), item.getSsid(), item.getAlgorithmVersion(), item.getMethod(), _new));
 
-            if (i % 1000 == 0) {
+            if (i % 500 == 0) {
                 try {
                     db.execSQL(sql.substring(0, sql.length() - 2));
                 } catch (Exception e) {
@@ -397,6 +397,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             try {
                 List<WiFiItem> wiFiItems = retrofitAPI.getDataWiFiItem(null, null, null, null, null, null).execute().body();
                 List<EstimatedResult> estimatedResults = retrofitAPI.getDataEstimateResult(null, null).execute().body();
+                System.out.println("wiFiItems.size() = " + wiFiItems.size());
+                System.out.println("estimatedResults.size() = " + estimatedResults.size());
                 insertIntoWiFiInfo(wiFiItems, 0);
                 insertIntoFingerprint(estimatedResults, 0);
             } catch (IOException e) {
