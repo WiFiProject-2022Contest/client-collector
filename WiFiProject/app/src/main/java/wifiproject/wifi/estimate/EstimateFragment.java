@@ -1,6 +1,5 @@
 package wifilocation.wifi.estimate;
 
-import android.app.AlertDialog;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothManager;
 import android.bluetooth.le.BluetoothLeScanner;
@@ -9,7 +8,6 @@ import android.bluetooth.le.ScanFilter;
 import android.bluetooth.le.ScanSettings;
 import android.content.BroadcastReceiver;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.graphics.PointF;
@@ -18,7 +16,6 @@ import android.net.wifi.WifiManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
 
-import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
 import android.text.method.ScrollingMovementMethod;
@@ -39,13 +36,7 @@ import wifilocation.wifi.MainActivity;
 import wifilocation.wifi.R;
 import wifilocation.wifi.customviews.SpotImageView;
 import wifilocation.wifi.database.DatabaseHelper;
-import wifilocation.wifi.model.PushResultModel;
 import wifilocation.wifi.model.WiFiItem;
-import wifilocation.wifi.serverconnection.RetrofitAPI;
-import wifilocation.wifi.serverconnection.RetrofitClient;
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
 
 public class EstimateFragment extends Fragment {
     Context context;
@@ -56,7 +47,7 @@ public class EstimateFragment extends Fragment {
     ScanSettings bluetoothLeScanSettings;
     ScanCallback bluetoothLeScanCallback;
 
-    Button buttonGetAllDatabase;
+    Button buttonLoadAllDatabase;
     Button buttonEstimate;
     Button buttonPushEstimationResult;
     TextView editTextRealX;
@@ -180,7 +171,7 @@ public class EstimateFragment extends Fragment {
         imageview_map3 = rootView.findViewById(R.id.imageViewMap3);
         imageview_map3.setImage(ImageSource.resource(R.drawable.skku_example));
 
-        buttonGetAllDatabase = rootView.findViewById(R.id.buttonGetAllDatabase);
+        buttonLoadAllDatabase = rootView.findViewById(R.id.buttonLoadAllDatabase);
         buttonEstimate = rootView.findViewById(R.id.buttonEstimate);
         buttonPushEstimationResult = rootView.findViewById(R.id.buttonPushEstimationResult);
 
@@ -192,7 +183,7 @@ public class EstimateFragment extends Fragment {
         textEstimateReason = rootView.findViewById(R.id.textEstimateReason);
         textEstimateReason.setMovementMethod(new ScrollingMovementMethod());
 
-        buttonGetAllDatabase.setOnClickListener(new View.OnClickListener() {
+        buttonLoadAllDatabase.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 getLocal();
@@ -273,39 +264,6 @@ public class EstimateFragment extends Fragment {
         context.unregisterReceiver(wifi_receiver);
     }
 
-    /*
-    private void getRemote() {
-        // DB 전체 다 받아오기
-        RetrofitAPI retrofit_api_wifi = RetrofitClient.getRetrofitAPI();
-        retrofit_api_wifi.getDataWiFiItem(MainActivity.building, MainActivity.ssid, null, null, null, null).enqueue(new Callback<List<WiFiItem>>() {
-            @Override
-            public void onResponse(Call<List<WiFiItem>> call, Response<List<WiFiItem>> response) {
-                databaseAllWiFiData = response.body();
-                Toast.makeText(context, "Database loaded.", Toast.LENGTH_SHORT).show();
-            }
-
-            @Override
-            public void onFailure(Call<List<WiFiItem>> call, Throwable t) {
-                Toast.makeText(context, "Database failed.", Toast.LENGTH_SHORT).show();
-            }
-        });
-
-        RetrofitAPI retrofit_api_ble = RetrofitClient.getRetrofitAPI();
-        retrofit_api_ble.getDataWiFiItem(MainActivity.building, MainActivity.bleName, null, null, null, null).enqueue(new Callback<List<WiFiItem>>() {
-            @Override
-            public void onResponse(Call<List<WiFiItem>> call, Response<List<WiFiItem>> response) {
-                databaseAllBleData = response.body();
-                Toast.makeText(context, "Database loaded.", Toast.LENGTH_SHORT).show();
-            }
-
-            @Override
-            public void onFailure(Call<List<WiFiItem>> call, Throwable t) {
-                Toast.makeText(context, "Database failed.", Toast.LENGTH_SHORT).show();
-            }
-        });
-    }
-     */
-
     private void getLocal() {
         DatabaseHelper dbHelper = new DatabaseHelper(context);
         databaseAllWiFiData = dbHelper.searchFromWiFiInfo(MainActivity.building, MainActivity.ssid, null, null, null, null, null);
@@ -313,38 +271,6 @@ public class EstimateFragment extends Fragment {
 
         Toast.makeText(context, "Local database loaded.", Toast.LENGTH_SHORT).show();
     }
-
-    /*
-    private void pushRemote(List<EstimatedResult> listForPost) {
-        RetrofitAPI retrofit_api = RetrofitClient.getRetrofitAPI();
-        retrofit_api.postDataEstimatedResult(listForPost).enqueue(new Callback<PushResultModel>() {
-            @Override
-            public void onResponse(Call<PushResultModel> call, Response<PushResultModel> response) {
-                PushResultModel r = response.body();
-                if (r.getSuccess().equals("true")) {
-                    getActivity().runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            Toast.makeText(context, "PUSH 성공", Toast.LENGTH_SHORT).show();
-                        }
-                    });
-                } else {
-                    getActivity()   .runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            Toast.makeText(context, "PUSH 실패", Toast.LENGTH_SHORT).show();
-                        }
-                    });
-                }
-            }
-
-            @Override
-            public void onFailure(Call<PushResultModel> call, Throwable t) {
-                t.printStackTrace();
-            }
-        });
-    }
-     */
 
     private void pushLocal(List<EstimatedResult> listForPost) {
         DatabaseHelper dbHelper = new DatabaseHelper(context);
