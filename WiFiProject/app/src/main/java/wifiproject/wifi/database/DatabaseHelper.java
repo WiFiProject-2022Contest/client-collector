@@ -123,6 +123,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
      * wifiinfo 테이블에 데이터 추가
      *
      * @param items 스캔한 WiFiItem 전달, DB에 저장
+     * @param _new  새로운 데이터라면 1, 아니라면 0 전달
      */
     public void insertIntoWiFiInfo(List<WiFiItem> items, int _new) {
         if (items.size() == 0) {
@@ -248,6 +249,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
      * fingerprint 테이블에 데이터 추가
      *
      * @param items 추정된 위치 정보 리스트 전달
+     * @param _new  새로운 데이터라면 1, 아니라면 0 전달
      */
     public void insertIntoFingerprint(List<EstimatedResult> items, int _new) {
         if (items.size() == 0) {
@@ -354,7 +356,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             // 서버로부터 데이터 받아오기
             publishProgress("서버로부터 데이터를 받아오는 중...");
             getAllFromRemote();
-            return "동기화 종료";
+            return "동기화 완료";
         }
 
         @Override
