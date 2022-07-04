@@ -8,7 +8,6 @@ import android.bluetooth.le.ScanFilter;
 import android.bluetooth.le.ScanSettings;
 import android.content.BroadcastReceiver;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.graphics.PointF;
@@ -25,14 +24,20 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
-import android.app.AlertDialog;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.davemorrissey.labs.subscaleview.ImageSource;
 
+import org.altbeacon.beacon.Beacon;
+import org.altbeacon.beacon.BeaconManager;
+import org.altbeacon.beacon.BeaconParser;
+import org.altbeacon.beacon.RangeNotifier;
+import org.altbeacon.beacon.Region;
+
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 import wifilocation.wifi.MainActivity;
@@ -56,6 +61,8 @@ public class ScanFragment extends Fragment {
     BluetoothManager bm;
     BluetoothAdapter bluetoothAdapter;
     BluetoothLeScanner bluetoothLeScanner;
+    BeaconManager beaconManager;
+    Region beaconRegion;
     ScanSettings bluetoothLeScanSettings;
     ScanCallback bluetoothLeScanCallback;
     Context context;
@@ -63,6 +70,7 @@ public class ScanFragment extends Fragment {
 
     ArrayList<WiFiItem> items;
     boolean bleScanRequired = false;
+    boolean beaconScanRequired = false;
 
     private BroadcastReceiver wifi_receiver = new BroadcastReceiver() {
         @Override
@@ -164,7 +172,7 @@ public class ScanFragment extends Fragment {
 
                         boolean alreadyExists = false;
                         for (WiFiItem elem : items) {
-                            if (BSSID.equals(elem.getBSSID())) {
+                            if (BSSID.equals(elem.getBSSID()) && elem.getMethod().equals("BLE")) {
                                 alreadyExists = true;
                                 break;
                             }
@@ -195,6 +203,58 @@ public class ScanFragment extends Fragment {
             }
         };
 
+        beaconManager = BeaconManager.getInstanceForApplication(context);
+        beaconManager.getBeaconParsers().add(new BeaconParser().setBeaconLayout("m:2-3=0215,i:4-19,i:20-21,i:22-23,p:24-24,d:25-25"));
+        beaconManager.addRangeNotifier(new RangeNotifier() {
+            @Override
+            public void didRangeBeaconsInRegion(Collection<Beacon> beacons, Region region) {
+                if (!beaconScanRequired) {
+                    return;
+                }
+
+                if (beacons.size() > 0) {
+                    float target_x, target_y;
+                    try {
+                        target_x = Float.parseFloat(edittext_x.getText().toString());
+                        target_y = Float.parseFloat(edittext_y.getText().toString());
+                    } catch (Exception e) {
+                        return;
+                    }
+
+                    for (Beacon beacon : beacons) {
+                        String SSID = beacon.getBluetoothName();
+                        if (SSID == null) {
+                            SSID = "";
+                        }
+                        SSID.replaceAll("\u0000", "");
+
+                        String BSSID = beacon.getBluetoothAddress();
+                        int level = beacon.getRssi();
+                        int distance = (int) Math.round(beacon.getDistance() * 1000);
+
+                        boolean alreadyExists = false;
+                        for (WiFiItem elem : items) {
+                            if (BSSID.equals(elem.getBSSID()) && elem.getMethod().equals("iBeacon")) {
+                                alreadyExists = true;
+                                break;
+                            }
+                        }
+                        if (alreadyExists) {
+                            continue;
+                        }
+
+                        items.add(new WiFiItem(target_x, target_y, SSID, BSSID, level, distance, MainActivity.uuid, MainActivity.building, "iBeacon"));
+                    }
+
+                    wifiitem_adpater.setItems(items);
+                    recyclerview_scanned.setAdapter(wifiitem_adpater);
+                }
+                beaconScanRequired = false;
+                beaconManager.stopRangingBeacons(region);
+            }
+        });
+        beaconRegion = new Region("iBeaconScan", null, null, null);
+
         IntentFilter filter = new IntentFilter();
         filter.addAction(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION);
         context.registerReceiver(wifi_receiver, filter);
@@ -222,6 +282,9 @@ public class ScanFragment extends Fragment {
                     bleScanRequired = true;
                     //bluetoothLeScanner.flushPendingScanResults(bluetoothLeScanCallback);
                     bluetoothLeScanner.startScan(new ArrayList<ScanFilter>(), bluetoothLeScanSettings, bluetoothLeScanCallback);
+
+                    beaconScanRequired = true;
+                    beaconManager.startRangingBeacons(beaconRegion);
                 } catch (SecurityException e) {
                     Toast.makeText(context, "블루투스 권한 실패", Toast.LENGTH_SHORT).show();
                 } catch (Exception e) {
