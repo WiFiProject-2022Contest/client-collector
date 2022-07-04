@@ -35,8 +35,11 @@ public class PositioningAlgorithm {
             K = 7;
             minValidAPNum = 1;
             minDbm = -55;
-        }
-        else if (method.equals("BLE") && targetGHZ == 2) {
+        } else if (method.equals("BLE")) {
+            K = 3;
+            minValidAPNum = 1;
+            minDbm = -70;
+        } else if (method.equals("iBeacon")) {
             K = 3;
             minValidAPNum = 1;
             minDbm = -70;
