@@ -61,10 +61,10 @@ public class ScanFragment extends Fragment {
     BluetoothManager bm;
     BluetoothAdapter bluetoothAdapter;
     BluetoothLeScanner bluetoothLeScanner;
-    BeaconManager beaconManager;
-    Region beaconRegion;
     ScanSettings bluetoothLeScanSettings;
     ScanCallback bluetoothLeScanCallback;
+    BeaconManager beaconManager;
+    Region beaconRegion;
     Context context;
     EditText edittext_x, edittext_y;
 
