@@ -181,9 +181,6 @@ public class ScanFragment extends Fragment {
             }
         };
 
-        IntentFilter filter = new IntentFilter();
-        filter.addAction(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION);
-        context.registerReceiver(wifi_receiver, filter);
         Button button_scan = rootview.findViewById(R.id.buttonScan);
         button_scan.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -221,32 +218,6 @@ public class ScanFragment extends Fragment {
             @Override
             public void onClick(View view) {
                 pushLocal();
-
-                /* AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(getActivity());
-                alertDialogBuilder.setTitle("데이터베이스 선택");
-                alertDialogBuilder.setCancelable(true);
-                alertDialogBuilder.setPositiveButton("서버", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialogInterface, int i) {
-                        pushRemote();
-                    }
-                });
-                alertDialogBuilder.setNegativeButton("로컬", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialogInterface, int i) {
-                        pushLocal();
-                    }
-                });
-                alertDialogBuilder.setNeutralButton("모두", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialogInterface, int i) {
-                        pushRemote();
-                        pushLocal();
-                    }
-                });
-
-                AlertDialog alertDialog = alertDialogBuilder.create();
-                alertDialog.show(); */
             }
         });
 
@@ -254,9 +225,16 @@ public class ScanFragment extends Fragment {
     }
 
     @Override
-    public void onDestroyView() {
-        super.onDestroyView();
+    public void onResume() {
+        super.onResume();
+        IntentFilter filter = new IntentFilter();
+        filter.addAction(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION);
+        context.registerReceiver(wifi_receiver, filter);
+    }
 
+    @Override
+    public void onPause() {
+        super.onPause();
         context.unregisterReceiver(wifi_receiver);
     }
 
@@ -281,37 +259,6 @@ public class ScanFragment extends Fragment {
     private void scanFailure() {
         Toast.makeText(context, "WiFi Scan failed.", Toast.LENGTH_SHORT).show();
         wm.getScanResults();
-    }
-
-    private void pushRemote() {
-        RetrofitAPI retrofit_api = RetrofitClient.getRetrofitAPI();
-
-        retrofit_api.postDataWiFiItem(wifiitem_adpater.getItems()).enqueue(new Callback<PushResultModel>() {
-            @Override
-            public void onResponse(Call<PushResultModel> call, Response<PushResultModel> response) {
-                PushResultModel r = response.body();
-                if (r.getSuccess().equals("true")) {
-                    getActivity().runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            Toast.makeText(context, "서버에 PUSH 성공", Toast.LENGTH_SHORT).show();
-                        }
-                    });
-                } else {
-                    getActivity().runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            Toast.makeText(context, "서버에 PUSH 실패", Toast.LENGTH_SHORT).show();
-                        }
-                    });
-                }
-            }
-
-            @Override
-            public void onFailure(Call<PushResultModel> call, Throwable t) {
-                t.printStackTrace();
-            }
-        });
     }
 
     private void pushLocal() {
