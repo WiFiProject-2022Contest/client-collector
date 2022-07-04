@@ -20,7 +20,6 @@ import android.os.Bundle;
 import androidx.fragment.app.Fragment;
 
 import android.text.method.ScrollingMovementMethod;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -30,14 +29,7 @@ import android.widget.Toast;
 
 import com.davemorrissey.labs.subscaleview.ImageSource;
 
-import org.altbeacon.beacon.Beacon;
-import org.altbeacon.beacon.BeaconManager;
-import org.altbeacon.beacon.BeaconParser;
-import org.altbeacon.beacon.RangeNotifier;
-import org.altbeacon.beacon.Region;
-
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
 
@@ -55,8 +47,6 @@ public class EstimateFragment extends Fragment {
     BluetoothLeScanner bluetoothLeScanner;
     ScanSettings bluetoothLeScanSettings;
     ScanCallback bluetoothLeScanCallback;
-    BeaconManager beaconManager;
-    Region beaconRegion;
 
     Button buttonLoadAllDatabase;
     Button buttonEstimate;
@@ -66,7 +56,6 @@ public class EstimateFragment extends Fragment {
     TextView textResultEstimateWiFi2G;
     TextView textResultEstimateWiFi5G;
     TextView textResultEstimateBLE;
-    TextView textResultEstimateBeacon;
     TextView textEstimateReason;
 
     SpotImageView imageview_map3;
@@ -75,11 +64,9 @@ public class EstimateFragment extends Fragment {
     EstimatedResult estimatedResultWiFi2G;
     EstimatedResult estimatedResultWiFi5G;
     EstimatedResult estimatedResultBLE;
-    EstimatedResult estimatedResultBeacon;
 
     CountDownLatch scanTaskCount;
     boolean bleScanRequired = false;
-    boolean beaconScanRequired = false;
 
     private BroadcastReceiver wifi_receiver = new BroadcastReceiver() {
         @Override
@@ -145,7 +132,7 @@ public class EstimateFragment extends Fragment {
 
                         boolean alreadyExists = false;
                         for (WiFiItem elem : userData) {
-                            if (BSSID.equals(elem.getBSSID()) && elem.getMethod().equals("BLE")) {
+                            if (BSSID.equals(elem.getBSSID())) {
                                 alreadyExists = true;
                                 break;
                             }
@@ -181,50 +168,6 @@ public class EstimateFragment extends Fragment {
             }
         };
 
-        beaconManager = BeaconManager.getInstanceForApplication(context);
-        beaconManager.getBeaconParsers().add(new BeaconParser().setBeaconLayout("m:2-3=0215,i:4-19,i:20-21,i:22-23,p:24-24,d:25-25"));
-        beaconManager.addRangeNotifier(new RangeNotifier() {
-            @Override
-            public void didRangeBeaconsInRegion(Collection<Beacon> beacons, Region region) {
-                if (!beaconScanRequired || beacons.size() == 0) {
-                    return;
-                }
-
-                List<WiFiItem> userData = new ArrayList<>();
-                for (Beacon beacon : beacons) {
-                    String SSID = beacon.getBluetoothName();
-                    if (SSID == null) {
-                        SSID = "";
-                    }
-                    SSID.replaceAll("\u0000", "");
-
-                    String BSSID = beacon.getBluetoothAddress();
-                    int level = beacon.getRssi();
-                    int distance = (int) Math.round(beacon.getDistance() * 1000);
-
-                    boolean alreadyExists = false;
-                    for (WiFiItem elem : userData) {
-                        if (BSSID.equals(elem.getBSSID()) && elem.getMethod().equals("iBeacon")) {
-                            alreadyExists = true;
-                            break;
-                        }
-                    }
-                    if (alreadyExists) {
-                        continue;
-                    }
-
-                    userData.add(new WiFiItem(0, 0, SSID, BSSID, level, distance, MainActivity.uuid, MainActivity.building, "iBeacon"));
-                }
-
-                estimatedResultBeacon = PositioningAlgorithm.run(userData, databaseAllBleData, MainActivity.building, MainActivity.bleName, MainActivity.uuid, "iBeacon", 2);
-
-                beaconScanRequired = false;
-                scanTaskCount.countDown();
-                beaconManager.stopRangingBeacons(region);
-            }
-        });
-        beaconRegion = new Region("iBeaconScan", null, null, null);
-
         ViewGroup rootView = (ViewGroup) inflater.inflate(R.layout.fragment_estimate, container, false);
         imageview_map3 = rootView.findViewById(R.id.imageViewMap3);
         imageview_map3.setImage(ImageSource.resource(R.drawable.skku_example));
@@ -238,7 +181,6 @@ public class EstimateFragment extends Fragment {
         textResultEstimateWiFi2G = rootView.findViewById(R.id.textResultEstimateWiFi2G);
         textResultEstimateWiFi5G = rootView.findViewById(R.id.textResultEstimateWiFi5G);
         textResultEstimateBLE = rootView.findViewById(R.id.textResultEstimateBLE);
-        textResultEstimateBeacon = rootView.findViewById(R.id.textResultEstimateBeacon);
         textEstimateReason = rootView.findViewById(R.id.textEstimateReason);
         textEstimateReason.setMovementMethod(new ScrollingMovementMethod());
 
@@ -258,7 +200,7 @@ public class EstimateFragment extends Fragment {
                         scanTaskCount.countDown();
                     }
                 }
-                scanTaskCount = new CountDownLatch(3);
+                scanTaskCount = new CountDownLatch(2);
 
                 ScanResultTask scanResultTask = new ScanResultTask();
                 scanResultTask.execute();
@@ -393,9 +335,6 @@ public class EstimateFragment extends Fragment {
                 bleScanRequired = true;
                 //bluetoothLeScanner.flushPendingScanResults(bluetoothLeScanCallback);
                 bluetoothLeScanner.startScan(new ArrayList<ScanFilter>(), bluetoothLeScanSettings, bluetoothLeScanCallback);
-
-                beaconScanRequired = true;
-                beaconManager.startRangingBeacons(beaconRegion);
             }
             catch (SecurityException e) {
                 getActivity().runOnUiThread(new Runnable() {
@@ -450,12 +389,6 @@ public class EstimateFragment extends Fragment {
                     } else {
                         textResultEstimateBLE.setText("Out of Service");
                     }
-                    if (estimatedResultBeacon != null) {
-                        textResultEstimateBeacon.setText(String.format("(%s, %s)", String.format("%.2f", estimatedResultBeacon.getPositionEstimatedX()), String.format("%.2f", estimatedResultBeacon.getPositionEstimatedY())));
-                        result.add(new PointF((float)estimatedResultBeacon.getPositionEstimatedX(), (float)estimatedResultBeacon.getPositionEstimatedY()));
-                    } else {
-                        textResultEstimateBeacon.setText("Out of Service");
-                    }
                     imageview_map3.setEstimateSpot(result);
 
                     textEstimateReason.setText(MainActivity.uuid + "\n" + MainActivity.building + ", " + MainActivity.ssid + ", " + MainActivity.bleName + "\n");
@@ -470,10 +403,6 @@ public class EstimateFragment extends Fragment {
                     textEstimateReason.setText(textEstimateReason.getText() + "\nBLE\n");
                     if (estimatedResultBLE != null) {
                         textEstimateReason.setText(textEstimateReason.getText() + estimatedResultBLE.getEstimateReason().toString());
-                    }
-                    textEstimateReason.setText(textEstimateReason.getText() + "\niBeacon\n");
-                    if (estimatedResultBeacon != null) {
-                        textEstimateReason.setText(textEstimateReason.getText() + estimatedResultBeacon.getEstimateReason().toString());
                     }
 
                     Toast.makeText(context, "Estimation finished.", Toast.LENGTH_SHORT).show();
