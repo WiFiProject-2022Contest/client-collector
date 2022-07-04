@@ -168,10 +168,6 @@ public class EstimateFragment extends Fragment {
             }
         };
 
-        IntentFilter filter = new IntentFilter();
-        filter.addAction(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION);
-        context.registerReceiver(wifi_receiver, filter);
-
         ViewGroup rootView = (ViewGroup) inflater.inflate(R.layout.fragment_estimate, container, false);
         imageview_map3 = rootView.findViewById(R.id.imageViewMap3);
         imageview_map3.setImage(ImageSource.resource(R.drawable.skku_example));
@@ -263,8 +259,17 @@ public class EstimateFragment extends Fragment {
     }
 
     @Override
-    public void onDestroyView() {
-        super.onDestroyView();
+    public void onResume() {
+        super.onResume();
+
+        IntentFilter filter = new IntentFilter();
+        filter.addAction(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION);
+        context.registerReceiver(wifi_receiver, filter);
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
 
         context.unregisterReceiver(wifi_receiver);
     }
