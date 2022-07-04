@@ -398,11 +398,21 @@ public class EstimateFragment extends Fragment {
                 beaconManager.startRangingBeacons(beaconRegion);
             }
             catch (SecurityException e) {
-                Toast.makeText(context, "블루투스 권한 실패", Toast.LENGTH_SHORT).show();
+                getActivity().runOnUiThread(new Runnable() {
+                    public void run() {
+                        Toast.makeText(context, "블루투스 권한 실패", Toast.LENGTH_SHORT).show();
+                    }
+                });
+
                 scanTaskCount.countDown();
             }
             catch (Exception e) {
-                Toast.makeText(context, "블루투스 실패", Toast.LENGTH_SHORT).show();
+                getActivity().runOnUiThread(new Runnable() {
+                    public void run() {
+                        Toast.makeText(context, "블루투스 실패", Toast.LENGTH_SHORT).show();
+                    }
+                });
+
                 scanTaskCount.countDown();
             }
 
