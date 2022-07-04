@@ -263,7 +263,7 @@ public class ScanFragment extends Fragment {
 
     private void pushLocal() {
         DatabaseHelper dbHelper = new DatabaseHelper(context);
-        dbHelper.insertIntoWiFiInfo(wifiitem_adpater.getItems());
+        dbHelper.insertIntoWiFiInfo(wifiitem_adpater.getItems(), 1);
         Toast.makeText(context, "push 성공!", Toast.LENGTH_SHORT).show();
     }
 }
