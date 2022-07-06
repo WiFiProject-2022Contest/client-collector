@@ -2,6 +2,7 @@ package wifilocation.wifi.database;
 
 import android.annotation.SuppressLint;
 import android.app.ProgressDialog;
+import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
@@ -17,6 +18,8 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import wifilocation.wifi.estimate.EstimatedResult;
 import wifilocation.wifi.model.WiFiItem;
@@ -132,11 +135,10 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         SQLiteDatabase db = getWritableDatabase();
         StringBuilder sql = new StringBuilder("insert into " + TABLE_WIFIINFO + String.format(" (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s) ", POS_X, POS_Y, SSID, BSSID, FREQUENCY, LEVEL, DATE, UUID, BUILDING, METHOD, NEW) + " values ");
         int sqlLength = sql.length();
-        for (int i = 0; i < items.size(); i++) {
-            WiFiItem item = items.get(i);
+        for (int i = 1; i <= items.size(); i++) {
+            WiFiItem item = items.get(i - 1);
             sql.append(String.format(" (%f, %f, '%s', '%s', %d, %d, %d, '%s', '%s', '%s', %d), ",
                     item.getX(), item.getY(), item.getSSID().replace("'", "''"), item.getBSSID(), item.getFrequency(), item.getRSSI(), item.getDate().getTime(), item.getUuid(), item.getBuilding(), item.getMethod(), _new));
-
 
             if (i % 500 == 0) {
                 try {
@@ -262,8 +264,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         SQLiteDatabase db = getWritableDatabase();
         StringBuilder sql = new StringBuilder("insert into " + TABLE_FINGERPRINT + String.format(" (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)", POS_X, POS_Y, UUID, DATE, EST_X, EST_Y, K, THRESHOLD, BUILDING, SSID, ALGORITHM_VERSION, METHOD, NEW) + " values ");
         int sqlLength = sql.length();
-        for (int i = 0; i < items.size(); i++) {
-            EstimatedResult item = items.get(i);
+        for (int i = 1; i <= items.size(); i++) {
+            EstimatedResult item = items.get(i - 1);
             sql.append(String.format(" (%f, %f, '%s', %d, %f, %f, %d, %d, '%s', '%s', %d, '%s', %d), ",
                     item.getPositionRealX(), item.getPositionRealY(), item.getUuid(), item.getDate().getTime(), item.getPositionEstimatedX(), item.getPositionEstimatedY(),
                     item.getK(), item.getThreshold(), item.getBuilding(), item.getSsid().replace("'", "''"), item.getAlgorithmVersion(), item.getMethod(), _new));
