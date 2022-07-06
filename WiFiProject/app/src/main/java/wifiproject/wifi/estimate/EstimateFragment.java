@@ -29,6 +29,10 @@ import android.widget.Toast;
 
 import com.davemorrissey.labs.subscaleview.ImageSource;
 
+import org.altbeacon.beacon.BeaconManager;
+import org.altbeacon.beacon.RangeNotifier;
+import org.altbeacon.beacon.Region;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
@@ -47,6 +51,9 @@ public class EstimateFragment extends Fragment {
     BluetoothLeScanner bluetoothLeScanner;
     ScanSettings bluetoothLeScanSettings;
     ScanCallback bluetoothLeScanCallback;
+    BeaconManager beaconManager;
+    RangeNotifier rangeNotifier;
+    Region beaconRegion;
 
     Button buttonLoadAllDatabase;
     Button buttonEstimate;
@@ -55,6 +62,7 @@ public class EstimateFragment extends Fragment {
     TextView editTextRealY;
     TextView textResultEstimateWiFi2G;
     TextView textResultEstimateWiFi5G;
+    TextView textResultEstimateBeacon;
     TextView textResultEstimateBLE;
     TextView textEstimateReason;
 
@@ -64,9 +72,11 @@ public class EstimateFragment extends Fragment {
     EstimatedResult estimatedResultWiFi2G;
     EstimatedResult estimatedResultWiFi5G;
     EstimatedResult estimatedResultBLE;
+    EstimatedResult estimatedResultBeacon;
 
     CountDownLatch scanTaskCount;
     boolean bleScanRequired = false;
+    boolean beaconScanRequired = false;
 
     private BroadcastReceiver wifi_receiver = new BroadcastReceiver() {
         @Override
@@ -132,7 +142,7 @@ public class EstimateFragment extends Fragment {
 
                         boolean alreadyExists = false;
                         for (WiFiItem elem : userData) {
-                            if (BSSID.equals(elem.getBSSID())) {
+                            if (BSSID.equals(elem.getBSSID()) && elem.getMethod().equals("BLE")) {
                                 alreadyExists = true;
                                 break;
                             }
@@ -181,6 +191,7 @@ public class EstimateFragment extends Fragment {
         textResultEstimateWiFi2G = rootView.findViewById(R.id.textResultEstimateWiFi2G);
         textResultEstimateWiFi5G = rootView.findViewById(R.id.textResultEstimateWiFi5G);
         textResultEstimateBLE = rootView.findViewById(R.id.textResultEstimateBLE);
+        textResultEstimateBeacon = rootView.findViewById(R.id.textResultEstimateBeacon);
         textEstimateReason = rootView.findViewById(R.id.textEstimateReason);
         textEstimateReason.setMovementMethod(new ScrollingMovementMethod());
 
@@ -389,6 +400,12 @@ public class EstimateFragment extends Fragment {
                     } else {
                         textResultEstimateBLE.setText("Out of Service");
                     }
+                    if (estimatedResultBeacon != null) {
+                        textResultEstimateBeacon.setText(String.format("(%s, %s)", String.format("%.2f", estimatedResultBeacon.getPositionEstimatedX()), String.format("%.2f", estimatedResultBeacon.getPositionEstimatedY())));
+                        result.add(new PointF((float)estimatedResultBeacon.getPositionEstimatedX(), (float)estimatedResultBeacon.getPositionEstimatedY()));
+                    } else {
+                        textResultEstimateBeacon.setText("Out of Service");
+                    }
                     imageview_map3.setEstimateSpot(result);
 
                     textEstimateReason.setText(MainActivity.uuid + "\n" + MainActivity.building + ", " + MainActivity.ssid + ", " + MainActivity.bleName + "\n");
@@ -403,6 +420,10 @@ public class EstimateFragment extends Fragment {
                     textEstimateReason.setText(textEstimateReason.getText() + "\nBLE\n");
                     if (estimatedResultBLE != null) {
                         textEstimateReason.setText(textEstimateReason.getText() + estimatedResultBLE.getEstimateReason().toString());
+                    }
+                    textEstimateReason.setText(textEstimateReason.getText() + "\niBeacon\n");
+                    if (estimatedResultBeacon != null) {
+                        textEstimateReason.setText(textEstimateReason.getText() + estimatedResultBeacon.getEstimateReason().toString());
                     }
 
                     Toast.makeText(context, "Estimation finished.", Toast.LENGTH_SHORT).show();
