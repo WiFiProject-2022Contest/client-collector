@@ -75,7 +75,7 @@ public class EstimateFragment extends Fragment {
     EstimatedResult estimatedResultBLE;
     EstimatedResult estimatedResultBeacon;
 
-    int resultCountThreshold = 3;
+    int resultCountThreshold = 4;
     int resultCount;
     boolean bleScanRequired = false;
     boolean beaconScanRequired = false;
@@ -263,6 +263,9 @@ public class EstimateFragment extends Fragment {
                     bleScanRequired = true;
                     bluetoothLeScanner.flushPendingScanResults(bluetoothLeScanCallback);
                     bluetoothLeScanner.startScan(new ArrayList<ScanFilter>(), bluetoothLeScanSettings, bluetoothLeScanCallback);
+
+                    beaconScanRequired = true;
+                    beaconManager.startRangingBeacons(beaconRegion);
                 }
                 catch (SecurityException e) {
                     Toast.makeText(context, "블루투스 권한 실패", Toast.LENGTH_SHORT).show();
@@ -281,21 +284,23 @@ public class EstimateFragment extends Fragment {
                 EstimatedResult copy2G = null;
                 EstimatedResult copy5G = null;
                 EstimatedResult copyBLE = null;
+                EstimatedResult copyBeacon = null;
 
                 if (estimatedResultWiFi2G != null) {
                     copy2G = new EstimatedResult(estimatedResultWiFi2G);
                 }
-
                 if (estimatedResultWiFi5G != null) {
                     copy5G = new EstimatedResult(estimatedResultWiFi5G);
                 }
-
                 if (estimatedResultBLE != null) {
                     copyBLE = new EstimatedResult(estimatedResultBLE);
                 }
+                if (estimatedResultBeacon != null) {
+                    copyBeacon = new EstimatedResult(estimatedResultBeacon);
+                }
 
                 List<EstimatedResult> listForPost = new ArrayList<>();
-                for (EstimatedResult er : new EstimatedResult[] {copy2G, copy5G, copyBLE}) {
+                for (EstimatedResult er : new EstimatedResult[] {copy2G, copy5G, copyBLE, copyBeacon}) {
                     if (er == null) {
                         continue;
                     }
@@ -342,6 +347,7 @@ public class EstimateFragment extends Fragment {
 
         context.unregisterReceiver(wifi_receiver);
         try {
+            bluetoothLeScanner.flushPendingScanResults(bluetoothLeScanCallback);
             bluetoothLeScanner.stopScan(bluetoothLeScanCallback);
         }
         catch (SecurityException e) {

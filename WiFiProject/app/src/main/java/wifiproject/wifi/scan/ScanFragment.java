@@ -321,6 +321,7 @@ public class ScanFragment extends Fragment {
 
         context.unregisterReceiver(wifi_receiver);
         try {
+            bluetoothLeScanner.flushPendingScanResults(bluetoothLeScanCallback);
             bluetoothLeScanner.stopScan(bluetoothLeScanCallback);
         }
         catch (SecurityException e) {

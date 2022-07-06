@@ -36,7 +36,12 @@ public class PositioningAlgorithm {
             minValidAPNum = 1;
             minDbm = -55;
         }
-        else if (method.equals("BLE") && targetGHZ == 2) {
+        else if (method.equals("BLE")) {
+            K = 3;
+            minValidAPNum = 1;
+            minDbm = -70;
+        }
+        else if (method.equals("iBeacon")) {
             K = 3;
             minValidAPNum = 1;
             minDbm = -70;
@@ -84,7 +89,7 @@ public class PositioningAlgorithm {
             if (!targetBuilding.equals(databaseRow.getBuilding())
                     || !method.equals(databaseRow.getMethod())
                     || !targetSSID.equals(databaseRow.getSSID())
-                    || databaseRow.getFrequency() != 0 && databaseRow.getFrequency() / 1000 != targetGHZ
+                    || method.equals("WiFi") && databaseRow.getFrequency() / 1000 != targetGHZ
                     || databaseRow.getRSSI() < minDbm) {
                 continue;
             }
