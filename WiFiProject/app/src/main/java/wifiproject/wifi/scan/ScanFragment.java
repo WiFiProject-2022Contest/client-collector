@@ -64,6 +64,7 @@ public class ScanFragment extends Fragment {
     ScanSettings bluetoothLeScanSettings;
     ScanCallback bluetoothLeScanCallback;
     BeaconManager beaconManager;
+    RangeNotifier rangeNotifier;
     Region beaconRegion;
     Context context;
     EditText edittext_x, edittext_y;
@@ -205,7 +206,8 @@ public class ScanFragment extends Fragment {
 
         beaconManager = BeaconManager.getInstanceForApplication(context);
         beaconManager.getBeaconParsers().add(new BeaconParser().setBeaconLayout("m:2-3=0215,i:4-19,i:20-21,i:22-23,p:24-24,d:25-25"));
-        beaconManager.addRangeNotifier(new RangeNotifier() {
+
+        rangeNotifier = new RangeNotifier() {
             @Override
             public void didRangeBeaconsInRegion(Collection<Beacon> beacons, Region region) {
                 if (!beaconScanRequired) {
@@ -252,7 +254,7 @@ public class ScanFragment extends Fragment {
                 beaconScanRequired = false;
                 beaconManager.stopRangingBeacons(region);
             }
-        });
+        };
         beaconRegion = new Region("iBeaconScan", null, null, null);
 
         Button button_scan = rootview.findViewById(R.id.buttonScan);
@@ -284,8 +286,8 @@ public class ScanFragment extends Fragment {
                     beaconManager.startRangingBeacons(beaconRegion);
                 } catch (SecurityException e) {
                     Toast.makeText(context, "블루투스 권한 실패", Toast.LENGTH_SHORT).show();
-                } catch (Exception e) {
-                    Toast.makeText(context, "블루투스 스캔 실패", Toast.LENGTH_SHORT).show();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
                 }
             }
         });
@@ -307,12 +309,14 @@ public class ScanFragment extends Fragment {
         IntentFilter filter = new IntentFilter();
         filter.addAction(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION);
         context.registerReceiver(wifi_receiver, filter);
+        beaconManager.addRangeNotifier(rangeNotifier);
     }
 
     @Override
     public void onPause() {
         super.onPause();
         context.unregisterReceiver(wifi_receiver);
+        beaconManager.removeRangeNotifier(rangeNotifier);
     }
 
     private void scanSuccess() {
