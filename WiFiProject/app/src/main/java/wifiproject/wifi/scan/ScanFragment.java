@@ -1,5 +1,6 @@
 package wifilocation.wifi.scan;
 
+import android.Manifest;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothManager;
 import android.bluetooth.le.BluetoothLeScanner;
@@ -10,6 +11,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.pm.PackageManager;
 import android.graphics.PointF;
 import android.net.wifi.ScanResult;
 import android.net.wifi.WifiManager;
@@ -24,6 +26,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
+import androidx.core.app.ActivityCompat;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -76,7 +79,7 @@ public class ScanFragment extends Fragment {
     private BroadcastReceiver wifi_receiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            if(Build.VERSION.SDK_INT <= 22) {
+            if (Build.VERSION.SDK_INT <= 22) {
                 scanSuccess();
             } else {
                 boolean success = intent.getBooleanExtra(WifiManager.EXTRA_RESULTS_UPDATED, false);
@@ -278,7 +281,7 @@ public class ScanFragment extends Fragment {
                     }
 
                     bleScanRequired = true;
-                    //bluetoothLeScanner.flushPendingScanResults(bluetoothLeScanCallback);
+                    bluetoothLeScanner.flushPendingScanResults(bluetoothLeScanCallback);
                     bluetoothLeScanner.startScan(new ArrayList<ScanFilter>(), bluetoothLeScanSettings, bluetoothLeScanCallback);
 
                     beaconScanRequired = true;
@@ -317,6 +320,12 @@ public class ScanFragment extends Fragment {
         super.onPause();
 
         context.unregisterReceiver(wifi_receiver);
+        try {
+            bluetoothLeScanner.stopScan(bluetoothLeScanCallback);
+        }
+        catch (SecurityException e) {
+            e.printStackTrace();
+        }
         beaconManager.stopRangingBeacons(beaconRegion);
         beaconManager.removeRangeNotifier(rangeNotifier);
     }

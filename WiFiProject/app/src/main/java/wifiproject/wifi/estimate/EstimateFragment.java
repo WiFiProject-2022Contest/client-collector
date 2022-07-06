@@ -331,6 +331,12 @@ public class EstimateFragment extends Fragment {
         super.onPause();
 
         context.unregisterReceiver(wifi_receiver);
+        try {
+            bluetoothLeScanner.stopScan(bluetoothLeScanCallback);
+        }
+        catch (SecurityException e) {
+            e.printStackTrace();
+        }
         beaconManager.stopRangingBeacons(beaconRegion);
         beaconManager.removeRangeNotifier(rangeNotifier);
     }
@@ -394,7 +400,7 @@ public class EstimateFragment extends Fragment {
                 }
 
                 bleScanRequired = true;
-                //bluetoothLeScanner.flushPendingScanResults(bluetoothLeScanCallback);
+                bluetoothLeScanner.flushPendingScanResults(bluetoothLeScanCallback);
                 bluetoothLeScanner.startScan(new ArrayList<ScanFilter>(), bluetoothLeScanSettings, bluetoothLeScanCallback);
             }
             catch (SecurityException e) {
