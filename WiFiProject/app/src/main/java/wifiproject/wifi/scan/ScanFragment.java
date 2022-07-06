@@ -1,5 +1,6 @@
 package wifilocation.wifi.scan;
 
+import android.Manifest;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothManager;
 import android.bluetooth.le.BluetoothLeScanner;
@@ -10,6 +11,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.pm.PackageManager;
 import android.graphics.PointF;
 import android.net.wifi.ScanResult;
 import android.net.wifi.WifiManager;
@@ -24,6 +26,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
+import androidx.core.app.ActivityCompat;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -64,6 +67,7 @@ public class ScanFragment extends Fragment {
     ScanSettings bluetoothLeScanSettings;
     ScanCallback bluetoothLeScanCallback;
     BeaconManager beaconManager;
+    RangeNotifier rangeNotifier;
     Region beaconRegion;
     Context context;
     EditText edittext_x, edittext_y;
@@ -75,7 +79,7 @@ public class ScanFragment extends Fragment {
     private BroadcastReceiver wifi_receiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            if(Build.VERSION.SDK_INT <= 22) {
+            if (Build.VERSION.SDK_INT <= 22) {
                 scanSuccess();
             } else {
                 boolean success = intent.getBooleanExtra(WifiManager.EXTRA_RESULTS_UPDATED, false);
@@ -205,7 +209,7 @@ public class ScanFragment extends Fragment {
 
         beaconManager = BeaconManager.getInstanceForApplication(context);
         beaconManager.getBeaconParsers().add(new BeaconParser().setBeaconLayout("m:2-3=0215,i:4-19,i:20-21,i:22-23,p:24-24,d:25-25"));
-        beaconManager.addRangeNotifier(new RangeNotifier() {
+        rangeNotifier = new RangeNotifier() {
             @Override
             public void didRangeBeaconsInRegion(Collection<Beacon> beacons, Region region) {
                 if (!beaconScanRequired) {
@@ -252,7 +256,7 @@ public class ScanFragment extends Fragment {
                 beaconScanRequired = false;
                 beaconManager.stopRangingBeacons(region);
             }
-        });
+        };
         beaconRegion = new Region("iBeaconScan", null, null, null);
 
         Button button_scan = rootview.findViewById(R.id.buttonScan);
@@ -277,15 +281,15 @@ public class ScanFragment extends Fragment {
                     }
 
                     bleScanRequired = true;
-                    //bluetoothLeScanner.flushPendingScanResults(bluetoothLeScanCallback);
+                    bluetoothLeScanner.flushPendingScanResults(bluetoothLeScanCallback);
                     bluetoothLeScanner.startScan(new ArrayList<ScanFilter>(), bluetoothLeScanSettings, bluetoothLeScanCallback);
 
                     beaconScanRequired = true;
                     beaconManager.startRangingBeacons(beaconRegion);
                 } catch (SecurityException e) {
                     Toast.makeText(context, "블루투스 권한 실패", Toast.LENGTH_SHORT).show();
-                } catch (Exception e) {
-                    Toast.makeText(context, "블루투스 스캔 실패", Toast.LENGTH_SHORT).show();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
                 }
             }
         });
@@ -304,15 +308,26 @@ public class ScanFragment extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
+
         IntentFilter filter = new IntentFilter();
         filter.addAction(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION);
         context.registerReceiver(wifi_receiver, filter);
+        beaconManager.addRangeNotifier(rangeNotifier);
     }
 
     @Override
     public void onPause() {
         super.onPause();
+
         context.unregisterReceiver(wifi_receiver);
+        try {
+            bluetoothLeScanner.stopScan(bluetoothLeScanCallback);
+        }
+        catch (SecurityException e) {
+            e.printStackTrace();
+        }
+        beaconManager.stopRangingBeacons(beaconRegion);
+        beaconManager.removeRangeNotifier(rangeNotifier);
     }
 
     private void scanSuccess() {
