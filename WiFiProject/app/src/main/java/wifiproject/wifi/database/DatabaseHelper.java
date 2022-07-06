@@ -135,7 +135,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         for (int i = 0; i < items.size(); i++) {
             WiFiItem item = items.get(i);
             sql.append(String.format(" (%f, %f, '%s', '%s', %d, %d, %d, '%s', '%s', '%s', %d), ",
-                    item.getX(), item.getY(), item.getSSID(), item.getBSSID(), item.getFrequency(), item.getRSSI(), item.getDate().getTime(), item.getUuid(), item.getBuilding(), item.getMethod(), _new));
+                    item.getX(), item.getY(), item.getSSID().replace("'", "''"), item.getBSSID(), item.getFrequency(), item.getRSSI(), item.getDate().getTime(), item.getUuid(), item.getBuilding(), item.getMethod(), _new));
 
 
             if (i % 500 == 0) {
@@ -266,7 +266,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             EstimatedResult item = items.get(i);
             sql.append(String.format(" (%f, %f, '%s', %d, %f, %f, %d, %d, '%s', '%s', %d, '%s', %d), ",
                     item.getPositionRealX(), item.getPositionRealY(), item.getUuid(), item.getDate().getTime(), item.getPositionEstimatedX(), item.getPositionEstimatedY(),
-                    item.getK(), item.getThreshold(), item.getBuilding(), item.getSsid(), item.getAlgorithmVersion(), item.getMethod(), _new));
+                    item.getK(), item.getThreshold(), item.getBuilding(), item.getSsid().replace("'", "''"), item.getAlgorithmVersion(), item.getMethod(), _new));
 
             if (i % 500 == 0) {
                 try {
