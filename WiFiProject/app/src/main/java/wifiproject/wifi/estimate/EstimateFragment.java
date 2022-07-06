@@ -29,11 +29,14 @@ import android.widget.Toast;
 
 import com.davemorrissey.labs.subscaleview.ImageSource;
 
+import org.altbeacon.beacon.Beacon;
 import org.altbeacon.beacon.BeaconManager;
+import org.altbeacon.beacon.BeaconParser;
 import org.altbeacon.beacon.RangeNotifier;
 import org.altbeacon.beacon.Region;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
 
@@ -178,6 +181,50 @@ public class EstimateFragment extends Fragment {
             }
         };
 
+        beaconManager = BeaconManager.getInstanceForApplication(context);
+        beaconManager.getBeaconParsers().add(new BeaconParser().setBeaconLayout("m:2-3=0215,i:4-19,i:20-21,i:22-23,p:24-24,d:25-25"));
+        rangeNotifier = new RangeNotifier() {
+            @Override
+            public void didRangeBeaconsInRegion(Collection<Beacon> beacons, Region region) {
+                if (!beaconScanRequired || beacons.size() == 0) {
+                    return;
+                }
+
+                List<WiFiItem> userData = new ArrayList<>();
+                for (Beacon beacon : beacons) {
+                    String SSID = beacon.getBluetoothName();
+                    if (SSID == null) {
+                        SSID = "";
+                    }
+                    SSID.replaceAll("\u0000", "");
+
+                    String BSSID = beacon.getBluetoothAddress();
+                    int level = beacon.getRssi();
+                    int distance = (int) Math.round(beacon.getDistance() * 1000);
+
+                    boolean alreadyExists = false;
+                    for (WiFiItem elem : userData) {
+                        if (BSSID.equals(elem.getBSSID()) && elem.getMethod().equals("iBeacon")) {
+                            alreadyExists = true;
+                            break;
+                        }
+                    }
+                    if (alreadyExists) {
+                        continue;
+                    }
+
+                    userData.add(new WiFiItem(0, 0, SSID, BSSID, level, distance, MainActivity.uuid, MainActivity.building, "iBeacon"));
+                }
+
+                estimatedResultBeacon = PositioningAlgorithm.run(userData, databaseAllBleData, MainActivity.building, MainActivity.bleName, MainActivity.uuid, "iBeacon", 2);
+
+                beaconScanRequired = false;
+                scanTaskCount.countDown();
+                beaconManager.stopRangingBeacons(region);
+            }
+        };
+        beaconRegion = new Region("iBeaconEstimate", null, null, null);
+
         ViewGroup rootView = (ViewGroup) inflater.inflate(R.layout.fragment_estimate, container, false);
         imageview_map3 = rootView.findViewById(R.id.imageViewMap3);
         imageview_map3.setImage(ImageSource.resource(R.drawable.skku_example));
@@ -276,6 +323,7 @@ public class EstimateFragment extends Fragment {
         IntentFilter filter = new IntentFilter();
         filter.addAction(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION);
         context.registerReceiver(wifi_receiver, filter);
+        beaconManager.addRangeNotifier(rangeNotifier);
     }
 
     @Override
@@ -283,6 +331,8 @@ public class EstimateFragment extends Fragment {
         super.onPause();
 
         context.unregisterReceiver(wifi_receiver);
+        beaconManager.stopRangingBeacons(beaconRegion);
+        beaconManager.removeRangeNotifier(rangeNotifier);
     }
 
     private void getLocal() {

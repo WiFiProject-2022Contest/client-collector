@@ -206,7 +206,6 @@ public class ScanFragment extends Fragment {
 
         beaconManager = BeaconManager.getInstanceForApplication(context);
         beaconManager.getBeaconParsers().add(new BeaconParser().setBeaconLayout("m:2-3=0215,i:4-19,i:20-21,i:22-23,p:24-24,d:25-25"));
-
         rangeNotifier = new RangeNotifier() {
             @Override
             public void didRangeBeaconsInRegion(Collection<Beacon> beacons, Region region) {
@@ -306,6 +305,7 @@ public class ScanFragment extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
+
         IntentFilter filter = new IntentFilter();
         filter.addAction(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION);
         context.registerReceiver(wifi_receiver, filter);
@@ -315,7 +315,9 @@ public class ScanFragment extends Fragment {
     @Override
     public void onPause() {
         super.onPause();
+
         context.unregisterReceiver(wifi_receiver);
+        beaconManager.stopRangingBeacons(beaconRegion);
         beaconManager.removeRangeNotifier(rangeNotifier);
     }
 
