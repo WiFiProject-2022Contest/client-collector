@@ -13,7 +13,6 @@ import android.content.IntentFilter;
 import android.graphics.PointF;
 import android.net.wifi.ScanResult;
 import android.net.wifi.WifiManager;
-import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 
@@ -38,7 +37,6 @@ import org.altbeacon.beacon.Region;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.concurrent.CountDownLatch;
 
 import wifilocation.wifi.MainActivity;
 import wifilocation.wifi.R;
@@ -77,7 +75,8 @@ public class EstimateFragment extends Fragment {
     EstimatedResult estimatedResultBLE;
     EstimatedResult estimatedResultBeacon;
 
-    CountDownLatch scanTaskCount;
+    int resultCountThreshold = 3;
+    int resultCount;
     boolean bleScanRequired = false;
     boolean beaconScanRequired = false;
 
@@ -94,8 +93,6 @@ public class EstimateFragment extends Fragment {
                     scanFailure();
                 }
             }
-
-            scanTaskCount.countDown();
         }
     };
 
@@ -160,6 +157,7 @@ public class EstimateFragment extends Fragment {
                     bluetoothLeScanner.stopScan(bluetoothLeScanCallback);
 
                     estimatedResultBLE = PositioningAlgorithm.run(userData, databaseAllBleData, MainActivity.building, MainActivity.bleName, MainActivity.uuid, "BLE", 2);
+                    showEstimationResult(1);
                 }
                 catch (SecurityException e) {
                     estimatedResultBLE = null;
@@ -167,17 +165,12 @@ public class EstimateFragment extends Fragment {
                     Toast.makeText(context, "블루투스 권한 실패", Toast.LENGTH_SHORT).show();
                     return;
                 }
-                finally {
-                    scanTaskCount.countDown();
-                }
             }
 
             @Override
             public void onScanFailed(int errorCode) {
                 super.onScanFailed(errorCode);
                 Toast.makeText(context, "BLE scan failed", Toast.LENGTH_SHORT).show();
-
-                scanTaskCount.countDown();
             }
         };
 
@@ -217,9 +210,9 @@ public class EstimateFragment extends Fragment {
                 }
 
                 estimatedResultBeacon = PositioningAlgorithm.run(userData, databaseAllBleData, MainActivity.building, MainActivity.bleName, MainActivity.uuid, "iBeacon", 2);
+                showEstimationResult(1);
 
                 beaconScanRequired = false;
-                scanTaskCount.countDown();
                 beaconManager.stopRangingBeacons(region);
             }
         };
@@ -252,16 +245,33 @@ public class EstimateFragment extends Fragment {
         buttonEstimate.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if (scanTaskCount != null) {
-                    // Release previous task
-                    while (scanTaskCount.getCount() > 0) {
-                        scanTaskCount.countDown();
-                    }
-                }
-                scanTaskCount = new CountDownLatch(2);
+                resultCount = 0;
 
-                ScanResultTask scanResultTask = new ScanResultTask();
-                scanResultTask.execute();
+                if (databaseAllWiFiData == null || databaseAllBleData == null) {
+                    Toast.makeText(context, "You should get database first.", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+
+                wm.startScan();
+
+                try {
+                    bluetoothAdapter.enable();
+                    while (!bluetoothAdapter.isEnabled()) {
+                        Thread.sleep(100);
+                    }
+
+                    bleScanRequired = true;
+                    bluetoothLeScanner.flushPendingScanResults(bluetoothLeScanCallback);
+                    bluetoothLeScanner.startScan(new ArrayList<ScanFilter>(), bluetoothLeScanSettings, bluetoothLeScanCallback);
+                }
+                catch (SecurityException e) {
+                    Toast.makeText(context, "블루투스 권한 실패", Toast.LENGTH_SHORT).show();
+                }
+                catch (Exception e) {
+                    Toast.makeText(context, "블루투스 실패", Toast.LENGTH_SHORT).show();
+                }
+
+                Toast.makeText(context, "Scan started.", Toast.LENGTH_SHORT).show();
             }
         });
 
@@ -367,126 +377,67 @@ public class EstimateFragment extends Fragment {
 
         estimatedResultWiFi2G = PositioningAlgorithm.run(userData, databaseAllWiFiData, MainActivity.building, MainActivity.ssid, MainActivity.uuid, "WiFi", 2);
         estimatedResultWiFi5G = PositioningAlgorithm.run(userData, databaseAllWiFiData, MainActivity.building, MainActivity.ssid, MainActivity.uuid, "WiFi", 5);
+        showEstimationResult(2);
     }
 
     private void scanFailure() {
-        getActivity().runOnUiThread(new Runnable() {
-            public void run() {
-                Toast.makeText(context, "Scan failed.", Toast.LENGTH_SHORT).show();
-            }
-        });
+        Toast.makeText(context, "Scan failed.", Toast.LENGTH_SHORT).show();
 
         wm.getScanResults();
     }
 
-    private class ScanResultTask extends AsyncTask<Void, Void, Void> {
-        @Override
-        protected Void doInBackground(Void... voids) {
-            if (databaseAllWiFiData == null || databaseAllBleData == null) {
-                getActivity().runOnUiThread(new Runnable() {
-                    public void run() {
-                        Toast.makeText(context, "You should get database first.", Toast.LENGTH_SHORT).show();
-                    }
-                });
-                return null;
-            }
+    private void showEstimationResult(int plus) {
+        resultCount += plus;
 
-            wm.startScan();
-
-            try {
-                bluetoothAdapter.enable();
-                while (!bluetoothAdapter.isEnabled()) {
-                    Thread.sleep(100);
-                }
-
-                bleScanRequired = true;
-                bluetoothLeScanner.flushPendingScanResults(bluetoothLeScanCallback);
-                bluetoothLeScanner.startScan(new ArrayList<ScanFilter>(), bluetoothLeScanSettings, bluetoothLeScanCallback);
-            }
-            catch (SecurityException e) {
-                getActivity().runOnUiThread(new Runnable() {
-                    public void run() {
-                        Toast.makeText(context, "블루투스 권한 실패", Toast.LENGTH_SHORT).show();
-                    }
-                });
-
-                scanTaskCount.countDown();
-            }
-            catch (Exception e) {
-                getActivity().runOnUiThread(new Runnable() {
-                    public void run() {
-                        Toast.makeText(context, "블루투스 실패", Toast.LENGTH_SHORT).show();
-                    }
-                });
-
-                scanTaskCount.countDown();
-            }
-
-            getActivity().runOnUiThread(new Runnable() {
-                public void run() {
-                    Toast.makeText(context, "Scan started.", Toast.LENGTH_SHORT).show();
-                }
-            });
-
-            try {
-                scanTaskCount.await();
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-                return null;
-            }
-
-            getActivity().runOnUiThread(new Runnable() {
-                public void run() {
-                    ArrayList<PointF> result = new ArrayList<PointF>();
-                    if (estimatedResultWiFi2G != null) {
-                        textResultEstimateWiFi2G.setText(String.format("(%s, %s)", String.format("%.2f", estimatedResultWiFi2G.getPositionEstimatedX()), String.format("%.2f", estimatedResultWiFi2G.getPositionEstimatedY())));
-                        result.add(new PointF((float)estimatedResultWiFi2G.getPositionEstimatedX(), (float)estimatedResultWiFi2G.getPositionEstimatedY()));
-                    } else {
-                        textResultEstimateWiFi2G.setText("Out of Service");
-                    }
-                    if (estimatedResultWiFi5G != null) {
-                        textResultEstimateWiFi5G.setText(String.format("(%s, %s)", String.format("%.2f", estimatedResultWiFi5G.getPositionEstimatedX()), String.format("%.2f", estimatedResultWiFi5G.getPositionEstimatedY())));
-                        result.add(new PointF((float)estimatedResultWiFi5G.getPositionEstimatedX(), (float)estimatedResultWiFi5G.getPositionEstimatedY()));
-                    } else {
-                        textResultEstimateWiFi5G.setText("Out of Service");
-                    }
-                    if (estimatedResultBLE != null) {
-                        textResultEstimateBLE.setText(String.format("(%s, %s)", String.format("%.2f", estimatedResultBLE.getPositionEstimatedX()), String.format("%.2f", estimatedResultBLE.getPositionEstimatedY())));
-                        result.add(new PointF((float)estimatedResultBLE.getPositionEstimatedX(), (float)estimatedResultBLE.getPositionEstimatedY()));
-                    } else {
-                        textResultEstimateBLE.setText("Out of Service");
-                    }
-                    if (estimatedResultBeacon != null) {
-                        textResultEstimateBeacon.setText(String.format("(%s, %s)", String.format("%.2f", estimatedResultBeacon.getPositionEstimatedX()), String.format("%.2f", estimatedResultBeacon.getPositionEstimatedY())));
-                        result.add(new PointF((float)estimatedResultBeacon.getPositionEstimatedX(), (float)estimatedResultBeacon.getPositionEstimatedY()));
-                    } else {
-                        textResultEstimateBeacon.setText("Out of Service");
-                    }
-                    imageview_map3.setEstimateSpot(result);
-
-                    textEstimateReason.setText(MainActivity.uuid + "\n" + MainActivity.building + ", " + MainActivity.ssid + ", " + MainActivity.bleName + "\n");
-                    textEstimateReason.setText(textEstimateReason.getText() + "\nWiFi 2Ghz\n");
-                    if (estimatedResultWiFi2G != null) {
-                        textEstimateReason.setText(textEstimateReason.getText() + estimatedResultWiFi2G.getEstimateReason().toString());
-                    }
-                    textEstimateReason.setText(textEstimateReason.getText() + "\nWiFi 5Ghz\n");
-                    if (estimatedResultWiFi5G != null) {
-                        textEstimateReason.setText(textEstimateReason.getText() + estimatedResultWiFi5G.getEstimateReason().toString());
-                    }
-                    textEstimateReason.setText(textEstimateReason.getText() + "\nBLE\n");
-                    if (estimatedResultBLE != null) {
-                        textEstimateReason.setText(textEstimateReason.getText() + estimatedResultBLE.getEstimateReason().toString());
-                    }
-                    textEstimateReason.setText(textEstimateReason.getText() + "\niBeacon\n");
-                    if (estimatedResultBeacon != null) {
-                        textEstimateReason.setText(textEstimateReason.getText() + estimatedResultBeacon.getEstimateReason().toString());
-                    }
-
-                    Toast.makeText(context, "Estimation finished.", Toast.LENGTH_SHORT).show();
-                }
-            });
-
-            return null;
+        if (resultCount < resultCountThreshold) {
+            return;
         }
+
+        ArrayList<PointF> result = new ArrayList<PointF>();
+        if (estimatedResultWiFi2G != null) {
+            textResultEstimateWiFi2G.setText(String.format("(%s, %s)", String.format("%.2f", estimatedResultWiFi2G.getPositionEstimatedX()), String.format("%.2f", estimatedResultWiFi2G.getPositionEstimatedY())));
+            result.add(new PointF((float)estimatedResultWiFi2G.getPositionEstimatedX(), (float)estimatedResultWiFi2G.getPositionEstimatedY()));
+        } else {
+            textResultEstimateWiFi2G.setText("Out of Service");
+        }
+        if (estimatedResultWiFi5G != null) {
+            textResultEstimateWiFi5G.setText(String.format("(%s, %s)", String.format("%.2f", estimatedResultWiFi5G.getPositionEstimatedX()), String.format("%.2f", estimatedResultWiFi5G.getPositionEstimatedY())));
+            result.add(new PointF((float)estimatedResultWiFi5G.getPositionEstimatedX(), (float)estimatedResultWiFi5G.getPositionEstimatedY()));
+        } else {
+            textResultEstimateWiFi5G.setText("Out of Service");
+        }
+        if (estimatedResultBLE != null) {
+            textResultEstimateBLE.setText(String.format("(%s, %s)", String.format("%.2f", estimatedResultBLE.getPositionEstimatedX()), String.format("%.2f", estimatedResultBLE.getPositionEstimatedY())));
+            result.add(new PointF((float)estimatedResultBLE.getPositionEstimatedX(), (float)estimatedResultBLE.getPositionEstimatedY()));
+        } else {
+            textResultEstimateBLE.setText("Out of Service");
+        }
+        if (estimatedResultBeacon != null) {
+            textResultEstimateBeacon.setText(String.format("(%s, %s)", String.format("%.2f", estimatedResultBeacon.getPositionEstimatedX()), String.format("%.2f", estimatedResultBeacon.getPositionEstimatedY())));
+            result.add(new PointF((float)estimatedResultBeacon.getPositionEstimatedX(), (float)estimatedResultBeacon.getPositionEstimatedY()));
+        } else {
+            textResultEstimateBeacon.setText("Out of Service");
+        }
+        imageview_map3.setEstimateSpot(result);
+
+        textEstimateReason.setText(MainActivity.uuid + "\n" + MainActivity.building + ", " + MainActivity.ssid + ", " + MainActivity.bleName + "\n");
+        textEstimateReason.setText(textEstimateReason.getText() + "\nWiFi 2Ghz\n");
+        if (estimatedResultWiFi2G != null) {
+            textEstimateReason.setText(textEstimateReason.getText() + estimatedResultWiFi2G.getEstimateReason().toString());
+        }
+        textEstimateReason.setText(textEstimateReason.getText() + "\nWiFi 5Ghz\n");
+        if (estimatedResultWiFi5G != null) {
+            textEstimateReason.setText(textEstimateReason.getText() + estimatedResultWiFi5G.getEstimateReason().toString());
+        }
+        textEstimateReason.setText(textEstimateReason.getText() + "\nBLE\n");
+        if (estimatedResultBLE != null) {
+            textEstimateReason.setText(textEstimateReason.getText() + estimatedResultBLE.getEstimateReason().toString());
+        }
+        textEstimateReason.setText(textEstimateReason.getText() + "\niBeacon\n");
+        if (estimatedResultBeacon != null) {
+            textEstimateReason.setText(textEstimateReason.getText() + estimatedResultBeacon.getEstimateReason().toString());
+        }
+
+        Toast.makeText(context, "Estimation finished.", Toast.LENGTH_SHORT).show();
     }
 }
