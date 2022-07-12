@@ -79,6 +79,11 @@ public class MainActivity extends AppCompatActivity {
                 ssid = "WiFiLocation@PDA";
                 bleName = "";
                 break;
+            case R.id.map_wifilocation_kimpo_3F_room_temp_mezzanine_bottom:
+                building = "WiFiLocation3F";
+                ssid = "WiFiLocation@PDA";
+                bleName = "";
+                break;
             case R.id.menu_synchronize:
                 DatabaseHelper dbHelper = new DatabaseHelper(this);
                 dbHelper.synchronize();

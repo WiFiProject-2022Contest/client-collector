@@ -112,6 +112,9 @@ public class ScanFragment extends Fragment {
             case "wifilocation":
                 imageview_map.setImage(ImageSource.resource(R.drawable.wifilocation_example));
                 break;
+            case "WiFiLocation3F":
+                imageview_map.setImage(ImageSource.resource(R.drawable.wifilocation_kimpo_3f_room_temp_mezzanine_bottom));
+                break;
             default:
                 break;
         }

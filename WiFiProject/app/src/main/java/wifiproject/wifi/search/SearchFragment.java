@@ -3,6 +3,7 @@ package wifilocation.wifi.search;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.graphics.PointF;
+import android.media.Image;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -64,6 +65,9 @@ public class SearchFragment extends Fragment {
                 break;
             case "wifilocation":
                 imageview_map2.setImage(ImageSource.resource(R.drawable.wifilocation_example));
+                break;
+            case "WiFiLocation3F":
+                imageview_map2.setImage(ImageSource.resource(R.drawable.wifilocation_kimpo_3f_room_temp_mezzanine_bottom));
                 break;
             default:
                 break;
