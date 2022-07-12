@@ -13,12 +13,12 @@ import androidx.annotation.Nullable;
 
 import com.davemorrissey.labs.subscaleview.SubsamplingScaleImageView;
 
+import wifilocation.wifi.MainActivity;
 import wifilocation.wifi.R;
 
 public class ScalableSpotImageView extends SubsamplingScaleImageView {
 
     private Bitmap bitmap_spot;
-    private final PointF MAP_SIZE = new PointF(100, 50);
 
     public ScalableSpotImageView(@NonNull Context context) {
         super(context);
@@ -45,6 +45,6 @@ public class ScalableSpotImageView extends SubsamplingScaleImageView {
         PointF size = new PointF(getSWidth(), getSHeight());
         float width_ratio = s_coord.x / size.x;
         float height_ratio = s_coord.y / size.y;
-        return new PointF(MAP_SIZE.x * width_ratio, MAP_SIZE.y * height_ratio);
+        return new PointF(MainActivity.mapSize.x * width_ratio, MainActivity.mapSize.y * height_ratio);
     }
 }

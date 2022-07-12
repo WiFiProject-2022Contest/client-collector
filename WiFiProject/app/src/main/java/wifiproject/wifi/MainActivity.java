@@ -3,6 +3,7 @@ package wifilocation.wifi;
 import android.Manifest;
 import android.content.Context;
 import android.content.pm.PackageManager;
+import android.graphics.PointF;
 import android.os.Bundle;
 import android.telephony.TelephonyManager;
 import android.view.Menu;
@@ -32,6 +33,7 @@ public class MainActivity extends AppCompatActivity {
     public static String ssid = "SKKU";
     public static String bleName = "";
     public static String uuid;
+    public static PointF mapSize = new PointF(100, 50);
 
     String[] PERMISSIONS = {
             Manifest.permission.ACCESS_COARSE_LOCATION,
@@ -73,6 +75,7 @@ public class MainActivity extends AppCompatActivity {
                 building = "Library5F";
                 ssid = "SKKU";
                 bleName = "";
+                mapSize.set(100f, 50f);
                 break;
             case R.id.map_wifilocation:
                 building = "wifilocation";
@@ -83,6 +86,7 @@ public class MainActivity extends AppCompatActivity {
                 building = "WiFiLocation3F";
                 ssid = "WiFiLocation@PDA";
                 bleName = "";
+                mapSize.set(209.95f, 109.2f);
                 break;
             case R.id.menu_synchronize:
                 DatabaseHelper dbHelper = new DatabaseHelper(this);

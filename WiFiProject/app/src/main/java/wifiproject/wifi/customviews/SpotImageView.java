@@ -16,6 +16,7 @@ import com.davemorrissey.labs.subscaleview.SubsamplingScaleImageView;
 
 import java.util.ArrayList;
 
+import wifilocation.wifi.MainActivity;
 import wifilocation.wifi.R;
 import wifilocation.wifi.model.WiFiItem;
 
@@ -24,7 +25,6 @@ public class SpotImageView extends SubsamplingScaleImageView {
     private ArrayList<PointF> positions = new ArrayList<PointF>();
     private Bitmap bitmap_green_spot;
     private Bitmap bitmap_red_spot;
-    private final PointF MAP_SIZE = new PointF(100, 50);
 
     public SpotImageView(@NonNull Context context) {
         super(context);
@@ -78,13 +78,13 @@ public class SpotImageView extends SubsamplingScaleImageView {
         PointF size = viewToSourceCoord(getWidth(), getHeight());
         float width_ratio = pos.x / size.x;
         float height_ratio = pos.y / size.y;
-        return new PointF(MAP_SIZE.x * width_ratio, MAP_SIZE.y * height_ratio);
+        return new PointF(MainActivity.mapSize.x * width_ratio, MainActivity.mapSize.y * height_ratio);
     }
 
     public PointF meterToSourceCoord(PointF m_coord) {
         PointF size = new PointF(getSWidth(), getSHeight());
-        float width_ratio = m_coord.x / MAP_SIZE.x;
-        float height_ratio = m_coord.y / MAP_SIZE.y;
+        float width_ratio = m_coord.x / MainActivity.mapSize.x;
+        float height_ratio = m_coord.y / MainActivity.mapSize.y;
         return new PointF(size.x * width_ratio, size.y * height_ratio);
     }
 }
