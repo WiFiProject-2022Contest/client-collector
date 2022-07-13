@@ -1,6 +1,5 @@
 package wifilocation.wifi.scan;
 
-import android.Manifest;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothManager;
 import android.bluetooth.le.BluetoothLeScanner;
@@ -11,7 +10,6 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.pm.PackageManager;
 import android.graphics.PointF;
 import android.net.wifi.ScanResult;
 import android.net.wifi.WifiManager;
@@ -26,7 +24,6 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
-import androidx.core.app.ActivityCompat;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -44,17 +41,12 @@ import java.util.Collection;
 import java.util.List;
 
 import wifilocation.wifi.MainActivity;
-import wifilocation.wifi.model.PushResultModel;
 import wifilocation.wifi.R;
 import wifilocation.wifi.model.WiFiItem;
 import wifilocation.wifi.model.WiFiItemAdapter;
 import wifilocation.wifi.customviews.ScalableSpotImageView;
 import wifilocation.wifi.database.DatabaseHelper;
-import wifilocation.wifi.serverconnection.RetrofitAPI;
-import wifilocation.wifi.serverconnection.RetrofitClient;
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
+
 
 public class ScanFragment extends Fragment {
     RecyclerView recyclerview_scanned;
