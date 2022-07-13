@@ -168,7 +168,7 @@ public class ScanFragment extends Fragment {
                         if (SSID == null) {
                             SSID = "";
                         }
-                        SSID.replaceAll("\u0000", "");
+                        SSID = SSID.replaceAll("[^\\u0020-\\u007e]", "");
 
                         String BSSID = scanResult.getDevice().getAddress();
                         int level = scanResult.getRssi();
@@ -231,7 +231,7 @@ public class ScanFragment extends Fragment {
                         if (SSID == null) {
                             SSID = "";
                         }
-                        SSID.replaceAll("\u0000", "");
+                        SSID = SSID.replaceAll("[^\\u0020-\\u007e]", "");
 
                         String BSSID = beacon.getBluetoothAddress();
                         int level = beacon.getRssi();
