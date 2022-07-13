@@ -220,7 +220,19 @@ public class EstimateFragment extends Fragment {
 
         ViewGroup rootView = (ViewGroup) inflater.inflate(R.layout.fragment_estimate, container, false);
         imageview_map3 = rootView.findViewById(R.id.imageViewMap3);
-        imageview_map3.setImage(ImageSource.resource(R.drawable.skku_example));
+        switch (MainActivity.building) {
+            case "Library5F":
+                imageview_map3.setImage(ImageSource.resource(R.drawable.skku_example));
+                break;
+            case "wifilocation":
+                imageview_map3.setImage(ImageSource.resource(R.drawable.wifilocation_example));
+                break;
+            case "WiFiLocation3F":
+                imageview_map3.setImage(ImageSource.resource(R.drawable.wifilocation_kimpo_3f_room_temp_mezzanine_bottom));
+                break;
+            default:
+                break;
+        }
 
         buttonLoadAllDatabase = rootView.findViewById(R.id.buttonLoadAllDatabase);
         buttonEstimate = rootView.findViewById(R.id.buttonEstimate);

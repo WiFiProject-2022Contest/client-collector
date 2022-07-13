@@ -68,6 +68,7 @@ public class MainActivity extends AppCompatActivity {
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         scan_fragment = new ScanFragment();
         search_fragment = new SearchFragment();
+        estimate_fragment = new EstimateFragment();
 
         int cur_id = item.getItemId();
         switch (cur_id) {
@@ -140,6 +141,7 @@ public class MainActivity extends AppCompatActivity {
                     now_fragment = 2;
                     getSupportFragmentManager().beginTransaction().replace(R.id.container, search_fragment).commit();
                 } else if (position == 2) {
+                    now_fragment = 3;
                     getSupportFragmentManager().beginTransaction().replace(R.id.container, estimate_fragment).commit();
                 }
             }
