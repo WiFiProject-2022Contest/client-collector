@@ -225,11 +225,8 @@ public class EstimateFragment extends Fragment {
             case "Library5F":
                 imageview_map3.setImage(ImageSource.resource(R.drawable.skku_example));
                 break;
-            case "wifilocation":
-                imageview_map3.setImage(ImageSource.resource(R.drawable.wifilocation_example));
-                break;
             case "WiFiLocation3F":
-                imageview_map3.setImage(ImageSource.resource(R.drawable.wifilocation_kimpo_3f_room_temp_mezzanine_bottom));
+                imageview_map3.setImage(ImageSource.resource(R.drawable.wifilocation_gimpo_3f_room_temp_mezzanine_bottom));
                 break;
             default:
                 break;
