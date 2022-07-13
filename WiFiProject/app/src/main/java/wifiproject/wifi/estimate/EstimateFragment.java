@@ -70,6 +70,7 @@ public class EstimateFragment extends Fragment {
     SpotImageView imageview_map3;
     List<WiFiItem> databaseAllWiFiData = null;
     List<WiFiItem> databaseAllBleData = null;
+    List<WiFiItem> scannedItems;
     EstimatedResult estimatedResultWiFi2G;
     EstimatedResult estimatedResultWiFi5G;
     EstimatedResult estimatedResultBLE;
@@ -157,7 +158,7 @@ public class EstimateFragment extends Fragment {
                     bluetoothLeScanner.stopScan(bluetoothLeScanCallback);
 
                     estimatedResultBLE = PositioningAlgorithm.run(userData, databaseAllBleData, MainActivity.building, MainActivity.bleName, MainActivity.uuid, "BLE", 2);
-                    showEstimationResult(1);
+                    handleEstimationResult(userData, 1);
                 }
                 catch (SecurityException e) {
                     estimatedResultBLE = null;
@@ -210,7 +211,7 @@ public class EstimateFragment extends Fragment {
                 }
 
                 estimatedResultBeacon = PositioningAlgorithm.run(userData, databaseAllBleData, MainActivity.building, MainActivity.bleName, MainActivity.uuid, "iBeacon", 2);
-                showEstimationResult(1);
+                handleEstimationResult(userData, 1);
 
                 beaconScanRequired = false;
                 beaconManager.stopRangingBeacons(region);
@@ -257,6 +258,7 @@ public class EstimateFragment extends Fragment {
         buttonEstimate.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                scannedItems = new ArrayList<>();
                 resultCount = 0;
 
                 if (databaseAllWiFiData == null || databaseAllBleData == null) {
@@ -293,6 +295,11 @@ public class EstimateFragment extends Fragment {
         buttonPushEstimationResult.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                List<WiFiItem> copyScannedItems = new ArrayList<>(scannedItems);
+                for (WiFiItem item : copyScannedItems) {
+                    item.setBuilding(item.getBuilding() + "Est");
+                }
+
                 EstimatedResult copy2G = null;
                 EstimatedResult copy5G = null;
                 EstimatedResult copyBLE = null;
@@ -311,7 +318,7 @@ public class EstimateFragment extends Fragment {
                     copyBeacon = new EstimatedResult(estimatedResultBeacon);
                 }
 
-                List<EstimatedResult> listForPost = new ArrayList<>();
+                List<EstimatedResult> estimatedDataSet = new ArrayList<>();
                 for (EstimatedResult er : new EstimatedResult[] {copy2G, copy5G, copyBLE, copyBeacon}) {
                     if (er == null) {
                         continue;
@@ -331,12 +338,14 @@ public class EstimateFragment extends Fragment {
                         continue;
                     }
 
-                    listForPost.add(er);
+                    estimatedDataSet.add(er);
                 }
 
-                pushLocal(listForPost);
+                pushLocal(copyScannedItems, estimatedDataSet);
             }
         });
+
+        scannedItems = new ArrayList<>();
 
         getLocal();
 
@@ -377,9 +386,10 @@ public class EstimateFragment extends Fragment {
         Toast.makeText(context, "Local database loaded.", Toast.LENGTH_SHORT).show();
     }
 
-    private void pushLocal(List<EstimatedResult> listForPost) {
+    private void pushLocal(List<WiFiItem> scannedItemsForPost, List<EstimatedResult> estimatedResultsForPost) {
         DatabaseHelper dbHelper = new DatabaseHelper(context);
-        dbHelper.insertIntoFingerprint(listForPost, 1);
+        dbHelper.insertIntoWiFiInfo(scannedItemsForPost, 1);
+        dbHelper.insertIntoFingerprint(estimatedResultsForPost, 1);
 
         Toast.makeText(context, "Local database push", Toast.LENGTH_SHORT).show();
     }
@@ -395,7 +405,7 @@ public class EstimateFragment extends Fragment {
 
         estimatedResultWiFi2G = PositioningAlgorithm.run(userData, databaseAllWiFiData, MainActivity.building, MainActivity.ssid, MainActivity.uuid, "WiFi", 2);
         estimatedResultWiFi5G = PositioningAlgorithm.run(userData, databaseAllWiFiData, MainActivity.building, MainActivity.ssid, MainActivity.uuid, "WiFi", 5);
-        showEstimationResult(2);
+        handleEstimationResult(userData, 2);
     }
 
     private void scanFailure() {
@@ -404,7 +414,8 @@ public class EstimateFragment extends Fragment {
         wm.getScanResults();
     }
 
-    private void showEstimationResult(int plus) {
+    private void handleEstimationResult(List<WiFiItem> userData, int plus) {
+        scannedItems.addAll(userData);
         resultCount += plus;
 
         if (resultCount < resultCountThreshold) {
