@@ -139,7 +139,7 @@ public class EstimateFragment extends Fragment {
                         if (SSID == null) {
                             SSID = "";
                         }
-                        SSID.replaceAll("\u0000", "");
+                        SSID = SSID.replaceAll("[^a-zA-Z0-9\\s]", "");
 
                         String BSSID = scanResult.getDevice().getAddress();
                         int level = scanResult.getRssi();
