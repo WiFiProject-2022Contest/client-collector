@@ -71,7 +71,7 @@ public class PositioningAlgorithm {
                     // 데이터베이스에 대한 작업은 기존에 변환한 정보가 없거나 받은 데이터베이스 정보가 변경되었을 때만 시행합니다.
                     tp = getRecordPointList(userData, targetBuilding, method, targetSSID, targetGHZ, minDbm);
                     if (tp.size() == 0) {
-                        return null;
+                        return results;
                     }
 
                     if (databaseData != previousDatabase || !method.equals(lastMethod) || lastGHZ != targetGHZ || lastK != K || lastMinValidAPNum != minValidAPNum || lastMinDbm != minDbm) {

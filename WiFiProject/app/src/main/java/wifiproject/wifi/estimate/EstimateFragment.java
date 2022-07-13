@@ -139,7 +139,7 @@ public class EstimateFragment extends Fragment {
                         if (SSID == null) {
                             SSID = "";
                         }
-                        SSID = SSID.replaceAll("[^a-zA-Z0-9\\s]", "");
+                        SSID = SSID.replaceAll("[^\\u0020-\\u007e]", "");
 
                         String BSSID = scanResult.getDevice().getAddress();
                         int level = scanResult.getRssi();
@@ -194,7 +194,7 @@ public class EstimateFragment extends Fragment {
                     if (SSID == null) {
                         SSID = "";
                     }
-                    SSID.replaceAll("\u0000", "");
+                    SSID = SSID.replaceAll("[^\\u0020-\\u007e]", "");
 
                     String BSSID = beacon.getBluetoothAddress();
                     int level = beacon.getRssi();
