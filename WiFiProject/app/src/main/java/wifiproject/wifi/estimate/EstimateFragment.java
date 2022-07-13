@@ -75,6 +75,10 @@ public class EstimateFragment extends Fragment {
     EstimatedResult estimatedResultWiFi5G;
     EstimatedResult estimatedResultBLE;
     EstimatedResult estimatedResultBeacon;
+    List<EstimatedResult> estimatedResultAllWiFi2G;
+    List<EstimatedResult> estimatedResultAllWiFi5G;
+    List<EstimatedResult> estimatedResultAllBLE;
+    List<EstimatedResult> estimatedResultAllBeacon;
 
     int resultCountThreshold = 4;
     int resultCount;
@@ -297,26 +301,17 @@ public class EstimateFragment extends Fragment {
                     item.setBuilding(item.getBuilding() + "Est");
                 }
 
-                EstimatedResult copy2G = null;
-                EstimatedResult copy5G = null;
-                EstimatedResult copyBLE = null;
-                EstimatedResult copyBeacon = null;
-
-                if (estimatedResultWiFi2G != null) {
-                    copy2G = new EstimatedResult(estimatedResultWiFi2G);
-                }
-                if (estimatedResultWiFi5G != null) {
-                    copy5G = new EstimatedResult(estimatedResultWiFi5G);
-                }
+                List<EstimatedResult> estimatedDataSet = new ArrayList<>();
+                estimatedDataSet.addAll(estimatedResultAllWiFi2G);
+                estimatedDataSet.addAll(estimatedResultAllWiFi5G);
                 if (estimatedResultBLE != null) {
-                    copyBLE = new EstimatedResult(estimatedResultBLE);
+                    estimatedDataSet.add(estimatedResultBLE);
                 }
                 if (estimatedResultBeacon != null) {
-                    copyBeacon = new EstimatedResult(estimatedResultBeacon);
+                    estimatedDataSet.add(estimatedResultBeacon);
                 }
 
-                List<EstimatedResult> estimatedDataSet = new ArrayList<>();
-                for (EstimatedResult er : new EstimatedResult[] {copy2G, copy5G, copyBLE, copyBeacon}) {
+                for (EstimatedResult er : estimatedDataSet) {
                     if (er == null) {
                         continue;
                     }
@@ -402,6 +397,15 @@ public class EstimateFragment extends Fragment {
 
         estimatedResultWiFi2G = PositioningAlgorithm.run(userData, databaseAllWiFiData, MainActivity.building, MainActivity.ssid, MainActivity.uuid, "WiFi", 2);
         estimatedResultWiFi5G = PositioningAlgorithm.run(userData, databaseAllWiFiData, MainActivity.building, MainActivity.ssid, MainActivity.uuid, "WiFi", 5);
+
+        int[] infoK = {3, 9, 2};
+        int[] infoMinValidAPNum = {1, 2, 1};
+        int[] infoMinDbm = {-65, -40, 5};
+        estimatedResultAllWiFi2G = PositioningAlgorithm.runRange(userData, databaseAllWiFiData, MainActivity.building, MainActivity.ssid, MainActivity.uuid, "WiFi", 2,
+                                                                infoK, infoMinValidAPNum, infoMinDbm);
+        estimatedResultAllWiFi5G = PositioningAlgorithm.runRange(userData, databaseAllWiFiData, MainActivity.building, MainActivity.ssid, MainActivity.uuid, "WiFi", 5,
+                                                                infoK, infoMinValidAPNum, infoMinDbm);
+
         handleEstimationResult(userData, 2);
     }
 
