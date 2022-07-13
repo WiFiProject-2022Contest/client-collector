@@ -99,6 +99,8 @@ public class MainActivity extends AppCompatActivity {
             getSupportFragmentManager().beginTransaction().replace(R.id.container, scan_fragment).commit();
         } else if (now_fragment == 2) {
             getSupportFragmentManager().beginTransaction().replace(R.id.container, search_fragment).commit();
+        } else if (now_fragment == 3) {
+            getSupportFragmentManager().beginTransaction().replace(R.id.container, estimate_fragment).commit();
         }
         return super.onOptionsItemSelected(item);
     }
