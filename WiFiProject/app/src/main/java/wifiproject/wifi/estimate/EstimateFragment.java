@@ -302,8 +302,12 @@ public class EstimateFragment extends Fragment {
                 }
 
                 List<EstimatedResult> estimatedDataSet = new ArrayList<>();
-                estimatedDataSet.addAll(estimatedResultAllWiFi2G);
-                estimatedDataSet.addAll(estimatedResultAllWiFi5G);
+                if (estimatedResultAllWiFi2G != null) {
+                    estimatedDataSet.addAll(estimatedResultAllWiFi2G);
+                }
+                if (estimatedResultAllWiFi5G != null) {
+                    estimatedDataSet.addAll(estimatedResultAllWiFi5G);
+                }
                 if (estimatedResultBLE != null) {
                     estimatedDataSet.add(estimatedResultBLE);
                 }
