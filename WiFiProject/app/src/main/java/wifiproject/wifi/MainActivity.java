@@ -27,7 +27,7 @@ public class MainActivity extends AppCompatActivity {
     public ScanFragment scan_fragment;
     public SearchFragment search_fragment;
     public EstimateFragment estimate_fragment;
-    public int now_fragment = 1; // 1은 scan, 2는 search
+    public int now_fragment = 1; // 1은 scan, 2는 search, 3은 estimate
 
     public static String building = "Library5F";
     public static String ssid = "SKKU";
@@ -78,12 +78,7 @@ public class MainActivity extends AppCompatActivity {
                 bleName = "";
                 mapSize.set(100f, 50f);
                 break;
-            case R.id.map_wifilocation:
-                building = "wifilocation";
-                ssid = "WiFiLocation@PDA";
-                bleName = "";
-                break;
-            case R.id.map_wifilocation_kimpo_3F_room_temp_mezzanine_bottom:
+            case R.id.map_wifilocation_gimpo_3F_room_temp_mezzanine_bottom:
                 building = "WiFiLocation3F";
                 ssid = "WiFiLocation@PDA";
                 bleName = "";

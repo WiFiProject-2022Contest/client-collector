@@ -8,12 +8,7 @@
         android:title="SKKU"
         app:showAsAction="never" />
     <item
-        android:id="@+id/map_wifilocation"
-        android:icon="@android:drawable/ic_menu_view"
-        android:title="WiFiLocation"
-        app:showAsAction="never" />
-    <item
-        android:id="@+id/map_wifilocation_kimpo_3F_room_temp_mezzanine_bottom"
+        android:id="@+id/map_wifilocation_gimpo_3F_room_temp_mezzanine_bottom"
         android:title="테스트 김포 3층 상온 메자닌 하부" />
     <item
         android:id="@+id/menu_synchronize"

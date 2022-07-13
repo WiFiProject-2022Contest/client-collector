@@ -109,11 +109,8 @@ public class ScanFragment extends Fragment {
             case "Library5F":
                 imageview_map.setImage(ImageSource.resource(R.drawable.skku_example));
                 break;
-            case "wifilocation":
-                imageview_map.setImage(ImageSource.resource(R.drawable.wifilocation_example));
-                break;
             case "WiFiLocation3F":
-                imageview_map.setImage(ImageSource.resource(R.drawable.wifilocation_kimpo_3f_room_temp_mezzanine_bottom));
+                imageview_map.setImage(ImageSource.resource(R.drawable.wifilocation_gimpo_3f_room_temp_mezzanine_bottom));
                 break;
             default:
                 break;
@@ -175,6 +172,7 @@ public class ScanFragment extends Fragment {
 
                         String BSSID = scanResult.getDevice().getAddress();
                         int level = scanResult.getRssi();
+                        Log.d("ㅎㅎㅎ", Integer.toString(level)+"ㅎㅎㅎ");
                         int frequency = 0;
 
                         boolean alreadyExists = false;
@@ -293,6 +291,8 @@ public class ScanFragment extends Fragment {
                     Toast.makeText(context, "블루투스 권한 실패", Toast.LENGTH_SHORT).show();
                 } catch (InterruptedException e) {
                     e.printStackTrace();
+                } catch (Exception e) {
+
                 }
             }
         });
