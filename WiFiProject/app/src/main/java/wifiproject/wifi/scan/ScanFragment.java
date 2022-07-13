@@ -172,7 +172,6 @@ public class ScanFragment extends Fragment {
 
                         String BSSID = scanResult.getDevice().getAddress();
                         int level = scanResult.getRssi();
-                        Log.d("ㅎㅎㅎ", Integer.toString(level)+"ㅎㅎㅎ");
                         int frequency = 0;
 
                         boolean alreadyExists = false;
@@ -301,7 +300,13 @@ public class ScanFragment extends Fragment {
         button_push.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                pushLocal();
+                try {
+                    for(int i=0; i<1500; i++) {
+                        pushLocal();
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
             }
         });
 
@@ -361,5 +366,6 @@ public class ScanFragment extends Fragment {
         DatabaseHelper dbHelper = new DatabaseHelper(context);
         dbHelper.insertIntoWiFiInfo(wifiitem_adpater.getItems(), 1);
         Toast.makeText(context, "push 성공!", Toast.LENGTH_SHORT).show();
+        dbHelper.close();
     }
 }
