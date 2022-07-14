@@ -22,7 +22,7 @@ public class PositioningAlgorithm {
     static int lastMinValidAPNum = 0;
     static int lastMinDbm = 0;
 
-    public static EstimatedResult run(List<WiFiItem> userData, List<WiFiItem> databaseData, String targetBuilding, String targetSSID, String targetUUID, String method, int targetGHZ, int standardRecordDistance) {
+    public static EstimatedResult run(List<WiFiItem> userData, List<WiFiItem> databaseData, String targetBuilding, String targetSSID, String targetUUID, String method, int targetGHZ, double standardRecordDistance) {
         int K = 0;
         int minValidAPNum = 0;
         int minDbm = 0;
@@ -53,7 +53,7 @@ public class PositioningAlgorithm {
         return runKNN(userData, databaseData, targetBuilding, targetSSID, targetUUID, method, targetGHZ, standardRecordDistance, K, minValidAPNum, minDbm);
     }
 
-    public static List<EstimatedResult> runRange(List<WiFiItem> userData, List<WiFiItem> databaseData, String targetBuilding, String targetSSID, String targetUUID, String method, int targetGHZ, int standardRecordDistance,
+    public static List<EstimatedResult> runRange(List<WiFiItem> userData, List<WiFiItem> databaseData, String targetBuilding, String targetSSID, String targetUUID, String method, int targetGHZ, double standardRecordDistance,
                                                  int[] infoK, int[] infoMinValidAPNum, int[] infoMinDbm) {
         List<EstimatedResult> results = new ArrayList<>();
 
@@ -72,7 +72,7 @@ public class PositioningAlgorithm {
         return results;
     }
 
-    public static EstimatedResult runKNN(List<WiFiItem> userData, List<WiFiItem> databaseData, String targetBuilding, String targetSSID, String targetUUID, String method, int targetGHZ, int standardRecordDistance, int K, int minValidAPNum, int minDbm) {
+    public static EstimatedResult runKNN(List<WiFiItem> userData, List<WiFiItem> databaseData, String targetBuilding, String targetSSID, String targetUUID, String method, int targetGHZ, double standardRecordDistance, int K, int minValidAPNum, int minDbm) {
         // 데이터베이스는 한 줄에 하나의 AP 정보가 담겨있기 때문에
         // 이것을 다루기 쉽게 한 측정 지점에서 측정한 RSSI 값들을 모두 하나의 RecordPoint 객체에 담아주는 과정입니다.
         // 데이터베이스에 대한 작업은 기존에 변환한 정보가 없거나 받은 데이터베이스 정보가 변경되었을 때만 시행합니다.
@@ -137,7 +137,7 @@ public class PositioningAlgorithm {
         return rp;
     }
 
-    static double[] estimate(RecordPoint tp, List<RecordPoint> rp, int K, int minValidAPNum, int minDbm, int standardRecordDistance, StringBuilder estimateReason) {
+    static double[] estimate(RecordPoint tp, List<RecordPoint> rp, int K, int minValidAPNum, int minDbm, double standardRecordDistance, StringBuilder estimateReason) {
         List<RecordPoint> vrp = interpolation(rp, standardRecordDistance);
         return weightedKNN(tp, vrp, K, minValidAPNum, minDbm, estimateReason);
     }
