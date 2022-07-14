@@ -298,6 +298,8 @@ public class ScanFragment extends Fragment {
             }
         });
 
+        items = new ArrayList<>();
+
         return rootview;
     }
 
