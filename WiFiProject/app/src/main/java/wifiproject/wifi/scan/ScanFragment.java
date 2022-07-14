@@ -275,17 +275,21 @@ public class ScanFragment extends Fragment {
                     }
 
                     bleScanRequired = true;
-                    //.flushPendingScanResults(bluetoothLeScanCallback);
+                    //bluetoothLeScanner.flushPendingScanResults(bluetoothLeScanCallback);
                     bluetoothLeScanner.startScan(new ArrayList<ScanFilter>(), bluetoothLeScanSettings, bluetoothLeScanCallback);
-
-                    beaconScanRequired = true;
-                    beaconManager.startRangingBeacons(beaconRegion);
                 } catch (SecurityException e) {
                     Toast.makeText(context, "블루투스 권한 실패", Toast.LENGTH_SHORT).show();
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 } catch (Exception e) {
 
+                }
+
+                try {
+                    beaconScanRequired = true;
+                    beaconManager.startRangingBeacons(beaconRegion);
+                } catch (ArrayIndexOutOfBoundsException e) {
+                    //Toast.makeText(context, "비콘 검색 결과 없음", Toast.LENGTH_SHORT).show();
                 }
             }
         });
