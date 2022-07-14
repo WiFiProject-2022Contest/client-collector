@@ -294,7 +294,7 @@ public class EstimateFragment extends Fragment {
                 }
                 catch (ArrayIndexOutOfBoundsException e) {
                     resultCount += 1;
-                    Toast.makeText(context, "비콘 검색 결과 없음", Toast.LENGTH_SHORT).show();
+                    //Toast.makeText(context, "비콘 검색 결과 없음", Toast.LENGTH_SHORT).show();
                 }
 
                 Toast.makeText(context, "Scan started.", Toast.LENGTH_SHORT).show();
