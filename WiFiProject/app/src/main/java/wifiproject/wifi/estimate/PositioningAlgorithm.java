@@ -111,6 +111,10 @@ public class PositioningAlgorithm {
         for (WiFiItem databaseRow : databaseData) {
             RecordPoint workingRP = null;
 
+            // 유사 위치를 동일 좌표로 간주하기 위해서 스캔 좌표 소수점을 반올림 처리 (현실적 판단)
+            databaseRow.setX(Math.round(databaseRow.getX()));
+            databaseRow.setY(Math.round(databaseRow.getY()));
+
             if (!targetBuilding.equals(databaseRow.getBuilding())
                     || !method.equals(databaseRow.getMethod())
                     || !targetSSID.equals(databaseRow.getSSID())
