@@ -8,6 +8,7 @@ import android.os.Bundle;
 import android.telephony.TelephonyManager;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
@@ -55,7 +56,24 @@ public class MainActivity extends AppCompatActivity {
         getPermission();
         initView();
 
-        uuid = getDevicesUUID(this);
+        // 앱을 설치하자마자 UUID를 받으려고 하면 null이 반환됨. 그에 대한 응급처치.
+        for (int i = 0; i < 20; i++) {
+            uuid = getDevicesUUID(this);
+
+            if (uuid != null) {
+                break;
+            }
+
+            try {
+                Thread.sleep(1000);
+            }
+            catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+        if (uuid == null) {
+            Toast.makeText(this, "UUID falied", Toast.LENGTH_SHORT).show();
+        }
     }
 
     @Override

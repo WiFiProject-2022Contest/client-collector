@@ -324,7 +324,6 @@ public class EstimateFragment extends Fragment {
                     try {
                         item.setX(x);
                         item.setY(y);
-                        item.setUuid(MainActivity.uuid);
                         if (!item.getBuilding().endsWith("-Est")) {
                             item.setBuilding(item.getBuilding() + "-Est");
                         }
