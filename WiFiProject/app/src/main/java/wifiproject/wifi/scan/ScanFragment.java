@@ -282,7 +282,7 @@ public class ScanFragment extends Fragment {
                     }
 
                     bleScanRequired = true;
-                    bluetoothLeScanner.flushPendingScanResults(bluetoothLeScanCallback);
+                    //.flushPendingScanResults(bluetoothLeScanCallback);
                     bluetoothLeScanner.startScan(new ArrayList<ScanFilter>(), bluetoothLeScanSettings, bluetoothLeScanCallback);
 
                     beaconScanRequired = true;
@@ -324,7 +324,7 @@ public class ScanFragment extends Fragment {
 
         context.unregisterReceiver(wifi_receiver);
         try {
-            bluetoothLeScanner.flushPendingScanResults(bluetoothLeScanCallback);
+            //bluetoothLeScanner.flushPendingScanResults(bluetoothLeScanCallback);
             bluetoothLeScanner.stopScan(bluetoothLeScanCallback);
         }
         catch (SecurityException e) {

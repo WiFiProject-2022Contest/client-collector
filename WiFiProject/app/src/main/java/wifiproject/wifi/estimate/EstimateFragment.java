@@ -85,6 +85,8 @@ public class EstimateFragment extends Fragment {
     boolean bleScanRequired = false;
     boolean beaconScanRequired = false;
 
+    final static int standardRecordDistance = 4;
+
     private BroadcastReceiver wifi_receiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -161,7 +163,7 @@ public class EstimateFragment extends Fragment {
                     bleScanRequired = false;
                     bluetoothLeScanner.stopScan(bluetoothLeScanCallback);
 
-                    estimatedResultBLE = PositioningAlgorithm.run(userData, databaseAllBleData, MainActivity.building, MainActivity.bleName, MainActivity.uuid, "BLE", 2);
+                    estimatedResultBLE = PositioningAlgorithm.run(userData, databaseAllBleData, MainActivity.building, MainActivity.bleName, MainActivity.uuid, "BLE", 2, standardRecordDistance);
                     handleEstimationResult(userData, 1);
                 }
                 catch (SecurityException e) {
@@ -214,7 +216,7 @@ public class EstimateFragment extends Fragment {
                     userData.add(new WiFiItem(0, 0, SSID, BSSID, level, distance, MainActivity.uuid, MainActivity.building, "iBeacon"));
                 }
 
-                estimatedResultBeacon = PositioningAlgorithm.run(userData, databaseAllBleData, MainActivity.building, MainActivity.bleName, MainActivity.uuid, "iBeacon", 2);
+                estimatedResultBeacon = PositioningAlgorithm.run(userData, databaseAllBleData, MainActivity.building, MainActivity.bleName, MainActivity.uuid, "iBeacon", 2, standardRecordDistance);
                 handleEstimationResult(userData, 1);
 
                 beaconScanRequired = false;
@@ -276,17 +278,23 @@ public class EstimateFragment extends Fragment {
                     }
 
                     bleScanRequired = true;
-                    bluetoothLeScanner.flushPendingScanResults(bluetoothLeScanCallback);
+                    //bluetoothLeScanner.flushPendingScanResults(bluetoothLeScanCallback);
                     bluetoothLeScanner.startScan(new ArrayList<ScanFilter>(), bluetoothLeScanSettings, bluetoothLeScanCallback);
-
-                    beaconScanRequired = true;
-                    beaconManager.startRangingBeacons(beaconRegion);
                 }
                 catch (SecurityException e) {
                     Toast.makeText(context, "블루투스 권한 실패", Toast.LENGTH_SHORT).show();
                 }
-                catch (Exception e) {
-                    Toast.makeText(context, "블루투스 실패", Toast.LENGTH_SHORT).show();
+                catch (InterruptedException e) {
+                    Toast.makeText(context, "블루투스 인터럽트", Toast.LENGTH_SHORT).show();
+                }
+
+                try {
+                    beaconScanRequired = true;
+                    beaconManager.startRangingBeacons(beaconRegion);
+                }
+                catch (ArrayIndexOutOfBoundsException e) {
+                    resultCount += 1;
+                    Toast.makeText(context, "비콘 검색 결과 없음", Toast.LENGTH_SHORT).show();
                 }
 
                 Toast.makeText(context, "Scan started.", Toast.LENGTH_SHORT).show();
@@ -364,7 +372,7 @@ public class EstimateFragment extends Fragment {
 
         context.unregisterReceiver(wifi_receiver);
         try {
-            bluetoothLeScanner.flushPendingScanResults(bluetoothLeScanCallback);
+            //bluetoothLeScanner.flushPendingScanResults(bluetoothLeScanCallback);
             bluetoothLeScanner.stopScan(bluetoothLeScanCallback);
         }
         catch (SecurityException e) {
@@ -399,15 +407,15 @@ public class EstimateFragment extends Fragment {
             userData.add(new WiFiItem(0, 0, result.SSID, result.BSSID, result.level, result.frequency, MainActivity.uuid, MainActivity.building, "WiFi"));
         }
 
-        estimatedResultWiFi2G = PositioningAlgorithm.run(userData, databaseAllWiFiData, MainActivity.building, MainActivity.ssid, MainActivity.uuid, "WiFi", 2);
-        estimatedResultWiFi5G = PositioningAlgorithm.run(userData, databaseAllWiFiData, MainActivity.building, MainActivity.ssid, MainActivity.uuid, "WiFi", 5);
+        estimatedResultWiFi2G = PositioningAlgorithm.run(userData, databaseAllWiFiData, MainActivity.building, MainActivity.ssid, MainActivity.uuid, "WiFi", 2, standardRecordDistance);
+        estimatedResultWiFi5G = PositioningAlgorithm.run(userData, databaseAllWiFiData, MainActivity.building, MainActivity.ssid, MainActivity.uuid, "WiFi", 5, standardRecordDistance);
 
         int[] infoK = {3, 9, 2};
         int[] infoMinValidAPNum = {1, 2, 1};
         int[] infoMinDbm = {-65, -40, 5};
-        estimatedResultAllWiFi2G = PositioningAlgorithm.runRange(userData, databaseAllWiFiData, MainActivity.building, MainActivity.ssid, MainActivity.uuid, "WiFi", 2,
+        estimatedResultAllWiFi2G = PositioningAlgorithm.runRange(userData, databaseAllWiFiData, MainActivity.building, MainActivity.ssid, MainActivity.uuid, "WiFi", 2, standardRecordDistance,
                                                                 infoK, infoMinValidAPNum, infoMinDbm);
-        estimatedResultAllWiFi5G = PositioningAlgorithm.runRange(userData, databaseAllWiFiData, MainActivity.building, MainActivity.ssid, MainActivity.uuid, "WiFi", 5,
+        estimatedResultAllWiFi5G = PositioningAlgorithm.runRange(userData, databaseAllWiFiData, MainActivity.building, MainActivity.ssid, MainActivity.uuid, "WiFi", 5, standardRecordDistance,
                                                                 infoK, infoMinValidAPNum, infoMinDbm);
 
         handleEstimationResult(userData, 2);
