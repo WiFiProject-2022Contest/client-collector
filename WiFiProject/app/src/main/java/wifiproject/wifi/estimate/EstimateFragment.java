@@ -316,8 +316,7 @@ public class EstimateFragment extends Fragment {
                     y = -1;
                 }
 
-                List<WiFiItem> copyScannedItems = new ArrayList<>(scannedItems);
-                for (WiFiItem item : copyScannedItems) {
+                for (WiFiItem item : scannedItems) {
                     if (item == null) {
                         continue;
                     }
@@ -326,7 +325,9 @@ public class EstimateFragment extends Fragment {
                         item.setX(x);
                         item.setY(y);
                         item.setUuid(MainActivity.uuid);
-                        item.setBuilding(item.getBuilding() + "-Est");
+                        if (!item.getBuilding().endsWith("-Est")) {
+                            item.setBuilding(item.getBuilding() + "-Est");
+                        }
                     }
                     catch (NullPointerException e) {
                         continue;
@@ -361,7 +362,7 @@ public class EstimateFragment extends Fragment {
                     }
                 }
 
-                pushLocal(copyScannedItems, estimatedDataSet);
+                pushLocal(scannedItems, estimatedDataSet);
             }
         });
 
