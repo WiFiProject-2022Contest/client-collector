@@ -386,6 +386,7 @@ public class EstimateFragment extends Fragment {
         DatabaseHelper dbHelper = new DatabaseHelper(context);
         databaseAllWiFiData = dbHelper.searchFromWiFiInfo(MainActivity.building, MainActivity.ssid, null, null, null, null, null);
         databaseAllBleData = dbHelper.searchFromWiFiInfo(MainActivity.building, MainActivity.bleName, null, null, null, null, null);
+        dbHelper.close();
 
         Toast.makeText(context, "Local database loaded.", Toast.LENGTH_SHORT).show();
     }
@@ -394,6 +395,7 @@ public class EstimateFragment extends Fragment {
         DatabaseHelper dbHelper = new DatabaseHelper(context);
         dbHelper.insertIntoWiFiInfo(scannedItemsForPost, 1);
         dbHelper.insertIntoFingerprint(estimatedResultsForPost, 1);
+        dbHelper.close();
 
         Toast.makeText(context, "Local database push", Toast.LENGTH_SHORT).show();
     }

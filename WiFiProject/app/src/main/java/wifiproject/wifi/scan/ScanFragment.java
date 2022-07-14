@@ -292,13 +292,7 @@ public class ScanFragment extends Fragment {
         button_push.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                try {
-                    for(int i=0; i<1500; i++) {
-                        pushLocal();
-                    }
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
+                pushLocal();
             }
         });
 
