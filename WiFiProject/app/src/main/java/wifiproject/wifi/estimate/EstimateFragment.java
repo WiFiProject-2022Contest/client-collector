@@ -85,7 +85,7 @@ public class EstimateFragment extends Fragment {
     boolean bleScanRequired = false;
     boolean beaconScanRequired = false;
 
-    final static int standardRecordDistance = 4;
+    final static double standardRecordDistance = 5.5;
 
     private BroadcastReceiver wifi_receiver = new BroadcastReceiver() {
         @Override
