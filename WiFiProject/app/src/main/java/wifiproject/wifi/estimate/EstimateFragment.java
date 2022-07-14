@@ -304,9 +304,33 @@ public class EstimateFragment extends Fragment {
         buttonPushEstimationResult.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                float x;
+                float y;
+
+                try {
+                    x = Float.parseFloat(editTextRealX.getText().toString());
+                    y = Float.parseFloat(editTextRealY.getText().toString());
+                }
+                catch (NumberFormatException e) {
+                    x = -1;
+                    y = -1;
+                }
+
                 List<WiFiItem> copyScannedItems = new ArrayList<>(scannedItems);
                 for (WiFiItem item : copyScannedItems) {
-                    item.setBuilding(item.getBuilding() + "Est");
+                    if (item == null) {
+                        continue;
+                    }
+
+                    try {
+                        item.setX(x);
+                        item.setY(y);
+                        item.setUuid(MainActivity.uuid);
+                        item.setBuilding(item.getBuilding() + "-Est");
+                    }
+                    catch (NullPointerException e) {
+                        continue;
+                    }
                 }
 
                 List<EstimatedResult> estimatedDataSet = new ArrayList<>();
@@ -329,20 +353,12 @@ public class EstimateFragment extends Fragment {
                     }
 
                     try {
-                        double x = Double.parseDouble(editTextRealX.getText().toString());
-                        double y = Double.parseDouble(editTextRealY.getText().toString());
                         er.setPositionRealX(x);
                         er.setPositionRealY(y);
-                    }
-                    catch (NumberFormatException e) {
-                        er.setPositionRealX(-1);
-                        er.setPositionRealY(-1);
                     }
                     catch (NullPointerException e) {
                         continue;
                     }
-
-                    estimatedDataSet.add(er);
                 }
 
                 pushLocal(copyScannedItems, estimatedDataSet);
