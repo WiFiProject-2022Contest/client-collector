@@ -6,6 +6,7 @@ import android.bluetooth.le.BluetoothLeScanner;
 import android.bluetooth.le.ScanCallback;
 import android.bluetooth.le.ScanFilter;
 import android.bluetooth.le.ScanSettings;
+import android.content.AsyncQueryHandler;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -13,6 +14,7 @@ import android.content.IntentFilter;
 import android.graphics.PointF;
 import android.net.wifi.ScanResult;
 import android.net.wifi.WifiManager;
+import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
@@ -349,9 +351,35 @@ public class ScanFragment extends Fragment {
     }
 
     private void pushLocal() {
-        DatabaseHelper dbHelper = new DatabaseHelper(context);
-        dbHelper.insertIntoWiFiInfo(wifiitem_adpater.getItems(), 1);
-        Toast.makeText(context, "push 성공!", Toast.LENGTH_SHORT).show();
-        dbHelper.close();
+        DBInsert task = new DBInsert();
+        task.execute();
+    }
+
+    private class DBInsert extends AsyncTask {
+        DatabaseHelper dbHelper;
+
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+            dbHelper = new DatabaseHelper(context);
+        }
+
+        @Override
+        protected void onProgressUpdate(Object[] values) {
+            super.onProgressUpdate(values);
+        }
+
+        @Override
+        protected void onPostExecute(Object o) {
+            super.onPostExecute(o);
+            Toast.makeText(context, "push 성공!", Toast.LENGTH_SHORT).show();
+            dbHelper.close();
+        }
+
+        @Override
+        protected Object doInBackground(Object[] objects) {
+            dbHelper.insertIntoWiFiInfo(wifiitem_adpater.getItems(), 1);
+            return null;
+        }
     }
 }
