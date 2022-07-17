@@ -329,6 +329,9 @@ public class ScanFragment extends Fragment {
         catch (SecurityException e) {
             e.printStackTrace();
         }
+        catch (Exception e) {
+            e.printStackTrace();
+        }
         beaconManager.stopRangingBeacons(beaconRegion);
         beaconManager.removeRangeNotifier(rangeNotifier);
     }

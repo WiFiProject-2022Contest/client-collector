@@ -156,7 +156,7 @@ public class PositioningAlgorithm {
                     distanceSquare += Math.pow(rp.get(i).getLocation()[k] - rp.get(j).getLocation()[k], 2);
                 }
 
-                if (distanceSquare < Math.pow(standardRecordDistance, 2) * 0.8 || distanceSquare > Math.pow(standardRecordDistance, 2) * 2) {
+                if (distanceSquare < Math.pow(standardRecordDistance, 2) * 0.7 || distanceSquare > Math.pow(standardRecordDistance, 2) * 2) {
                     continue;
                 }
 
