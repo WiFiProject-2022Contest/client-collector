@@ -20,11 +20,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.TimeUnit;
 
 import wifilocation.wifi.estimate.EstimatedResult;
-import wifilocation.wifi.model.PushResultModel;
 import wifilocation.wifi.model.WiFiItem;
 import wifilocation.wifi.serverconnection.RetrofitAPI;
 import wifilocation.wifi.serverconnection.RetrofitClient;
@@ -346,9 +343,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     }
 
     private class SynchronizeTask extends AsyncTask<String, String, String> {
+
         ProgressDialog progressDialog = new ProgressDialog(context);
-        CountDownLatch countDownLatch;
-        boolean continuable = true;
 
         @Override
         protected void onPreExecute() {
@@ -388,119 +384,31 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         }
 
         private void pushRemoteNewData() {
-            countDownLatch = new CountDownLatch(2);
-            CountDownLatch innerCount = new CountDownLatch(1);
-
             List<WiFiItem> wiFiItems = searchFromWiFiInfo(null, null, null, null, null, null, 1);
             List<EstimatedResult> estimatedResults = searchFromFingerprint(1);
             RetrofitAPI retrofitAPI = RetrofitClient.getRetrofitAPI();
-
-            retrofitAPI.postDataWiFiItem(wiFiItems).enqueue(new Callback<PushResultModel>() {
-                @Override
-                public void onResponse(Call<PushResultModel> call, Response<PushResultModel> response) {
-                    countDownLatch.countDown();
-                    innerCount.countDown();
-                }
-
-                @Override
-                public void onFailure(Call<PushResultModel> call, Throwable t) {
-                    continuable = false;
-                    countDownLatch.countDown();
-                    innerCount.countDown();
-                }
-            });
-
             try {
-                innerCount.await();
-            }
-            catch (InterruptedException e) {
+                retrofitAPI.postDataWiFiItem(wiFiItems).execute();
+                retrofitAPI.postDataEstimatedResult(estimatedResults).execute();
+            } catch (IOException e) {
                 e.printStackTrace();
             }
-
-            retrofitAPI.postDataEstimatedResult(estimatedResults).enqueue(new Callback<PushResultModel>() {
-                @Override
-                public void onResponse(Call<PushResultModel> call, Response<PushResultModel> response) {
-                    countDownLatch.countDown();
-                }
-
-                @Override
-                public void onFailure(Call<PushResultModel> call, Throwable t) {
-                    continuable = false;
-                    countDownLatch.countDown();
-                }
-            });
         }
 
         private void deleteAllLocal() {
-            try {
-                countDownLatch.await();
-            }
-            catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-            if (!continuable) {
-                return;
-            }
-
             SQLiteDatabase db = getWritableDatabase();
             db.execSQL("delete from " + TABLE_WIFIINFO);
             db.execSQL("delete from " + TABLE_FINGERPRINT);
         }
 
         private void getAllFromRemote() {
-            countDownLatch = new CountDownLatch(2);
-            CountDownLatch innerCount = new CountDownLatch(1);
-            if (!continuable) {
-                return;
-            }
-
             RetrofitAPI retrofitAPI = RetrofitClient.getRetrofitAPI();
-
-            retrofitAPI.getDataWiFiItem(null, null, null, null, null, null).enqueue(new Callback<List<WiFiItem>>() {
-                @Override
-                public void onResponse(Call<List<WiFiItem>> call, Response<List<WiFiItem>> response) {
-                    List<WiFiItem> wiFiItems = response.body();
-                    insertIntoWiFiInfo(wiFiItems, 0);
-
-                    countDownLatch.countDown();
-                    innerCount.countDown();
-                }
-
-                @Override
-                public void onFailure(Call<List<WiFiItem>> call, Throwable t) {
-                    continuable = false;
-                    countDownLatch.countDown();
-                    innerCount.countDown();
-                }
-            });
-
             try {
-                innerCount.await();
-            }
-            catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-
-            retrofitAPI.getDataEstimateResult(null, null).enqueue(new Callback<List<EstimatedResult>>() {
-                @Override
-                public void onResponse(Call<List<EstimatedResult>> call, Response<List<EstimatedResult>> response) {
-                    List<EstimatedResult> estimatedResults = response.body();
-                    insertIntoFingerprint(estimatedResults, 0);
-
-                    countDownLatch.countDown();
-                }
-
-                @Override
-                public void onFailure(Call<List<EstimatedResult>> call, Throwable t) {
-                    continuable = false;
-                    countDownLatch.countDown();
-                }
-            });
-
-            try {
-                countDownLatch.await();
-            }
-            catch (InterruptedException e) {
+                List<WiFiItem> wiFiItems = retrofitAPI.getDataWiFiItem(null, null, null, null, null, null).execute().body();
+                List<EstimatedResult> estimatedResults = retrofitAPI.getDataEstimateResult(null, null).execute().body();
+                insertIntoWiFiInfo(wiFiItems, 0);
+                insertIntoFingerprint(estimatedResults, 0);
+            } catch (IOException e) {
                 e.printStackTrace();
             }
         }
