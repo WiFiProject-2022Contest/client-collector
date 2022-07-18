@@ -75,7 +75,7 @@ public class SpotImageView extends SubsamplingScaleImageView {
     }
 
     public PointF sourceToMeter(PointF pos) {
-        PointF size = viewToSourceCoord(getWidth(), getHeight());
+        PointF size = new PointF(getSWidth(), getSHeight());
         float width_ratio = pos.x / size.x;
         float height_ratio = pos.y / size.y;
         return new PointF(MainActivity.mapSize.x * width_ratio, MainActivity.mapSize.y * height_ratio);
