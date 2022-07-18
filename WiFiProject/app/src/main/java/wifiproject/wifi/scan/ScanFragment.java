@@ -366,11 +366,10 @@ public class ScanFragment extends Fragment {
 
     private class DBInsert extends AsyncTask {
         DatabaseHelper dbHelper;
-
         @Override
         protected void onPreExecute() {
             super.onPreExecute();
-            dbHelper = new DatabaseHelper(context);
+             dbHelper = new DatabaseHelper(context);
         }
 
         @Override
