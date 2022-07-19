@@ -147,7 +147,7 @@ public class PositioningAlgorithm {
     }
 
     static List<RecordPoint> interpolation(List<RecordPoint> rp, double standardRecordDistance) {
-        List<RecordPoint> vrp = new ArrayList<>(rp);
+        List<RecordPoint> candidate = new ArrayList<>();
 
         for (int i = 0; i < rp.size(); i++) {
             for (int j = i + 1; j < rp.size(); j++) {
@@ -156,7 +156,7 @@ public class PositioningAlgorithm {
                     distanceSquare += Math.pow(rp.get(i).getLocation()[k] - rp.get(j).getLocation()[k], 2);
                 }
 
-                if (distanceSquare < Math.pow(standardRecordDistance, 2) * 0.7 || distanceSquare > Math.pow(standardRecordDistance, 2) * 2) {
+                if (distanceSquare < Math.pow(standardRecordDistance, 2) * 0.6 || distanceSquare > Math.pow(standardRecordDistance, 2) * 2) {
                     continue;
                 }
 
@@ -171,7 +171,30 @@ public class PositioningAlgorithm {
                     newRP.getLocation()[k] = (rp.get(i).getLocation()[k] + rp.get(j).getLocation()[k]) / 2;
                 }
 
-                vrp.add(newRP);
+                candidate.add(newRP);
+            }
+        }
+
+        List<RecordPoint> vrp = new ArrayList<>(rp);
+        // 기존 RP와 지나치게 가까운 VRP 후보 삭제
+        for (int i = 0; i < candidate.size(); i++) {
+            boolean adjacent = true;
+
+            for (int j = 0; j < rp.size(); j++) {
+                for (int k = 0; k < 2; k++) {
+                    if (Math.abs(candidate.get(i).getLocation()[k] - rp.get(j).getLocation()[k]) > 1) {
+                        adjacent = false;
+                        break;
+                    }
+                }
+
+                if (adjacent) {
+                    break;
+                }
+            }
+
+            if (!adjacent) {
+                vrp.add(candidate.get(i));
             }
         }
 
