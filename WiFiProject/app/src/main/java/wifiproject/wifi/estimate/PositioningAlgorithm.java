@@ -93,7 +93,7 @@ public class PositioningAlgorithm {
         }
 
         // 변환된 정보를 함수에 넣어서 추정값을 반환받습니다.
-        EstimatedResult estimatedResult = new EstimatedResult(targetBuilding, targetSSID, targetUUID, method + "-" + targetGHZ + "Ghz", K, minDbm, 1);
+        EstimatedResult estimatedResult = new EstimatedResult(targetBuilding, targetSSID, targetUUID, method + "-" + targetGHZ + "Ghz", K, minDbm, 2);
         double[] positionResult = estimate(tp.get(0), rp, K, minValidAPNum, minDbm, standardRecordDistance, estimatedResult.getEstimateReason());
         if (positionResult == null) {
             return null;
@@ -165,7 +165,8 @@ public class PositioningAlgorithm {
 
                 RecordPoint newRP = new RecordPoint();
                 for (String BSSID : intersectBSSID) {
-                    newRP.getRSSI().put(BSSID, (rp.get(i).getRSSI().get(BSSID) + rp.get(j).getRSSI().get(BSSID)) / 2);
+                    double distanceSum = dbmToDistance(rp.get(i).getRSSI().get(BSSID)) + dbmToDistance(rp.get(j).getRSSI().get(BSSID));
+                    newRP.getRSSI().put(BSSID, distanceToDbm(distanceSum / 2));
                 }
                 for (int k = 0; k < 2; k++) {
                     newRP.getLocation()[k] = (rp.get(i).getLocation()[k] + rp.get(j).getLocation()[k]) / 2;
@@ -234,7 +235,7 @@ public class PositioningAlgorithm {
 
         Map<RecordPoint, Double> weight = new HashMap<>();
         for (Entry<RecordPoint, Double> entry : evaluateDistance.entrySet()) {
-            weight.put(entry.getKey(), 1 / (entry.getValue() + 0.01));
+            weight.put(entry.getKey(), 1 / Math.pow(Math.E, entry.getValue()));
         }
 
         double totalWeight = 0;
@@ -273,9 +274,9 @@ public class PositioningAlgorithm {
 
             for (String BSSID : allBSSID) {
                 if (tp.getRSSI().containsKey(BSSID) && rp.get(i).getRSSI().containsKey(BSSID) && rp.get(i).getRSSI().get(BSSID) >= minDbm) {
-                    currentDistanceSquareSum += Math.pow(tp.getRSSI().get(BSSID) - rp.get(i).getRSSI().get(BSSID), 2);
+                    currentDistanceSquareSum += Math.pow(dbmToDistance(tp.getRSSI().get(BSSID)) - dbmToDistance(rp.get(i).getRSSI().get(BSSID)), 2);
                 } else {
-                    currentDistanceSquareSum += Math.pow(Math.abs(maxDbm - minDbm) + 10, 2);
+                    currentDistanceSquareSum += Math.pow(Math.abs(dbmToDistance(maxDbm) - dbmToDistance(minDbm - 10)), 2);
                 }
 
                 if (nearDistanceSquareSum.size() >= K && currentDistanceSquareSum >= maxDistanceSquareSum) {
@@ -301,5 +302,13 @@ public class PositioningAlgorithm {
         }
 
         return nearDistance;
+    }
+
+    static double dbmToDistance(int dbm) {
+        return Math.pow(10, (dbm + 35) / -32.2);
+    }
+
+    static int distanceToDbm(double distance) {
+        return (int) Math.round(-32.2 * Math.log10(distance) - 35);
     }
 }
