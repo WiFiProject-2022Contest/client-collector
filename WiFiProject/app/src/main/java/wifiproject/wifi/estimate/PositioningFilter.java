@@ -33,7 +33,7 @@ class KalmanFilter {
 
     double previousEstimatedData;
     double previousP;
-    long lastTime;
+    long previousTime;
     boolean firstAttempt;
 
     public KalmanFilter() {
@@ -53,7 +53,7 @@ class KalmanFilter {
         if (firstAttempt) {
             previousEstimatedData = measuredData;
             previousP = 0;
-            lastTime = timestamp;
+            previousTime = timestamp;
 
             firstAttempt = false;
             return previousEstimatedData;
@@ -74,7 +74,7 @@ class KalmanFilter {
 
         previousEstimatedData = estimatedData;
         previousP = P;
-        lastTime = timestamp;
+        previousTime = timestamp;
         return estimatedData;
     }
 }
