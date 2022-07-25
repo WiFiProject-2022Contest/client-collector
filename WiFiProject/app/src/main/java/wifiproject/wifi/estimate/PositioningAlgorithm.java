@@ -12,16 +12,6 @@ import java.util.Set;
 import wifilocation.wifi.model.WiFiItem;
 
 public class PositioningAlgorithm {
-    static List<RecordPoint> tp;
-    static List<RecordPoint> rp;
-    static List<WiFiItem> previousDatabase = null;
-
-    static String lastMethod = "";
-    static int lastGHZ = 0;
-    static int lastK = 0;
-    static int lastMinValidAPNum = 0;
-    static int lastMinDbm = 0;
-
     public static EstimatedResult run(List<WiFiItem> userData, List<WiFiItem> databaseData, String targetBuilding, String targetSSID, String targetUUID, String method, int targetGHZ, double standardRecordDistance) {
         int K;
         int minValidRPNum;
@@ -89,21 +79,12 @@ public class PositioningAlgorithm {
         // 데이터베이스는 한 줄에 하나의 AP 정보가 담겨있기 때문에
         // 이것을 다루기 쉽게 한 측정 지점에서 측정한 RSSI 값들을 모두 하나의 RecordPoint 객체에 담아주는 과정입니다.
         // 데이터베이스에 대한 작업은 기존에 변환한 정보가 없거나 받은 데이터베이스 정보가 변경되었을 때만 시행합니다.
-        tp = getRecordPointList(userData, targetBuilding, method, targetSSID, targetGHZ, minDbm);
+        List<RecordPoint> tp = getRecordPointList(userData, targetBuilding, method, targetSSID, targetGHZ, minDbm);
         if (tp.size() == 0) {
             return null;
         }
 
-        if (databaseData != previousDatabase || !method.equals(lastMethod) || lastGHZ != targetGHZ || lastK != K || lastMinValidAPNum != minValidAPNum || lastMinDbm != minDbm) {
-            rp = getRecordPointList(databaseData, targetBuilding, method, targetSSID, targetGHZ, minDbm);
-
-            previousDatabase = databaseData;
-            lastMethod = method;
-            lastGHZ = targetGHZ;
-            lastK = K;
-            lastMinValidAPNum = minValidAPNum;
-            lastMinDbm = minDbm;
-        }
+        List<RecordPoint> rp = getRecordPointList(databaseData, targetBuilding, method, targetSSID, targetGHZ, minDbm);
 
         // 변환된 정보를 함수에 넣어서 추정값을 반환받습니다.
         EstimatedResult estimatedResult = new EstimatedResult(targetBuilding, targetSSID, targetUUID, method + "-" + targetGHZ + "Ghz", K, minDbm, 2);
