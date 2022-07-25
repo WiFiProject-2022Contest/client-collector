@@ -6,7 +6,11 @@ import java.util.List;
 public class PositioningFilter {
     List<KalmanFilter> filterList = new ArrayList<>(2);
 
-    public EstimatedResult run(EstimatedResult estimatedResult, int timestamp) {
+    public EstimatedResult run(EstimatedResult estimatedResult, long timestamp) {
+        if (estimatedResult == null) {
+            return null;
+        }
+
         double[] estimatedPosition = new double[] {estimatedResult.getPositionEstimatedX(), estimatedResult.getPositionEstimatedY()};
         double[] filteredPosition = new double[2];
         for (int i = 0; i < 2; i++) {
