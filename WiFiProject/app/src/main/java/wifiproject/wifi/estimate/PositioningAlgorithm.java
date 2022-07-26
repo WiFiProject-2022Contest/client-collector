@@ -86,7 +86,7 @@ public class PositioningAlgorithm {
 
         // 변환된 정보를 함수에 넣어서 추정값을 반환받습니다.
         EstimatedResult estimatedResult = new EstimatedResult(targetBuilding, targetSSID, targetUUID, method + "-" + targetGHZ + "Ghz", K, minDbm, 2);
-        List<RecordPoint> vrp = interpolation(rp, standardRecordDistance);
+        List<RecordPoint> vrp = interpolation(rp, method, standardRecordDistance);
         double[] positionResult = weightedKNN(tp.get(0), vrp, K, minValidRPNum, minValidAPNum, minDbm, estimatedResult.getEstimateReason());
         if (positionResult == null) {
             return null;
@@ -134,7 +134,7 @@ public class PositioningAlgorithm {
         return rp;
     }
 
-    static List<RecordPoint> interpolation(List<RecordPoint> rp, double standardRecordDistance) {
+    static List<RecordPoint> interpolation(List<RecordPoint> rp, String method, double standardRecordDistance) {
         List<RecordPoint> candidate = new ArrayList<>();
 
         for (int i = 0; i < rp.size(); i++) {
@@ -153,8 +153,14 @@ public class PositioningAlgorithm {
 
                 RecordPoint newRP = new RecordPoint();
                 for (String BSSID : intersectBSSID) {
-                    double distanceSum = dbmToDistance(rp.get(i).getRSSI().get(BSSID)) + dbmToDistance(rp.get(j).getRSSI().get(BSSID));
-                    newRP.getRSSI().put(BSSID, distanceToDbm(distanceSum / 2));
+                    if (method.equals("WiFi")) {
+                        double rssiSum = dbmToDistance(rp.get(i).getRSSI().get(BSSID)) + dbmToDistance(rp.get(j).getRSSI().get(BSSID));
+                        newRP.getRSSI().put(BSSID, distanceToDbm(rssiSum / 2));
+                    }
+                    else {
+                        double rssiSum = rp.get(i).getRSSI().get(BSSID) + rp.get(j).getRSSI().get(BSSID);
+                        newRP.getRSSI().put(BSSID, (int) Math.round(rssiSum / 2));
+                    }
                 }
                 for (int k = 0; k < 2; k++) {
                     newRP.getLocation()[k] = (rp.get(i).getLocation()[k] + rp.get(j).getLocation()[k]) / 2;
