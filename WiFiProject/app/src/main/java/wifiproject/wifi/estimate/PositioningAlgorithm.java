@@ -85,9 +85,16 @@ public class PositioningAlgorithm {
         List<RecordPoint> rp = getRecordPointList(databaseData, targetBuilding, method, targetSSID, targetGHZ, minDbm);
 
         // 변환된 정보를 함수에 넣어서 추정값을 반환받습니다.
-        EstimatedResult estimatedResult = new EstimatedResult(targetBuilding, targetSSID, targetUUID, method + "-" + targetGHZ + "Ghz", K, minDbm, 2);
+        String resultMethodName;
+        if (method.equals("WiFi")) {
+            resultMethodName = method + "-" + targetGHZ + "Ghz";
+        }
+        else {
+            resultMethodName = method;
+        }
+        EstimatedResult estimatedResult = new EstimatedResult(targetBuilding, targetSSID, targetUUID, resultMethodName, K, minDbm, 4);
         List<RecordPoint> vrp = interpolation(rp, method, standardRecordDistance);
-        double[] positionResult = weightedKNN(tp.get(0), vrp, K, minValidRPNum, minValidAPNum, minDbm, estimatedResult.getEstimateReason());
+        double[] positionResult = weightedKNN(tp.get(0), vrp, method, K, minValidRPNum, minValidAPNum, minDbm, estimatedResult.getEstimateReason());
         if (positionResult == null) {
             return null;
         }
@@ -196,7 +203,7 @@ public class PositioningAlgorithm {
         return vrp;
     }
 
-    static double[] weightedKNN(RecordPoint tp, List<RecordPoint> rp, int K, int minValidRPNum, int minValidAPNum, int minDbm, StringBuilder estimateReason) {
+    static double[] weightedKNN(RecordPoint tp, List<RecordPoint> rp, String method, int K, int minValidRPNum, int minValidAPNum, int minDbm, StringBuilder estimateReason) {
         // K개의 최근접 RP를 선별하는 과정
         List<RecordPoint> candidateRP = new ArrayList<>();
         for (int i = 0; i < rp.size(); i++) {
@@ -218,18 +225,26 @@ public class PositioningAlgorithm {
             }
         }
 
-        Map<RecordPoint, Double> nearDistance = getKNearDistance(tp, candidateRP, K, maxDbm, minDbm);
+        Map<RecordPoint, Double> nearDistance = getKNearDistance(tp, candidateRP, method, K, maxDbm, minDbm);
         // 아무것도 추정되지 않은 경우, 서비스 지역이 있지 않은 경우임
         if (nearDistance.size() < minValidRPNum) {
             return null;
         }
 
         // K개의 최근접 AP를 토대로 평가용 가중치를 산정하는 과정
-        Map<RecordPoint, Double> evaluateDistance = getKNearDistance(tp, new ArrayList<RecordPoint>(nearDistance.keySet()), K, maxDbm, minDbm);
+        Map<RecordPoint, Double> evaluateDistance = getKNearDistance(tp, new ArrayList<RecordPoint>(nearDistance.keySet()), method, K, maxDbm, minDbm);
 
         Map<RecordPoint, Double> weight = new HashMap<>();
         for (Entry<RecordPoint, Double> entry : evaluateDistance.entrySet()) {
-            weight.put(entry.getKey(), 1 / Math.pow(Math.E, entry.getValue()));
+            double w;
+            if (method.equals("WiFi")) {
+                w = 1 / Math.pow(Math.E, entry.getValue());
+
+            }
+            else {
+                w = 1 / (entry.getValue() + 0.000001);
+            }
+            weight.put(entry.getKey(), w);
         }
 
         double totalWeight = 0;
@@ -255,7 +270,7 @@ public class PositioningAlgorithm {
         return estimatedPosition;
     }
 
-    static Map<RecordPoint, Double> getKNearDistance(RecordPoint tp, List<RecordPoint> rp, int K, int maxDbm, int minDbm) {
+    static Map<RecordPoint, Double> getKNearDistance(RecordPoint tp, List<RecordPoint> rp, String method, int K, int maxDbm, int minDbm) {
         Set<String> allBSSID = new HashSet<>(tp.getRSSI().keySet());
         for (int i = 0; i < rp.size(); i++) {
             allBSSID.addAll(rp.get(i).getRSSI().keySet());
@@ -267,11 +282,25 @@ public class PositioningAlgorithm {
             double currentDistanceSquareSum = 0;
 
             for (String BSSID : allBSSID) {
+                double distanceDiff;
+
                 if (tp.getRSSI().containsKey(BSSID) && rp.get(i).getRSSI().containsKey(BSSID) && rp.get(i).getRSSI().get(BSSID) >= minDbm) {
-                    currentDistanceSquareSum += Math.pow(dbmToDistance(tp.getRSSI().get(BSSID)) - dbmToDistance(rp.get(i).getRSSI().get(BSSID)), 2);
+                    if (method.equals("WiFi")) {
+                        distanceDiff = dbmToDistance(tp.getRSSI().get(BSSID)) - dbmToDistance(rp.get(i).getRSSI().get(BSSID));
+                    }
+                    else {
+                        distanceDiff = tp.getRSSI().get(BSSID) - rp.get(i).getRSSI().get(BSSID);
+                    }
+
                 } else {
-                    currentDistanceSquareSum += Math.pow(Math.abs(dbmToDistance(maxDbm) - dbmToDistance(minDbm - 10)), 2);
+                    if (method.equals("WiFi")) {
+                        distanceDiff = Math.abs(dbmToDistance(maxDbm) - dbmToDistance(minDbm - 10));
+                    }
+                    else {
+                        distanceDiff = maxDbm - minDbm + 10;
+                    }
                 }
+                currentDistanceSquareSum += Math.pow(distanceDiff, 2);
 
                 if (nearDistanceSquareSum.size() >= K && currentDistanceSquareSum >= maxDistanceSquareSum) {
                     break;
