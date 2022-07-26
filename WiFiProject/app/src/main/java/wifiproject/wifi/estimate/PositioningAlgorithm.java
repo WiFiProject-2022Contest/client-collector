@@ -173,6 +173,8 @@ public class PositioningAlgorithm {
                         double rssiSum = rp.get(i).getRSSI().get(BSSID) + rp.get(j).getRSSI().get(BSSID);
                         newRP.getRSSI().put(BSSID, (int) Math.round(rssiSum / 2));
                     }
+                    newRP.getMethod().put(BSSID, rp.get(i).getMethod().get(BSSID));
+                    newRP.getFrequency().put(BSSID, rp.get(i).getFrequency().get(BSSID));
                 }
                 for (int k = 0; k < 2; k++) {
                     newRP.getLocation()[k] = (rp.get(i).getLocation()[k] + rp.get(j).getLocation()[k]) / 2;
