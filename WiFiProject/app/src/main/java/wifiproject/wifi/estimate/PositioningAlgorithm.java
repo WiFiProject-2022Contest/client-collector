@@ -82,12 +82,12 @@ public class PositioningAlgorithm {
         if (tp.size() == 0) {
             return null;
         }
-
         List<RecordPoint> rp = getRecordPointList(databaseData, targetBuilding, method, targetSSID, targetGHZ, minDbm);
 
         // 변환된 정보를 함수에 넣어서 추정값을 반환받습니다.
         EstimatedResult estimatedResult = new EstimatedResult(targetBuilding, targetSSID, targetUUID, method + "-" + targetGHZ + "Ghz", K, minDbm, 2);
-        double[] positionResult = estimate(tp.get(0), rp, K, minValidRPNum, minValidAPNum, minDbm, standardRecordDistance, estimatedResult.getEstimateReason());
+        List<RecordPoint> vrp = interpolation(rp, standardRecordDistance);
+        double[] positionResult = weightedKNN(tp.get(0), vrp, K, minValidRPNum, minValidAPNum, minDbm, estimatedResult.getEstimateReason());
         if (positionResult == null) {
             return null;
         }
@@ -132,11 +132,6 @@ public class PositioningAlgorithm {
         }
 
         return rp;
-    }
-
-    static double[] estimate(RecordPoint tp, List<RecordPoint> rp, int K, int minValidRPNum, int minValidAPNum, int minDbm, double standardRecordDistance, StringBuilder estimateReason) {
-        List<RecordPoint> vrp = interpolation(rp, standardRecordDistance);
-        return weightedKNN(tp, vrp, K, minValidRPNum, minValidAPNum, minDbm, estimateReason);
     }
 
     static List<RecordPoint> interpolation(List<RecordPoint> rp, double standardRecordDistance) {
