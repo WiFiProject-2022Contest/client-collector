@@ -138,7 +138,9 @@ public class PositioningAlgorithm {
                 workingRP = new RecordPoint(new double[] {databaseRow.getX(), databaseRow.getY()});
                 rp.add(workingRP);
             }
+            workingRP.getMethod().put(databaseRow.getBSSID(), databaseRow.getMethod());
             workingRP.getRSSI().put(databaseRow.getBSSID(), databaseRow.getRSSI());
+            workingRP.getFrequency().put(databaseRow.getBSSID(), databaseRow.getFrequency());
         }
 
         return rp;
