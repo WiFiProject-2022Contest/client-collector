@@ -29,7 +29,7 @@ public class PositioningAlgorithm {
                     minValidRPNum = 2;
                 }
 
-                estimatedResult = performKNN(userData, databaseData, targetBuilding, targetSSID, targetUUID, method, targetGHZ, standardRecordDistance, K, minValidRPNum, 1, minDbm);
+                estimatedResult = performSingleKNN(userData, databaseData, targetBuilding, targetSSID, targetUUID, method, targetGHZ, standardRecordDistance, K, minValidRPNum, 1, minDbm);
 
                 if (estimatedResult != null) {
                     break;
@@ -43,14 +43,17 @@ public class PositioningAlgorithm {
             minValidRPNum = 1;
             minDbm = -70;
 
-            return performKNN(userData, databaseData, targetBuilding, targetSSID, targetUUID, method, targetGHZ, standardRecordDistance, K, minValidRPNum, 1, minDbm);
+            return performSingleKNN(userData, databaseData, targetBuilding, targetSSID, targetUUID, method, targetGHZ, standardRecordDistance, K, minValidRPNum, 1, minDbm);
         }
         else if (method.equals("iBeacon")) {
             K = 3;
             minValidRPNum = 1;
             minDbm = -70;
 
-            return performKNN(userData, databaseData, targetBuilding, targetSSID, targetUUID, method, targetGHZ, standardRecordDistance, K, minValidRPNum, 1, minDbm);
+            return performSingleKNN(userData, databaseData, targetBuilding, targetSSID, targetUUID, method, targetGHZ, standardRecordDistance, K, minValidRPNum, 1, minDbm);
+        }
+        else if (method.equals("WiFi+iBeacon")) {
+            return null;
         }
         else {
             return null;
@@ -63,7 +66,7 @@ public class PositioningAlgorithm {
 
         for (int K = infoK[0]; K < infoK[1]; K += infoK[2]) {
             for (int minDbm = infoMinDbm[0]; minDbm < infoMinDbm[1]; minDbm += infoMinDbm[2]) {
-                EstimatedResult result = performKNN(userData, databaseData, targetBuilding, targetSSID, targetUUID, method, targetGHZ, standardRecordDistance, K, 1, 1, minDbm);
+                EstimatedResult result = performSingleKNN(userData, databaseData, targetBuilding, targetSSID, targetUUID, method, targetGHZ, standardRecordDistance, K, 1, 1, minDbm);
 
                 if (result != null) {
                     results.add(result);
@@ -74,8 +77,8 @@ public class PositioningAlgorithm {
         return results;
     }
 
-    public static EstimatedResult performKNN(List<WiFiItem> userData, List<WiFiItem> databaseData, String targetBuilding, String targetSSID, String targetUUID,
-                                             String method, int targetGHZ, double standardRecordDistance, int K, int minValidRPNum, int minValidAPNum, int minDbm) {
+    public static EstimatedResult performSingleKNN(List<WiFiItem> userData, List<WiFiItem> databaseData, String targetBuilding, String targetSSID, String targetUUID,
+                                                   String method, int targetGHZ, double standardRecordDistance, int K, int minValidRPNum, int minValidAPNum, int minDbm) {
         // 데이터베이스는 한 줄에 하나의 AP 정보가 담겨있기 때문에
         // 이것을 다루기 쉽게 한 측정 지점에서 측정한 RSSI 값들을 모두 하나의 RecordPoint 객체에 담아주는 과정입니다.
         List<RecordPoint> tp = getRecordPointList(userData, targetBuilding, method, targetSSID, targetGHZ, minDbm);
