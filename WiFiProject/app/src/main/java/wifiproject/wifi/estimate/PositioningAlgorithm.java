@@ -29,7 +29,7 @@ public class PositioningAlgorithm {
                     minValidRPNum = 2;
                 }
 
-                estimatedResult = performSingleKNN(userData, databaseData, targetBuilding, targetSSID, targetUUID, method, targetGHZ, standardRecordDistance, K, minValidRPNum, 1, minDbm);
+                estimatedResult = performKNN(userData, databaseData, targetBuilding, targetSSID, targetUUID, method, targetGHZ, standardRecordDistance, K, minValidRPNum, 1, minDbm);
 
                 if (estimatedResult != null) {
                     break;
@@ -43,16 +43,16 @@ public class PositioningAlgorithm {
             minValidRPNum = 1;
             minDbm = -70;
 
-            return performSingleKNN(userData, databaseData, targetBuilding, targetSSID, targetUUID, method, targetGHZ, standardRecordDistance, K, minValidRPNum, 1, minDbm);
+            return performKNN(userData, databaseData, targetBuilding, targetSSID, targetUUID, method, targetGHZ, standardRecordDistance, K, minValidRPNum, 1, minDbm);
         }
         else if (method.equals("iBeacon")) {
             K = 3;
             minValidRPNum = 1;
             minDbm = -70;
 
-            return performSingleKNN(userData, databaseData, targetBuilding, targetSSID, targetUUID, method, targetGHZ, standardRecordDistance, K, minValidRPNum, 1, minDbm);
+            return performKNN(userData, databaseData, targetBuilding, targetSSID, targetUUID, method, targetGHZ, standardRecordDistance, K, minValidRPNum, 1, minDbm);
         }
-        else if (method.equals("WiFi+iBeacon")) {
+        else if (method.equals("combined")) {
             return null;
         }
         else {
@@ -66,7 +66,7 @@ public class PositioningAlgorithm {
 
         for (int K = infoK[0]; K < infoK[1]; K += infoK[2]) {
             for (int minDbm = infoMinDbm[0]; minDbm < infoMinDbm[1]; minDbm += infoMinDbm[2]) {
-                EstimatedResult result = performSingleKNN(userData, databaseData, targetBuilding, targetSSID, targetUUID, method, targetGHZ, standardRecordDistance, K, 1, 1, minDbm);
+                EstimatedResult result = performKNN(userData, databaseData, targetBuilding, targetSSID, targetUUID, method, targetGHZ, standardRecordDistance, K, 1, 1, minDbm);
 
                 if (result != null) {
                     results.add(result);
@@ -77,8 +77,8 @@ public class PositioningAlgorithm {
         return results;
     }
 
-    public static EstimatedResult performSingleKNN(List<WiFiItem> userData, List<WiFiItem> databaseData, String targetBuilding, String targetSSID, String targetUUID,
-                                                   String method, int targetGHZ, double standardRecordDistance, int K, int minValidRPNum, int minValidAPNum, int minDbm) {
+    public static EstimatedResult performKNN(List<WiFiItem> userData, List<WiFiItem> databaseData, String targetBuilding, String targetSSID, String targetUUID,
+                                             String method, int targetGHZ, double standardRecordDistance, int K, int minValidRPNum, int minValidAPNum, int minDbm) {
         // 데이터베이스는 한 줄에 하나의 AP 정보가 담겨있기 때문에
         // 이것을 다루기 쉽게 한 측정 지점에서 측정한 RSSI 값들을 모두 하나의 RecordPoint 객체에 담아주는 과정입니다.
         List<RecordPoint> tp = getRecordPointList(userData, targetBuilding, method, targetSSID, targetGHZ, minDbm);
@@ -166,8 +166,8 @@ public class PositioningAlgorithm {
                 RecordPoint newRP = new RecordPoint();
                 for (String BSSID : intersectBSSID) {
                     if (method.equals("WiFi")) {
-                        double rssiSum = dbmToDistance(rp.get(i).getRSSI().get(BSSID)) + dbmToDistance(rp.get(j).getRSSI().get(BSSID));
-                        newRP.getRSSI().put(BSSID, distanceToDbm(rssiSum / 2));
+                        double rssiSum = dbmToDistanceWiFi(rp.get(i).getRSSI().get(BSSID)) + dbmToDistanceWiFi(rp.get(j).getRSSI().get(BSSID));
+                        newRP.getRSSI().put(BSSID, distanceToDbmWiFi(rssiSum / 2));
                     }
                     else {
                         double rssiSum = rp.get(i).getRSSI().get(BSSID) + rp.get(j).getRSSI().get(BSSID);
@@ -232,14 +232,14 @@ public class PositioningAlgorithm {
             }
         }
 
-        Map<RecordPoint, Double> nearDistance = getKNearDistance(tp, candidateRP, method, K, maxDbm, minDbm);
+        Map<RecordPoint, Double> nearDistance = getKNearDistanceSingle(tp, candidateRP, method, K, maxDbm, minDbm);
         // 아무것도 추정되지 않은 경우, 서비스 지역이 있지 않은 경우임
         if (nearDistance.size() < minValidRPNum) {
             return null;
         }
 
         // K개의 최근접 AP를 토대로 평가용 가중치를 산정하는 과정
-        Map<RecordPoint, Double> evaluateDistance = getKNearDistance(tp, new ArrayList<RecordPoint>(nearDistance.keySet()), method, K, maxDbm, minDbm);
+        Map<RecordPoint, Double> evaluateDistance = getKNearDistanceSingle(tp, new ArrayList<RecordPoint>(nearDistance.keySet()), method, K, maxDbm, minDbm);
 
         Map<RecordPoint, Double> weight = new HashMap<>();
         for (Entry<RecordPoint, Double> entry : evaluateDistance.entrySet()) {
@@ -277,7 +277,7 @@ public class PositioningAlgorithm {
         return estimatedPosition;
     }
 
-    static Map<RecordPoint, Double> getKNearDistance(RecordPoint tp, List<RecordPoint> rp, String method, int K, int maxDbm, int minDbm) {
+    static Map<RecordPoint, Double> getKNearDistanceSingle(RecordPoint tp, List<RecordPoint> rp, String method, int K, int maxDbm, int minDbm) {
         Set<String> allBSSID = new HashSet<>(tp.getRSSI().keySet());
         for (int i = 0; i < rp.size(); i++) {
             allBSSID.addAll(rp.get(i).getRSSI().keySet());
@@ -293,7 +293,7 @@ public class PositioningAlgorithm {
 
                 if (tp.getRSSI().containsKey(BSSID) && rp.get(i).getRSSI().containsKey(BSSID) && rp.get(i).getRSSI().get(BSSID) >= minDbm) {
                     if (method.equals("WiFi")) {
-                        distanceDiff = dbmToDistance(tp.getRSSI().get(BSSID)) - dbmToDistance(rp.get(i).getRSSI().get(BSSID));
+                        distanceDiff = dbmToDistanceWiFi(tp.getRSSI().get(BSSID)) - dbmToDistanceWiFi(rp.get(i).getRSSI().get(BSSID));
                     }
                     else {
                         distanceDiff = tp.getRSSI().get(BSSID) - rp.get(i).getRSSI().get(BSSID);
@@ -301,7 +301,7 @@ public class PositioningAlgorithm {
 
                 } else {
                     if (method.equals("WiFi")) {
-                        distanceDiff = Math.abs(dbmToDistance(maxDbm) - dbmToDistance(minDbm - 10));
+                        distanceDiff = Math.abs(dbmToDistanceWiFi(maxDbm) - dbmToDistanceWiFi(minDbm - 10));
                     }
                     else {
                         distanceDiff = maxDbm - minDbm + 10;
@@ -334,11 +334,11 @@ public class PositioningAlgorithm {
         return nearDistance;
     }
 
-    static double dbmToDistance(int dbm) {
+    static double dbmToDistanceWiFi(int dbm) {
         return Math.pow(10, (dbm + 35) / -32.2);
     }
 
-    static int distanceToDbm(double distance) {
+    static int distanceToDbmWiFi(double distance) {
         return (int) Math.round(-32.2 * Math.log10(distance) - 35);
     }
 }
