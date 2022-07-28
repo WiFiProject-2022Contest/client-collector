@@ -2,12 +2,14 @@ package wifilocation.wifi.estimate;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.function.Predicate;
 
 import wifilocation.wifi.model.WiFiItem;
 
@@ -18,6 +20,9 @@ public class PositioningAlgorithm {
         int minDbm;
 
         if (method.equals("WiFi")) {
+            EstimatedResult estimatedResult = estimatedResult = performKNN(userData, databaseData, targetBuilding, targetSSID, targetUUID, method, targetGHZ, standardRecordDistance, 0, 2, 1, -70);
+
+            /*
             K = 7;
 
             EstimatedResult estimatedResult = null;
@@ -35,6 +40,7 @@ public class PositioningAlgorithm {
                     break;
                 }
             }
+             */
 
             return estimatedResult;
         }
@@ -95,7 +101,7 @@ public class PositioningAlgorithm {
         else {
             resultMethodName = method;
         }
-        EstimatedResult estimatedResult = new EstimatedResult(targetBuilding, targetSSID, targetUUID, resultMethodName, K, minDbm, 4);
+        EstimatedResult estimatedResult = new EstimatedResult(targetBuilding, targetSSID, targetUUID, resultMethodName, K, minDbm, 5);
         List<RecordPoint> vrp = interpolation(rp, method, standardRecordDistance);
         double[] positionResult = weightedKNN(tp.get(0), vrp, method, K, minValidRPNum, minValidAPNum, minDbm, estimatedResult.getEstimateReason());
         if (positionResult == null) {
@@ -232,10 +238,26 @@ public class PositioningAlgorithm {
             }
         }
 
+
+        if (K == 0) { // Dynamic Mode
+            K = candidateRP.size();
+        }
         Map<RecordPoint, Double> nearDistance = getKNearDistanceSingle(tp, candidateRP, method, K, maxDbm, minDbm);
         // 아무것도 추정되지 않은 경우, 서비스 지역이 있지 않은 경우임
         if (nearDistance.size() < minValidRPNum) {
             return null;
+        }
+
+        if (K == 0) { // Dynamic Mode
+            double minDistance = Collections.min(nearDistance.values());
+
+            for (Map.Entry<RecordPoint, Double> entry : new HashMap<RecordPoint, Double>(nearDistance).entrySet()) {
+                if (entry.getValue() > minDistance * 1.17) {
+                    nearDistance.remove(entry.getKey());
+                }
+            }
+
+            K = nearDistance.size();
         }
 
         // K개의 최근접 AP를 토대로 평가용 가중치를 산정하는 과정
