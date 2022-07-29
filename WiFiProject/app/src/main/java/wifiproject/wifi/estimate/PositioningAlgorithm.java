@@ -239,15 +239,16 @@ public class PositioningAlgorithm {
             }
         }
 
-
-        if (K == 0) { // Dynamic Mode
+        boolean dynamicMode = false;
+        if (K == 0) {
             K = candidateRP.size();
+            dynamicMode = true;
         }
         Map<RecordPoint, Double> nearDistance = getKNearDistanceSingle(tp, candidateRP, method, K, maxDbm, minDbm);
 
-        if (K == candidateRP.size()) { // Dynamic Mode
+        if (dynamicMode) {
             double minDistance = Collections.min(nearDistance.values());
-            double maxDistance = Collections.max(nearDistance.values());
+            //double maxDistance = Collections.max(nearDistance.values());
             double ratio = 1.17;
 
             Map<RecordPoint, Double> adaptiveMap = new HashMap<>();
