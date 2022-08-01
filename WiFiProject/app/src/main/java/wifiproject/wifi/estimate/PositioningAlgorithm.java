@@ -9,7 +9,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
-import java.util.function.Predicate;
 
 import wifilocation.wifi.model.WiFiItem;
 
@@ -59,7 +58,7 @@ public class PositioningAlgorithm {
             return performKNN(userData, databaseData, targetBuilding, targetSSID, targetUUID, method, targetGHZ, standardRecordDistance, K, minValidRPNum, 1, minDbm);
         }
         else if (method.equals("combined")) {
-            return null;
+            return performKNN(userData, databaseData, targetBuilding, targetSSID, targetUUID, method, targetGHZ, standardRecordDistance, 0, 2, 1, -70);
         }
         else {
             return null;
@@ -244,7 +243,14 @@ public class PositioningAlgorithm {
             K = candidateRP.size();
             dynamicMode = true;
         }
-        Map<RecordPoint, Double> nearDistance = getKNearDistanceSingle(tp, candidateRP, method, K, maxDbm, minDbm);
+
+        Map<RecordPoint, Double> nearDistance;
+        if (method.equals("combined")) {
+            nearDistance = getKNearDistanceCombined(tp, candidateRP, K, maxDbm, minDbm);
+        }
+        else {
+            nearDistance = getKNearDistanceSingle(tp, candidateRP, method, K, maxDbm, minDbm);
+        }
 
         if (dynamicMode) {
             double minDistance = Collections.min(nearDistance.values());
@@ -295,7 +301,13 @@ public class PositioningAlgorithm {
             // 기준에 맞는 RP 개수가 2개 이하면 강제로 2개로 재시도
             if (K < 2) {
                 K = 2;
-                nearDistance = getKNearDistanceSingle(tp, candidateRP, method, K, maxDbm, minDbm);
+
+                if (method.equals("combined")) {
+                    nearDistance = getKNearDistanceCombined(tp, candidateRP, K, maxDbm, minDbm);
+                }
+                else {
+                    nearDistance = getKNearDistanceSingle(tp, candidateRP, method, K, maxDbm, minDbm);
+                }
             }
         }
 
@@ -391,6 +403,107 @@ public class PositioningAlgorithm {
         Map<RecordPoint, Double> nearDistance = new HashMap<>();
         for (Entry<RecordPoint, Double> entry : nearDistanceSquareSum.entrySet()) {
             nearDistance.put(entry.getKey(), Math.sqrt(entry.getValue()) / rp.size());
+        }
+
+        return nearDistance;
+    }
+
+    static Map<RecordPoint, Double> getKNearDistanceCombined(RecordPoint tp, List<RecordPoint> rp, int K, int maxDbm, int minDbm) {
+        Set<String> allBSSID = new HashSet<>(tp.getRSSI().keySet());
+
+        // 표준편차 구하기
+        Map<String, Double> standardDeviationMap = new HashMap<>();
+        List<Integer> standardDeviationLen = new ArrayList<>();
+        double standardDeviationAll = 0;
+        for (String[] methodArr : new String[][] {{"WiFi", "2"}, {"WiFi", "5"}, {"iBeacon", "2"}}) {
+            Map<String, Double> standardDeviationCurrent = new HashMap<>();
+
+            double sdSum = 0;
+            for (String BSSID : allBSSID) {
+                // methodArr 조건에 맞지 않으면 처리하지 않음
+                if (!tp.getMethod().equals(methodArr[0]) || methodArr[0].equals("WiFi") && tp.getFrequency().get(BSSID) % 1000 != Integer.parseInt(methodArr[1])) {
+                    continue;
+                }
+
+                List<Integer> matchedRSSIList = new ArrayList<>();
+                Integer rssi = tp.getRSSI().get(BSSID);
+
+                if (rssi == null) {
+                    continue;
+                }
+
+                matchedRSSIList.add(rssi);
+
+                double squareSum = 0.0;
+                for (int x : matchedRSSIList) {
+                    squareSum += Math.pow(x, 2);
+                }
+
+                double sd;
+                if (matchedRSSIList.size() < 2) {
+                    sd = 0.01;
+                }
+                else {
+                    sd = Math.sqrt(squareSum / matchedRSSIList.size() - 1);
+                }
+
+                sdSum += sd;
+                if (matchedRSSIList.size() > 0) {
+                    standardDeviationCurrent.put(BSSID, sd);
+                }
+            }
+
+            standardDeviationMap.putAll(standardDeviationCurrent);
+            standardDeviationLen.add(standardDeviationCurrent.size());
+            if (standardDeviationCurrent.size() > 0) {
+                standardDeviationAll += sdSum;
+            }
+        }
+
+        // 거리 구하기
+        Map<RecordPoint, Double> nearDistance = new HashMap<>();
+        double maxDistanceSum = Double.MAX_VALUE;
+        for (int i = 0; i < rp.size(); i++) {
+            double currentDistanceCalcAll = 0;
+
+            int j = 0;
+            for (String[] methodArr : new String[][] {{"WiFi", "2"}, {"WiFi", "5"}, {"iBeacon", "2"}}) {
+                if (standardDeviationLen.get(j++) == 0) {
+                    continue;
+                }
+
+                double currentDistanceCalc = 0;
+
+                for (String BSSID : allBSSID) {
+                    // methodArr 조건에 맞지 않으면 처리하지 않음
+                    if (!tp.getMethod().equals(methodArr[0]) || methodArr[0].equals("WiFi") && tp.getFrequency().get(BSSID) % 1000 != Integer.parseInt(methodArr[1])) {
+                        continue;
+                    }
+
+                    double distanceDiff;
+
+                    if (tp.getRSSI().containsKey(BSSID) && rp.get(i).getRSSI().containsKey(BSSID) && rp.get(i).getRSSI().get(BSSID) >= minDbm) {
+                        distanceDiff = Math.abs(tp.getRSSI().get(BSSID) - rp.get(i).getRSSI().get(BSSID));
+                    } else {
+                        distanceDiff = maxDbm - minDbm + 10;
+                    }
+                    currentDistanceCalc += standardDeviationMap.get(BSSID) * distanceDiff;
+                }
+
+                currentDistanceCalcAll += currentDistanceCalc;
+            }
+            currentDistanceCalcAll /= standardDeviationAll;
+
+            if (nearDistance.size() >= K && currentDistanceCalcAll >= maxDistanceSum) {
+                continue;
+            }
+
+            nearDistance.put(rp.get(i), currentDistanceCalcAll);
+            if (nearDistance.size() > K) {
+                nearDistance.values().remove(maxDistanceSum);
+            }
+
+            maxDistanceSum = Collections.max(nearDistance.values());
         }
 
         return nearDistance;
