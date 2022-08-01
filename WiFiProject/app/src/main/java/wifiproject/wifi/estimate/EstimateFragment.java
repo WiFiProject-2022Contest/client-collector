@@ -75,6 +75,10 @@ public class EstimateFragment extends Fragment {
     EstimatedResult estimatedResultWiFi5G;
     EstimatedResult estimatedResultBLE;
     EstimatedResult estimatedResultBeacon;
+    PositioningFilter filterWiFi2G;
+    PositioningFilter filterWiFi5G;
+    PositioningFilter filterBLE;
+    PositioningFilter filterBeacon;
     List<EstimatedResult> estimatedResultAllWiFi2G;
     List<EstimatedResult> estimatedResultAllWiFi5G;
     List<EstimatedResult> estimatedResultAllBLE;
@@ -370,6 +374,11 @@ public class EstimateFragment extends Fragment {
 
         scannedItems = new ArrayList<>();
 
+        filterWiFi2G = new PositioningFilter();
+        filterWiFi5G = new PositioningFilter();
+        filterBLE = new PositioningFilter();
+        filterBeacon = new PositioningFilter();
+
         getLocal();
 
         return rootView;
@@ -429,7 +438,9 @@ public class EstimateFragment extends Fragment {
         }
 
         estimatedResultWiFi2G = PositioningAlgorithm.run(userData, databaseAllWiFiData, MainActivity.building, MainActivity.ssid, MainActivity.uuid, "WiFi", 2, standardRecordDistance);
+        estimatedResultWiFi2G = filterWiFi2G.run(estimatedResultWiFi2G, userData.get(userData.size() - 1).getDate().getTime());
         estimatedResultWiFi5G = PositioningAlgorithm.run(userData, databaseAllWiFiData, MainActivity.building, MainActivity.ssid, MainActivity.uuid, "WiFi", 5, standardRecordDistance);
+        estimatedResultWiFi5G = filterWiFi5G.run(estimatedResultWiFi5G, userData.get(userData.size() - 1).getDate().getTime());
 
         int[] infoK = {3, 9, 2};
         int[] infoMinValidAPNum = {1, 2, 1};
