@@ -1,9 +1,7 @@
 package wifilocation.wifi.search;
 
 import android.content.Context;
-import android.content.DialogInterface;
 import android.graphics.PointF;
-import android.media.Image;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -13,7 +11,6 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 
-import android.app.AlertDialog;
 import android.widget.Toast;
 
 import androidx.fragment.app.DialogFragment;
@@ -61,7 +58,10 @@ public class SearchFragment extends Fragment {
         imageview_map2 = rootview.findViewById(R.id.imageViewMap2);
         switch (MainActivity.building) {
             case "Library5F":
-                imageview_map2.setImage(ImageSource.resource(R.drawable.skku_example));
+                imageview_map2.setImage(ImageSource.resource(R.drawable.skku_library_5f));
+                break;
+            case "Library3F":
+                imageview_map2.setImage(ImageSource.resource(R.drawable.skku_library_3f));
                 break;
             case "WiFiLocation3F":
                 imageview_map2.setImage(ImageSource.resource(R.drawable.wifilocation_gimpo_3f_room_temp_mezzanine_bottom));

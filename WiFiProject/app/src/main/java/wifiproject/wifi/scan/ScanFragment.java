@@ -6,7 +6,6 @@ import android.bluetooth.le.BluetoothLeScanner;
 import android.bluetooth.le.ScanCallback;
 import android.bluetooth.le.ScanFilter;
 import android.bluetooth.le.ScanSettings;
-import android.content.AsyncQueryHandler;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -17,7 +16,6 @@ import android.net.wifi.WifiManager;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
@@ -101,7 +99,10 @@ public class ScanFragment extends Fragment {
         imageview_map = rootview.findViewById(R.id.imageViewMap);
         switch (MainActivity.building) {
             case "Library5F":
-                imageview_map.setImage(ImageSource.resource(R.drawable.skku_example));
+                imageview_map.setImage(ImageSource.resource(R.drawable.skku_library_5f));
+                break;
+            case "Library3F":
+                imageview_map.setImage(ImageSource.resource(R.drawable.skku_library_3f));
                 break;
             case "WiFiLocation3F":
                 imageview_map.setImage(ImageSource.resource(R.drawable.wifilocation_gimpo_3f_room_temp_mezzanine_bottom));

@@ -229,7 +229,10 @@ public class EstimateFragment extends Fragment {
         imageview_map3 = rootView.findViewById(R.id.imageViewMap3);
         switch (MainActivity.building) {
             case "Library5F":
-                imageview_map3.setImage(ImageSource.resource(R.drawable.skku_example));
+                imageview_map3.setImage(ImageSource.resource(R.drawable.skku_library_5f));
+                break;
+            case "Library3F":
+                imageview_map3.setImage(ImageSource.resource(R.drawable.skku_library_3f));
                 break;
             case "WiFiLocation3F":
                 imageview_map3.setImage(ImageSource.resource(R.drawable.wifilocation_gimpo_3f_room_temp_mezzanine_bottom));
