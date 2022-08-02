@@ -125,9 +125,9 @@ public class PositioningAlgorithm {
             databaseRow.setY(Math.round(databaseRow.getY()));
 
             if (!targetBuilding.equals(databaseRow.getBuilding())
-                    || !method.equals(databaseRow.getMethod())
+                    || !method.equals("combined") && !method.equals(databaseRow.getMethod())
                     || !targetSSID.equals(databaseRow.getSSID())
-                    || method.equals("WiFi") && databaseRow.getFrequency() / 1000 != targetGHZ
+                    || method.equals("WiFi") && targetGHZ != 0 && databaseRow.getFrequency() / 1000 != targetGHZ
                     || databaseRow.getRSSI() < minDbm) {
                 continue;
             }
@@ -254,7 +254,7 @@ public class PositioningAlgorithm {
 
         if (dynamicMode) {
             double minDistance = Collections.min(nearDistance.values());
-            //double maxDistance = Collections.max(nearDistance.values());
+            double maxDistance = Collections.max(nearDistance.values());
             double ratio = 1.2;
 
             Map<RecordPoint, Double> adaptiveMap = new HashMap<>();
@@ -421,22 +421,26 @@ public class PositioningAlgorithm {
             double sdSum = 0;
             for (String BSSID : allBSSID) {
                 // methodArr 조건에 맞지 않으면 처리하지 않음
-                if (!tp.getMethod().equals(methodArr[0]) || methodArr[0].equals("WiFi") && tp.getFrequency().get(BSSID) % 1000 != Integer.parseInt(methodArr[1])) {
+                if (!tp.getMethod().get(BSSID).equals(methodArr[0]) || methodArr[0].equals("WiFi") && tp.getFrequency().get(BSSID) / 1000 != Integer.parseInt(methodArr[1])) {
                     continue;
                 }
 
                 List<Integer> matchedRSSIList = new ArrayList<>();
-                Integer rssi = tp.getRSSI().get(BSSID);
-
-                if (rssi == null) {
-                    continue;
+                List<RecordPoint> recordPointPool = new ArrayList<>(rp);
+                int sum = 0;
+                recordPointPool.add(tp);
+                for (RecordPoint recordPoint : recordPointPool) {
+                    Integer rssi = recordPoint.getRSSI().get(BSSID);
+                    if (rssi != null) {
+                        matchedRSSIList.add(rssi);
+                        sum += rssi;
+                    }
                 }
 
-                matchedRSSIList.add(rssi);
-
+                double avg = (double) sum / matchedRSSIList.size();
                 double squareSum = 0.0;
                 for (int x : matchedRSSIList) {
-                    squareSum += Math.pow(x, 2);
+                    squareSum += Math.pow(x - avg, 2);
                 }
 
                 double sd;
@@ -444,7 +448,7 @@ public class PositioningAlgorithm {
                     sd = 0.01;
                 }
                 else {
-                    sd = Math.sqrt(squareSum / matchedRSSIList.size() - 1);
+                    sd = Math.sqrt(squareSum / (matchedRSSIList.size() - 1));
                 }
 
                 sdSum += sd;
@@ -476,7 +480,7 @@ public class PositioningAlgorithm {
 
                 for (String BSSID : allBSSID) {
                     // methodArr 조건에 맞지 않으면 처리하지 않음
-                    if (!tp.getMethod().equals(methodArr[0]) || methodArr[0].equals("WiFi") && tp.getFrequency().get(BSSID) % 1000 != Integer.parseInt(methodArr[1])) {
+                    if (!tp.getMethod().get(BSSID).equals(methodArr[0]) || methodArr[0].equals("WiFi") && tp.getFrequency().get(BSSID) / 1000 != Integer.parseInt(methodArr[1])) {
                         continue;
                     }
 
