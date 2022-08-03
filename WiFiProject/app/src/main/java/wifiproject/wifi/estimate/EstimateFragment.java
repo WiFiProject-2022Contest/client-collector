@@ -230,7 +230,7 @@ public class EstimateFragment extends Fragment {
         beaconRegion = new Region("iBeaconEstimate", null, null, null);
 
         ViewGroup rootView = (ViewGroup) inflater.inflate(R.layout.fragment_estimate, container, false);
-        imageview_map3 = rootView.findViewById(R.id.imageViewMap3);
+        imageview_map3 = rootView.findViewById(R.id.imageViewMapBarcode);
         switch (MainActivity.building) {
             case "Library5F":
                 imageview_map3.setImage(ImageSource.resource(R.drawable.skku_library_5f));

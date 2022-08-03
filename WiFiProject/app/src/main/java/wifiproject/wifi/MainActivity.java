@@ -19,6 +19,7 @@ import com.google.android.material.tabs.TabLayout;
 
 import java.util.UUID;
 
+import wifilocation.wifi.barcode.BarcodeFragment;
 import wifilocation.wifi.database.DatabaseHelper;
 import wifilocation.wifi.estimate.EstimateFragment;
 import wifilocation.wifi.scan.ScanFragment;
@@ -28,6 +29,7 @@ public class MainActivity extends AppCompatActivity {
     public ScanFragment scan_fragment;
     public SearchFragment search_fragment;
     public EstimateFragment estimate_fragment;
+    public BarcodeFragment barcode_fragment;
     public int now_fragment = 1; // 1은 scan, 2는 search, 3은 estimate
 
     public static String building = "Library5F";
@@ -87,6 +89,7 @@ public class MainActivity extends AppCompatActivity {
         scan_fragment = new ScanFragment();
         search_fragment = new SearchFragment();
         estimate_fragment = new EstimateFragment();
+        barcode_fragment = new BarcodeFragment();
 
         int cur_id = item.getItemId();
         switch (cur_id) {
@@ -121,6 +124,8 @@ public class MainActivity extends AppCompatActivity {
             getSupportFragmentManager().beginTransaction().replace(R.id.container, search_fragment).commit();
         } else if (now_fragment == 3) {
             getSupportFragmentManager().beginTransaction().replace(R.id.container, estimate_fragment).commit();
+        } else if (now_fragment == 4) {
+            getSupportFragmentManager().beginTransaction().replace(R.id.container, barcode_fragment).commit();
         }
         return super.onOptionsItemSelected(item);
     }
@@ -140,6 +145,7 @@ public class MainActivity extends AppCompatActivity {
         scan_fragment = new ScanFragment();
         search_fragment = new SearchFragment();
         estimate_fragment = new EstimateFragment();
+        barcode_fragment = new BarcodeFragment();
 
         now_fragment = 1;
         getSupportFragmentManager().beginTransaction().replace(R.id.container, scan_fragment).commit();
@@ -148,6 +154,7 @@ public class MainActivity extends AppCompatActivity {
         tabs.addTab(tabs.newTab().setText("스캔"));
         tabs.addTab(tabs.newTab().setText("검색"));
         tabs.addTab(tabs.newTab().setText("측정"));
+        tabs.addTab(tabs.newTab().setText("바코드"));
 
         tabs.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
             @Override
@@ -162,6 +169,9 @@ public class MainActivity extends AppCompatActivity {
                 } else if (position == 2) {
                     now_fragment = 3;
                     getSupportFragmentManager().beginTransaction().replace(R.id.container, estimate_fragment).commit();
+                } else if (position == 3) {
+                    now_fragment = 4;
+                    getSupportFragmentManager().beginTransaction().replace(R.id.container, barcode_fragment).commit();
                 }
             }
 

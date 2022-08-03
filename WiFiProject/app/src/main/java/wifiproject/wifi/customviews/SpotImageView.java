@@ -15,9 +15,11 @@ import androidx.annotation.Nullable;
 import com.davemorrissey.labs.subscaleview.SubsamplingScaleImageView;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import wifilocation.wifi.MainActivity;
 import wifilocation.wifi.R;
+import wifilocation.wifi.barcode.Barcode;
 import wifilocation.wifi.model.WiFiItem;
 
 public class SpotImageView extends SubsamplingScaleImageView {
@@ -62,6 +64,19 @@ public class SpotImageView extends SubsamplingScaleImageView {
             if (item.getX() == x && item.getY() == y) continue;
             x = item.getX();
             y = item.getY();
+            positions.add(new PointF(x, y));
+        }
+        invalidate();
+    }
+
+    public void setSpot(List<Barcode> items) {
+        setScaleAndCenter(0.0f, getCenter());
+        positions.clear();
+        float x = -1, y = -1;
+        for (Barcode item : items) {
+            if (item.getPosX() == x && item.getPosY() == y) continue;
+            x = item.getPosX();
+            y = item.getPosY();
             positions.add(new PointF(x, y));
         }
         invalidate();
