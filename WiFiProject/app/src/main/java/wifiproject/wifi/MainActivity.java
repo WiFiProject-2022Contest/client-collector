@@ -93,9 +93,15 @@ public class MainActivity extends AppCompatActivity {
 
         int cur_id = item.getItemId();
         switch (cur_id) {
-            case R.id.map_skku:
+            case R.id.map_skku_library_5F:
                 building = "Library5F";
-                ssid = "SKKU";
+                ssid = "SKKU_5F";
+                bleName = "";
+                mapSize.set(100f, 50f);
+                break;
+            case R.id.map_skku_library_3F:
+                building = "Library3F";
+                ssid = "SKKU_3F";
                 bleName = "";
                 mapSize.set(100f, 50f);
                 break;

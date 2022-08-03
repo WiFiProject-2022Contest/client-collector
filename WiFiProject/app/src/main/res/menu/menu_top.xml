@@ -3,9 +3,14 @@
     xmlns:android="http://schemas.android.com/apk/res/android">
 
     <item
-        android:id="@+id/map_skku"
+        android:id="@+id/map_skku_library_5F"
         android:icon="@android:drawable/ic_menu_view"
-        android:title="SKKU"
+        android:title="삼성학술정보관 5층"
+        app:showAsAction="never" />v
+    <item
+        android:id="@+id/map_skku_library_3F"
+        android:icon="@android:drawable/ic_menu_view"
+        android:title="삼성학술정보관 3층"
         app:showAsAction="never" />
     <item
         android:id="@+id/map_wifilocation_gimpo_3F_room_temp_mezzanine_bottom"
