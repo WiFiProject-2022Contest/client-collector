@@ -92,13 +92,13 @@ public class MainActivity extends AppCompatActivity {
         switch (cur_id) {
             case R.id.map_skku_library_5F:
                 building = "Library5F";
-                ssid = "SKKU_5F";
+                ssid = "SKKU";
                 bleName = "";
                 mapSize.set(100f, 50f);
                 break;
             case R.id.map_skku_library_3F:
                 building = "Library3F";
-                ssid = "SKKU_3F";
+                ssid = "SKKU";
                 bleName = "";
                 mapSize.set(100f, 50f);
                 break;

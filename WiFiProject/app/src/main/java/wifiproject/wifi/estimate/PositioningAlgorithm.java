@@ -86,7 +86,7 @@ public class PositioningAlgorithm {
                                              String method, int targetGHZ, double standardRecordDistance, int K, int minValidRPNum, int minValidAPNum, int minDbm) {
         // 데이터베이스는 한 줄에 하나의 AP 정보가 담겨있기 때문에
         // 이것을 다루기 쉽게 한 측정 지점에서 측정한 RSSI 값들을 모두 하나의 RecordPoint 객체에 담아주는 과정입니다.
-        List<RecordPoint> tp = getRecordPointList(userData, targetBuilding, method, targetSSID, targetGHZ, minDbm);
+       List<RecordPoint> tp = getRecordPointList(userData, targetBuilding, method, targetSSID, targetGHZ, minDbm);
         if (tp.size() == 0) {
             return null;
         }
@@ -116,8 +116,27 @@ public class PositioningAlgorithm {
 
     static List<RecordPoint> getRecordPointList(List<WiFiItem> databaseData, String targetBuilding, String method, String targetSSID, int targetGHZ, int minDbm) {
         List<RecordPoint> rp = new ArrayList<>();
+        String[] ssidList = targetSSID.split(",", -1);
+        String originalMethod = method;
+        int originalMinDbm = minDbm;
 
         for (WiFiItem databaseRow : databaseData) {
+            if (originalMethod.equals("combined")) {
+                method = databaseRow.getMethod();
+
+                if (method.equals("WiFi")) {
+                    targetSSID = ssidList[0];
+                    minDbm = originalMinDbm;
+                }
+                else if (method.equals("iBeacon")) {
+                    targetSSID = ssidList[1];
+                    minDbm = -90;
+                }
+                else {
+                    continue;
+                }
+            }
+
             RecordPoint workingRP = null;
 
             // 유사 위치를 동일 좌표로 간주하기 위해서 스캔 좌표 소수점을 반올림 처리 (현실적 판단)
@@ -414,11 +433,14 @@ public class PositioningAlgorithm {
         // 표준편차 구하기
         Map<String, Double> standardDeviationMap = new HashMap<>();
         List<Integer> standardDeviationLen = new ArrayList<>();
-        double standardDeviationAll = 0;
+        List<Double> standardDeviationSum = new ArrayList<>();
         for (String[] methodArr : new String[][] {{"WiFi", "2"}, {"WiFi", "5"}, {"iBeacon", "2"}}) {
-            Map<String, Double> standardDeviationCurrent = new HashMap<>();
+            List<RecordPoint> recordPointPool = new ArrayList<>(rp);
+            recordPointPool.add(tp);
 
+            Map<String, Double> standardDeviationCurrent = new HashMap<>();
             double sdSum = 0;
+
             for (String BSSID : allBSSID) {
                 // methodArr 조건에 맞지 않으면 처리하지 않음
                 if (!tp.getMethod().get(BSSID).equals(methodArr[0]) || methodArr[0].equals("WiFi") && tp.getFrequency().get(BSSID) / 1000 != Integer.parseInt(methodArr[1])) {
@@ -426,9 +448,7 @@ public class PositioningAlgorithm {
                 }
 
                 List<Integer> matchedRSSIList = new ArrayList<>();
-                List<RecordPoint> recordPointPool = new ArrayList<>(rp);
                 int sum = 0;
-                recordPointPool.add(tp);
                 for (RecordPoint recordPoint : recordPointPool) {
                     Integer rssi = recordPoint.getRSSI().get(BSSID);
                     if (rssi != null) {
@@ -449,6 +469,10 @@ public class PositioningAlgorithm {
                 }
                 else {
                     sd = Math.sqrt(squareSum / (matchedRSSIList.size() - 1));
+
+                    if (tp.getMethod().get(BSSID).equals("iBeacon")) {
+                        sd *= 2;
+                    }
                 }
 
                 sdSum += sd;
@@ -459,8 +483,13 @@ public class PositioningAlgorithm {
 
             standardDeviationMap.putAll(standardDeviationCurrent);
             standardDeviationLen.add(standardDeviationCurrent.size());
-            if (standardDeviationCurrent.size() > 0) {
-                standardDeviationAll += sdSum;
+            standardDeviationSum.add(sdSum);
+        }
+
+        double standardDeviationAll = 0;
+        for (int j = 0; j < standardDeviationLen.size(); j++) {
+            if (standardDeviationLen.get(j) > 0) {
+                standardDeviationAll += standardDeviationSum.get(j);
             }
         }
 
@@ -469,13 +498,11 @@ public class PositioningAlgorithm {
         double maxDistanceSum = Double.MAX_VALUE;
         for (int i = 0; i < rp.size(); i++) {
             double currentDistanceCalcAll = 0;
-
             int j = 0;
             for (String[] methodArr : new String[][] {{"WiFi", "2"}, {"WiFi", "5"}, {"iBeacon", "2"}}) {
                 if (standardDeviationLen.get(j++) == 0) {
                     continue;
                 }
-
                 double currentDistanceCalc = 0;
 
                 for (String BSSID : allBSSID) {
