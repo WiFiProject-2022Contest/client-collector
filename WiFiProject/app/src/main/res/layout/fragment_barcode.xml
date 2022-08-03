@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".barcode.BarcodeFragment">
+
+    <EditText
+        android:id="@+id/editTextBarcodeSerial"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:ems="10"
+        android:hint="바코드  시리얼"
+        android:inputType="textPersonName"
+        app:layout_constraintEnd_toStartOf="@+id/buttonPush2"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <EditText
+        android:id="@+id/editTextPosX"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:ems="10"
+        android:hint="X 좌표(m)"
+        android:inputType="textPersonName"
+        android:minHeight="48dp"
+        app:layout_constraintEnd_toStartOf="@+id/editTextPosY"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/editTextBarcodeSerial" />
+
+    <EditText
+        android:id="@+id/editTextPosY"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:ems="10"
+        android:hint="Y 좌표(m)"
+        android:inputType="textPersonName"
+        android:minHeight="48dp"
+        app:layout_constraintEnd_toStartOf="@+id/buttonPush2"
+        app:layout_constraintStart_toEndOf="@+id/editTextPosX"
+        app:layout_constraintTop_toBottomOf="@+id/editTextBarcodeSerial" />
+
+    <androidx.appcompat.widget.AppCompatButton
+        android:id="@+id/buttonPush2"
+        android:layout_width="wrap_content"
+        android:layout_height="0dp"
+        android:text="PUSH"
+        app:layout_constraintBottom_toBottomOf="@+id/editTextPosY"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toEndOf="@+id/editTextBarcodeSerial"
+        app:layout_constraintTop_toTopOf="@+id/editTextBarcodeSerial" />
+
+    <View
+        android:id="@+id/divisionLine5"
+        android:layout_width="0dp"
+        android:layout_height="2dp"
+        android:layout_marginTop="3dp"
+        android:background="#DADADA"
+        android:focusable="auto"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/buttonPush2" />
+
+    <wifilocation.wifi.customviews.SpotImageView
+        android:id="@+id/imageViewMapBarcode"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="3dp"
+        android:src="@drawable/skku_example"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.392"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/divisionLine5" />
+
+    <androidx.appcompat.widget.AppCompatButton
+        android:id="@+id/buttonSearch2"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="SEARCH"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/imageViewMapBarcode" />
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/RecyclerViewBarcode"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/buttonSearch2" />
+</androidx.constraintlayout.widget.ConstraintLayout>
