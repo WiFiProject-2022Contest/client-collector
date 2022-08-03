@@ -61,7 +61,10 @@ public class BarcodeFragment extends Fragment {
 
         switch (MainActivity.building) {
             case "Library5F":
-                imageViewMapBarcode.setImage(ImageSource.resource(R.drawable.skku_example));
+                imageViewMapBarcode.setImage(ImageSource.resource(R.drawable.skku_library_5f));
+                break;
+            case "Library3F":
+                imageViewMapBarcode.setImage(ImageSource.resource(R.drawable.skku_library_3f));
                 break;
             case "WiFiLocation3F":
                 imageViewMapBarcode.setImage(ImageSource.resource(R.drawable.wifilocation_gimpo_3f_room_temp_mezzanine_bottom));
@@ -88,10 +91,15 @@ public class BarcodeFragment extends Fragment {
             @Override
             public void onClick(View view) {
                 List<Barcode> items = new ArrayList<>();
-                items.add(new Barcode(editTextBarcodeSerial.getText().toString(),
-                        Float.parseFloat(editTextPosX.getText().toString()),
-                        Float.parseFloat(editTextPosY.getText().toString()),
-                        new Date()));
+                try {
+                    items.add(new Barcode(editTextBarcodeSerial.getText().toString(),
+                            Float.parseFloat(editTextPosX.getText().toString()),
+                            Float.parseFloat(editTextPosY.getText().toString()),
+                            new Date()));
+                } catch (Exception e) {
+                    Toast.makeText(context, "올바른 데이터 입력 필요", Toast.LENGTH_SHORT).show();
+                    return;
+                }
                 pushLocal(items);
             }
         });
