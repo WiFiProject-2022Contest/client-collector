@@ -130,7 +130,7 @@ public class PositioningAlgorithm {
                 }
                 else if (method.equals("iBeacon")) {
                     targetSSID = ssidList[1];
-                    minDbm = -90;
+                    minDbm = -120;
                 }
                 else {
                     continue;
@@ -274,7 +274,7 @@ public class PositioningAlgorithm {
         if (dynamicMode) {
             double minDistance = Collections.min(nearDistance.values());
             double maxDistance = Collections.max(nearDistance.values());
-            double ratio = 1.2;
+            double ratio = 1.15;
 
             Map<RecordPoint, Double> adaptiveMap = new HashMap<>();
             for (Map.Entry<RecordPoint, Double> entry : nearDistance.entrySet()) {
@@ -469,10 +469,6 @@ public class PositioningAlgorithm {
                 }
                 else {
                     sd = Math.sqrt(squareSum / (matchedRSSIList.size() - 1));
-
-                    if (tp.getMethod().get(BSSID).equals("iBeacon")) {
-                        sd *= 2;
-                    }
                 }
 
                 sdSum += sd;
