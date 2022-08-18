@@ -13,6 +13,12 @@
         android:title="삼성학술정보관 3층"
         app:showAsAction="never" />
     <item
+        android:id="@+id/map_wifilocation_gimpo_2F_ice_temp_mezzanine_bottom"
+        android:title="테스트 김포 2층 냉장 메자닌 하부" />
+    <item
+        android:id="@+id/map_wifilocation_gimpo_3F_room_temp_mezzanine_top"
+        android:title="테스트 김포 3층 상온 메자닌 상부" />
+    <item
         android:id="@+id/map_wifilocation_gimpo_3F_room_temp_mezzanine_bottom"
         android:title="테스트 김포 3층 상온 메자닌 하부" />
     <item

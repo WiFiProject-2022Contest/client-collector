@@ -105,7 +105,19 @@ public class MainActivity extends AppCompatActivity {
                 bleName = "";
                 mapSize.set(100f, 50f);
                 break;
-            case R.id.map_wifilocation_gimpo_3F_room_temp_mezzanine_bottom:
+            case R.id.map_wifilocation_gimpo_2F_ice_temp_mezzanine_bottom: //냉장
+                building = "WiFiLocation2F";
+                ssid = "WiFiLocation@PDA";
+                bleName = "";
+                mapSize.set(209.95f, 109.2f);
+                break;
+            case R.id.map_wifilocation_gimpo_3F_room_temp_mezzanine_top: //상온 3층 상부
+                building = "WiFiLocation3FTop";
+                ssid = "WiFiLocation@PDA";
+                bleName = "";
+                mapSize.set(209.95f, 109.2f);
+                break;
+            case R.id.map_wifilocation_gimpo_3F_room_temp_mezzanine_bottom: //상온 3층 하부
                 building = "WiFiLocation3F";
                 ssid = "WiFiLocation@PDA";
                 bleName = "";

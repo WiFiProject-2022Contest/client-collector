@@ -66,6 +66,12 @@ public class BarcodeFragment extends Fragment {
             case "Library3F":
                 imageViewMapBarcode.setImage(ImageSource.resource(R.drawable.skku_library_3f));
                 break;
+            case "WiFiLocation2F":
+                imageViewMapBarcode.setImage(ImageSource.resource(R.drawable.wifilocation_gimpo_2f_ice_temp_mezzanine_bottom));
+                break;
+            case "WiFiLocation3FTop":
+                imageViewMapBarcode.setImage(ImageSource.resource(R.drawable.wifilocation_gimpo_3f_room_temp_mezzanine_top));
+                break;
             case "WiFiLocation3F":
                 imageViewMapBarcode.setImage(ImageSource.resource(R.drawable.wifilocation_gimpo_3f_room_temp_mezzanine_bottom));
                 break;
